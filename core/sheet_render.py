@@ -49,6 +49,7 @@ class SBlock:
         self.params = []
         self.tag = ""
         self.tdes = ""
+        self.sym = ""          # ten SYMBOL (de tim file SVG)
         self.pins = []          # [(x, y, is_out, name, connected)] toa do DB
         self.box = None         # (x_left, y_bot, x_right, y_top)
 
@@ -207,6 +208,7 @@ def build_sheet(path, sheet_id):
             b.bid = bid; b.code = codeU; b.x = x; b.y = y
             b.exorder = exo if exo is not None and exo >= 0 else -1
             b.name = D.macro_name(codeU, sym)
+            b.sym = sym or ""
             mdef = MP.get(sym) or MP.get((sym or "").strip())
             terms = mterms.get(codeU)
             if terms:

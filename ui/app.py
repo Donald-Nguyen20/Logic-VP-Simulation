@@ -14,9 +14,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPainter, QAction, QPixmap
 from PySide6.QtCore import Qt
 
-from core.model import (Circuit, Simulator, DefGenerator, BLOCK_SPECS,
+from core.model import (Circuit, BLOCK_SPECS,
                         PRIMITIVE_ORDER, CATALOG_BY_CAT, CATALOG_COUNT)
-from core.importer import parse_def_text, def_to_circuit, read_pdf
+from core.importer import def_to_circuit, read_pdf
 from core import dbreader
 from ui.canvas import LogicScene
 from core.logic_sim import LogicSim, has_behavior
@@ -390,17 +390,15 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("T-Designer Lite - FBD Logic Editor (prototype)")
         self.resize(1280, 800)
         self.circuit = Circuit("SHEET1")
-        self.sim = None
-        self.file_path = None
         self.db_path = None
         self.nav_history = []
         self.manual = self._load_manual()
         self.internal_map = self._load_internal()
         self._last_block_code = None
+        self._svg_mode = False
 
         self.scene = LogicScene(self.circuit)
         self.scene.on_status = self.status
-        self.scene.on_di_click = self.di_clicked
         self.view = ZoomView(self.scene)
         self.view.on_context = self.block_context_menu
         self.setCentralWidget(self.view)
@@ -570,28 +568,18 @@ class MainWindow(QMainWindow):
             tb.addAction(a)
             return a
 
-        act("Moi", self.new_file)
-        act("Mo...", self.open_file)
-        act("Luu", self.save_file)
-        tb.addSeparator()
-        act("Sinh .DEF", self.gen_def, "Sinh ma Instruction List .DEF")
-        self.run_act = act("Mo phong", self.toggle_sim, "Bat/tat che do mo phong")
-        act("Scan", self.do_scan, "Chay 1 chu ky quet")
         self.palette_act = act("Thu vien FB", self.toggle_palette,
                                "Mo cua so thu vien Function Block")
-        act("Logic ben trong", self.open_internal_logic,
-            "Xem so do logic noi bo (AAxxx) cua khoi vua chon")
-        act("Mo phong khoi", self.open_block_sim,
-            "Bat/tat dau vao 0/1 de xem dau ra (khoi co mo hinh logic)")
         tb.addSeparator()
         act("Import DB", self.import_db, "Doc file .db du an va dung lai sheet")
         act("Import thu muc", self.import_folder, "Import tat ca .db trong 1 thu muc (nhom theo Project/CPU)")
         act("< Back", self.nav_back, "Quay lai sheet truoc (dieu huong)")
-        act("Import .DEF", self.import_def, "Doc file .DEF (vd TAG_MCR.DEF)")
         act("Import PDF", self.import_pdf, "Doc logic tu PDF da xuat")
-        act("Nap SVG...", self.set_svg, "Chon thu muc SVG de dung lam ky hieu")
-        tb.addSeparator()
-        act("Vi du seal-in", self.load_example)
+        self.svg_act = QAction("Ky hieu SVG", self)
+        self.svg_act.setCheckable(True)
+        self.svg_act.setToolTip("Ve khoi bang ky hieu SVG giong PDF (bat/tat)")
+        self.svg_act.toggled.connect(self.toggle_svg_symbols)
+        tb.addAction(self.svg_act)
         tb.addSeparator()
         act("Zoom +", self.view.zoom_in, "Phong to (hoac lan chuot len)")
         act("Zoom -", self.view.zoom_out, "Thu nho (hoac lan chuot xuong)")
@@ -622,73 +610,15 @@ class MainWindow(QMainWindow):
         else:
             super().keyPressEvent(ev)
 
-    def new_file(self):
-        self.circuit = Circuit("SHEET1")
-        self._reset_scene()
-        self.output.clear()
-        self.status("Da tao so do moi.")
-
-    def open_file(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Mo", "", "T-Designer Lite (*.tdl);;JSON (*.json)")
-        if not p:
-            return
-        self.circuit = Circuit.load(p)
-        self.file_path = p
-        self._reset_scene()
-        self.status("Da mo %s" % os.path.basename(p))
-
-    def save_file(self):
-        p, _ = QFileDialog.getSaveFileName(self, "Luu", self.file_path or "sheet.tdl", "T-Designer Lite (*.tdl)")
-        if not p:
-            return
-        self.circuit.save(p)
-        self.file_path = p
-        self.status("Da luu %s" % os.path.basename(p))
 
     def _reset_scene(self):
         svg = self.scene.svg_dir
         self.scene = LogicScene(self.circuit)
         self.scene.svg_dir = svg
         self.scene.on_status = self.status
-        self.scene.on_di_click = self.di_clicked
         self.view.setScene(self.scene)
-        self.sim = None
-        self.run_act.setText("Mo phong")
 
-    def gen_def(self):
-        name, ok = QInputDialog.getText(self, "Ten macro", "Ten .DEF:", text=self.circuit.name)
-        if ok and name:
-            self.circuit.name = name
-        self.output.setPlainText(DefGenerator(self.circuit).generate())
-        self.status("Da sinh ma .DEF (xem panel duoi).")
 
-    def toggle_sim(self):
-        self.scene.sim_mode = not self.scene.sim_mode
-        if self.scene.sim_mode:
-            self.sim = Simulator(self.circuit)
-            self.run_act.setText("Dung MP")
-            self.do_scan()
-            self.status("Che do mo phong: bam vao khoi DI de bat/tat.")
-        else:
-            self.run_act.setText("Mo phong")
-            self.scene.apply_sim({})
-            self.status("Da thoat mo phong.")
-
-    def di_clicked(self, bid):
-        if self.sim:
-            self.sim.toggle_di(bid)
-            self.do_scan()
-
-    def do_scan(self):
-        if not self.sim:
-            self.sim = Simulator(self.circuit)
-        out = self.sim.scan()
-        self.scene.apply_sim(out)
-        dos = ["%s=%s" % (b.tag or b.id, "1" if self.sim.block_value(b.id) else "0")
-               for b in self.circuit.blocks.values() if b.btype == "DO"]
-        self.status("Scan xong.  " + "  ".join(dos))
-
-    # ---------- Import DB ----------
     def import_db(self):
         paths, _ = QFileDialog.getOpenFileNames(
             self, "Chon 1 hoac nhieu file DB du an (Ctrl/Shift de chon nhieu)",
@@ -746,6 +676,8 @@ class MainWindow(QMainWindow):
         self.cur_sheet = sheet_id
         self.cur_sheet_name = sheet.title
         self.sheet_scene = SheetScene(sheet)
+        if self._svg_mode:
+            self.sheet_scene.set_svg_mode(True)
         self.sheet_scene.on_navigate = self.navigate_from_term
         self.sheet_scene.on_block_click = self.on_sheet_block
         self.view.setScene(self.sheet_scene)
@@ -812,16 +744,6 @@ class MainWindow(QMainWindow):
             else:
                 self._open_sheet(prev)
 
-    def import_def(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Import .DEF", "", "DEF (*.DEF *.def);;All (*.*)")
-        if not p:
-            return
-        try:
-            txt = open(p, encoding="latin-1").read()
-        except Exception as e:
-            QMessageBox.warning(self, "Loi", str(e))
-            return
-        self._show_macros(parse_def_text(txt), p)
 
     def import_pdf(self):
         p, _ = QFileDialog.getOpenFileName(self, "Import PDF", "", "PDF (*.pdf)")
@@ -858,26 +780,6 @@ class MainWindow(QMainWindow):
             self._reset_scene()
         self.status("Da doc %d macro tu %s" % (len(macros), os.path.basename(path)))
 
-    def set_svg(self):
-        d = QFileDialog.getExistingDirectory(self, "Chon thu muc SVG")
-        if d:
-            self.scene.svg_dir = d
-            self.scene.rebuild()
-            self.status("Da nap thu vien SVG.")
-
-    def load_example(self):
-        c = Circuit("SEAL_IN")
-        start = c.add_block("DI", tag="START", x=60, y=80)
-        stop = c.add_block("DI", tag="STOP", x=60, y=200)
-        ff = c.add_block("FF", x=320, y=120)
-        motor = c.add_block("DO", tag="MOTOR", x=600, y=130)
-        c.connect(start.id, 0, ff.id, 0)
-        c.connect(stop.id, 0, ff.id, 1)
-        c.connect(ff.id, 0, motor.id, 0)
-        self.circuit = c
-        self._reset_scene()
-        self.output.setPlainText(DefGenerator(self.circuit).generate())
-        self.status("Da nap vi du seal-in (START giu MOTOR, STOP nha).")
 
     def _load_manual(self):
         p = os.path.join(os.path.dirname(os.path.dirname(__file__)), "core", "macro_manual.json")
@@ -915,11 +817,6 @@ class MainWindow(QMainWindow):
             name or "", code, info.get("manual", ""), info.get("page", ""))
         ImageViewer(path, title, self).exec()
 
-    def open_internal_logic(self):
-        if self._last_block_code:
-            self.show_internal_logic(self._last_block_code)
-        else:
-            self.status("Bam vao 1 khoi tren sheet truoc, roi bam 'Logic ben trong'.")
 
     def open_block_sim(self):
         code = self._last_block_code
@@ -947,6 +844,13 @@ class MainWindow(QMainWindow):
             self._last_block_code = code
             self.open_block_sim()
 
+    def toggle_svg_symbols(self, on):
+        self._svg_mode = bool(on)
+        sc = getattr(self, "sheet_scene", None)
+        if sc is not None and hasattr(sc, "set_svg_mode"):
+            sc.set_svg_mode(self._svg_mode)
+        else:
+            self.status("Mo 1 sheet (Import DB) truoc khi bat ky hieu SVG.")
 
 
     def status(self, msg):

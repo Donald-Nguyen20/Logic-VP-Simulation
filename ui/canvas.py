@@ -65,24 +65,8 @@ class BlockItem(QGraphicsItem):
         return max(W, mi + mo + 34)
 
     def _load_svg(self):
-        d = getattr(self.sref, "svg_dir", None)
-        if not d or self.term:
-            return
-        SVG_MAP = {"AND": "AND2_1", "OR": "OR2_1", "XOR": "XOR2_1", "NOT": "NOT_1"}
-        cand = [self.b.tag] if self.b.tag else []
-        cand.append(SVG_MAP.get(self.b.btype, self.b.btype))
-        for name in cand:
-            p = os.path.join(d, name + ".svg")
-            if os.path.exists(p):
-                try:
-                    from PySide6.QtSvgWidgets import QGraphicsSvgItem
-                    self.svg = QGraphicsSvgItem(p, self)
-                    r = self.svg.boundingRect()
-                    if r.width() > 0:
-                        self.svg.setScale(min(self.w / r.width(), self.h / r.height()))
-                    return
-                except Exception:
-                    self.svg = None
+        # Da bo tinh nang nap SVG cho canvas noi bo (khong con phu thuoc QtSvg).
+        return
 
     def in_pos(self, i):
         if self.term:

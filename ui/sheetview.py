@@ -5,6 +5,8 @@ khoi + tag + nhan + exec(do) + tham so, day theo TOA DO GOC (CAD_LIN_DETAIL),
 ten net tren day, terminal 2 mep (Line Name/From/LID/To), khung 7 cot.
 """
 from __future__ import annotations
+import os
+import re
 from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtGui import QPen, QBrush, QColor, QFont, QPainterPath, QFontMetrics
 from PySide6.QtCore import Qt, QRectF, QPointF
@@ -22,6 +24,22 @@ COL_NET = QColor("#1560b0")
 COL_TXT = QColor("#12305a")
 
 
+# --- Bo ky hieu rieng (trich tu SVG -> core/symbol_shapes.json) de ve khoi giong PDF ---
+import json as _json
+_SYMS = None
+
+
+def _symbol_shapes():
+    global _SYMS
+    if _SYMS is None:
+        p = os.path.join(os.path.dirname(os.path.dirname(__file__)), "core", "symbol_shapes.json")
+        try:
+            _SYMS = _json.load(open(p, encoding="utf-8"))
+        except Exception:
+            _SYMS = {}
+    return _SYMS
+
+
 class SheetScene(QGraphicsScene):
     def __init__(self, sheet, parent=None):
         super().__init__(parent)
@@ -33,6 +51,7 @@ class SheetScene(QGraphicsScene):
         self.on_block_click = None   # callback(code, name) khi click 1 khoi
         self._hits = []              # [(QRectF, term)]
         self._block_hits = []        # [(QRectF, code, name)]
+        self.svg_mode = False        # True = ve ky hieu SVG giong PDF
         self.build()
 
     # --- bien doi toa do ---
@@ -41,6 +60,10 @@ class SheetScene(QGraphicsScene):
 
     def sy(self, y):
         return (self.ymax - y) * SC + MARGIN_T
+
+    def set_svg_mode(self, on):
+        self.svg_mode = bool(on)
+        self.build()
 
     def build(self):
         self.clear()
@@ -75,10 +98,63 @@ class SheetScene(QGraphicsScene):
     # --- khoi (dung box + vi tri chan CHUAN theo macro) ---
     def _blocks(self):
         for b in self.sh.blocks:
+            if self.svg_mode and self._block_symbol(b):
+                continue
             if b.box:
                 self._block_real(b)
             else:
                 self._block_fallback(b)
+
+    def _block_symbol(self, b):
+        """Ve khoi bang bo ky hieu rieng (native). Tra False neu khong co -> fallback."""
+        if not getattr(b, "box", None):
+            return False
+        sh = _symbol_shapes().get(getattr(b, "sym", ""))
+        if not sh:
+            return False
+        try:
+            xl, yb, xr, yt = b.box
+            left, top = self.sx(xl), self.sy(yt)
+            wpx, hpx = (xr - xl) * SC, (yt - yb) * SC
+            if wpx <= 1 or hpx <= 1:
+                return False
+
+            def X(v):
+                return left + v * SC
+
+            def Y(v):
+                return top + v * SC
+
+            # nen trang che day (KHONG vien) - de ky hieu tu ve khung cua no
+            self.addRect(left, top, wpx, hpx, QPen(Qt.PenStyle.NoPen), QBrush(QColor("white")))
+            pen = QPen(QColor("#111827"), 1.0)
+            blk = QBrush(QColor("#111827"))
+            nob = QBrush(Qt.BrushStyle.NoBrush)
+            for x1, y1, x2, y2 in sh.get("lines", []):
+                self.addLine(X(x1), Y(y1), X(x2), Y(y2), pen)
+            for x, y, w, h, fl in sh.get("rects", []):
+                self.addRect(X(x), Y(y), w * SC, h * SC, pen, blk if fl else nob)
+            for cx, cy, r, fl in sh.get("circles", []):
+                self.addEllipse(X(cx - r), Y(cy - r), 2 * r * SC, 2 * r * SC, pen, blk if fl else nob)
+            for tx in sh.get("texts", []):
+                x, y, size = tx[0], tx[1], tx[2]
+                txt, col = tx[3], (tx[4] if len(tx) > 4 else "#000000")
+                ps = max(5, int(size * SC))
+                fnt = QFont("Segoe UI")
+                fnt.setPixelSize(ps)
+                it = self.addText(str(txt), fnt)
+                it.setDefaultTextColor(QColor(col or "#000000"))
+                it.setPos(X(x) - 2, Y(y) - ps)
+            self._block_hits.append((QRectF(left, top, wpx, hpx), b.code, b.name))
+            if b.tag:
+                tg = self.addText(str(b.tag), QFont("Segoe UI", 11, QFont.Weight.Bold))
+                tg.setDefaultTextColor(COL_RED); tg.setPos(left, top - 40)
+            if b.exorder >= 0:
+                eo = self.addText("%02d" % b.exorder, QFont("Segoe UI", 11, QFont.Weight.Bold))
+                eo.setDefaultTextColor(COL_RED); eo.setPos(left + wpx - 18, top + hpx - 1)
+            return True
+        except Exception:
+            return False
 
     def _block_real(self, b):
         xl, yb, xr, yt = b.box
@@ -87,12 +163,9 @@ class SheetScene(QGraphicsScene):
         w, h = right - left, bot - top
         self.addRect(left, top, w, h, QPen(COL_BLK, 1.1), QBrush(COL_BODY))
         self._block_hits.append((QRectF(left, top, w, h), b.code, b.name))
-        # thanh tieu de
         self.addRect(left, top, w, 18, QPen(Qt.PenStyle.NoPen), QBrush(COL_BLK))
         tl = self.addText(str(b.name)[:16], QFont("Segoe UI", 11, QFont.Weight.Bold))
         tl.setDefaultTextColor(QColor("white")); tl.setPos(left + 2, top - 1)
-        # nhan xep chong PHIA TREN thanh tieu de, cach nhau 16px de khong de nhau:
-        #   tag (KKS, do)  top-50  |  mo ta  top-33  |  nhan vi tri  top-17
         if b.tag:
             tg = self.addText(str(b.tag), QFont("Segoe UI", 11, QFont.Weight.Bold))
             tg.setDefaultTextColor(COL_RED); tg.setPos(left, top - 60)
@@ -109,7 +182,6 @@ class SheetScene(QGraphicsScene):
         for pv in b.params[:4]:
             pt = self.addText(str(pv)[:14], QFont("Segoe UI", 10))
             pt.setDefaultTextColor(QColor("#333")); pt.setPos(left, yy); yy += 13
-        # chan tai vi tri CHUAN theo dinh nghia macro (offset macro)
         for pin in b.pins:
             px, py, is_out, name = pin[0], pin[1], pin[2], pin[3]
             conn = pin[4] if len(pin) > 4 else True
