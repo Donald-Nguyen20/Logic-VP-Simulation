@@ -1,0 +1,1940 @@
+{
+ "8204": {
+  "name": "MOV2-NSH",
+  "desc": "Motor Operated Valve 2 - Non-Self Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating, 1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "nodes": {
+   "setMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ]
+   },
+   "resetMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ]
+   },
+   "AutoMode": {
+    "op": "SR",
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true
+   },
+   "ManualMode": {
+    "op": "NOT",
+    "in": [
+     "AutoMode"
+    ]
+   },
+   "openAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ]
+   },
+   "openMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ]
+   },
+   "OpenReq": {
+    "op": "OR",
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ]
+   },
+   "closeAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ]
+   },
+   "closeMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ]
+   },
+   "CloseReq": {
+    "op": "OR",
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ]
+   },
+   "nLocal": {
+    "op": "NOT",
+    "in": [
+     "Local"
+    ]
+   },
+   "nOPINH": {
+    "op": "NOT",
+    "in": [
+     "OP INH"
+    ]
+   },
+   "nCLINH": {
+    "op": "NOT",
+    "in": [
+     "CL INH"
+    ]
+   },
+   "nOpenLim": {
+    "op": "NOT",
+    "in": [
+     "Open"
+    ]
+   },
+   "nClosedLim": {
+    "op": "NOT",
+    "in": [
+     "Closed"
+    ]
+   },
+   "nCloseReq": {
+    "op": "NOT",
+    "in": [
+     "CloseReq"
+    ]
+   },
+   "nOpenReq": {
+    "op": "NOT",
+    "in": [
+     "OpenReq"
+    ]
+   },
+   "Opening": {
+    "op": "AND",
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nOpenLim",
+     "nCloseReq"
+    ]
+   },
+   "Closing": {
+    "op": "AND",
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nClosedLim",
+     "nOpenReq"
+    ]
+   },
+   "swTorque": {
+    "op": "PARAM_EQ",
+    "param": "SW",
+    "val": 1
+   },
+   "trqNormal": {
+    "op": "AND",
+    "in": [
+     "swTorque",
+     "Closed"
+    ]
+   },
+   "nTrqNormal": {
+    "op": "NOT",
+    "in": [
+     "trqNormal"
+    ]
+   },
+   "OvTrqFault": {
+    "op": "AND",
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ]
+   },
+   "Abn": {
+    "op": "OR",
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ]
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "Opening",
+   "CL DMD": "Closing",
+   "ABN": "Abn"
+  }
+ },
+ "8202": {
+  "name": "MOV-NSH",
+  "desc": "MOV-NSH - Motor Operated Valve Non-Self Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating, 1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "nodes": {
+   "setMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ]
+   },
+   "resetMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ]
+   },
+   "AutoMode": {
+    "op": "SR",
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true
+   },
+   "ManualMode": {
+    "op": "NOT",
+    "in": [
+     "AutoMode"
+    ]
+   },
+   "openAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ]
+   },
+   "openMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ]
+   },
+   "OpenReq": {
+    "op": "OR",
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ]
+   },
+   "closeAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ]
+   },
+   "closeMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ]
+   },
+   "CloseReq": {
+    "op": "OR",
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ]
+   },
+   "nLocal": {
+    "op": "NOT",
+    "in": [
+     "Local"
+    ]
+   },
+   "nOPINH": {
+    "op": "NOT",
+    "in": [
+     "OP INH"
+    ]
+   },
+   "nCLINH": {
+    "op": "NOT",
+    "in": [
+     "CL INH"
+    ]
+   },
+   "nOpenLim": {
+    "op": "NOT",
+    "in": [
+     "Open"
+    ]
+   },
+   "nClosedLim": {
+    "op": "NOT",
+    "in": [
+     "Closed"
+    ]
+   },
+   "nCloseReq": {
+    "op": "NOT",
+    "in": [
+     "CloseReq"
+    ]
+   },
+   "nOpenReq": {
+    "op": "NOT",
+    "in": [
+     "OpenReq"
+    ]
+   },
+   "Opening": {
+    "op": "AND",
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nOpenLim",
+     "nCloseReq"
+    ]
+   },
+   "Closing": {
+    "op": "AND",
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nClosedLim",
+     "nOpenReq"
+    ]
+   },
+   "swTorque": {
+    "op": "PARAM_EQ",
+    "param": "SW",
+    "val": 1
+   },
+   "trqNormal": {
+    "op": "AND",
+    "in": [
+     "swTorque",
+     "Closed"
+    ]
+   },
+   "nTrqNormal": {
+    "op": "NOT",
+    "in": [
+     "trqNormal"
+    ]
+   },
+   "OvTrqFault": {
+    "op": "AND",
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ]
+   },
+   "Abn": {
+    "op": "OR",
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ]
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "Opening",
+   "CL DMD": "Closing",
+   "ABN": "Abn"
+  }
+ },
+ "8249": {
+  "name": "MOV3-NSH",
+  "desc": "MOV3-NSH - Motor Operated Valve Non-Self Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating, 1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "nodes": {
+   "setMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ]
+   },
+   "resetMode": {
+    "op": "OR",
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ]
+   },
+   "AutoMode": {
+    "op": "SR",
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true
+   },
+   "ManualMode": {
+    "op": "NOT",
+    "in": [
+     "AutoMode"
+    ]
+   },
+   "openAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ]
+   },
+   "openMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ]
+   },
+   "OpenReq": {
+    "op": "OR",
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ]
+   },
+   "closeAuto": {
+    "op": "AND",
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ]
+   },
+   "closeMan": {
+    "op": "AND",
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ]
+   },
+   "CloseReq": {
+    "op": "OR",
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ]
+   },
+   "nLocal": {
+    "op": "NOT",
+    "in": [
+     "Local"
+    ]
+   },
+   "nOPINH": {
+    "op": "NOT",
+    "in": [
+     "OP INH"
+    ]
+   },
+   "nCLINH": {
+    "op": "NOT",
+    "in": [
+     "CL INH"
+    ]
+   },
+   "nOpenLim": {
+    "op": "NOT",
+    "in": [
+     "Open"
+    ]
+   },
+   "nClosedLim": {
+    "op": "NOT",
+    "in": [
+     "Closed"
+    ]
+   },
+   "nCloseReq": {
+    "op": "NOT",
+    "in": [
+     "CloseReq"
+    ]
+   },
+   "nOpenReq": {
+    "op": "NOT",
+    "in": [
+     "OpenReq"
+    ]
+   },
+   "Opening": {
+    "op": "AND",
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nOpenLim",
+     "nCloseReq"
+    ]
+   },
+   "Closing": {
+    "op": "AND",
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nClosedLim",
+     "nOpenReq"
+    ]
+   },
+   "swTorque": {
+    "op": "PARAM_EQ",
+    "param": "SW",
+    "val": 1
+   },
+   "trqNormal": {
+    "op": "AND",
+    "in": [
+     "swTorque",
+     "Closed"
+    ]
+   },
+   "nTrqNormal": {
+    "op": "NOT",
+    "in": [
+     "trqNormal"
+    ]
+   },
+   "OvTrqFault": {
+    "op": "AND",
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ]
+   },
+   "Abn": {
+    "op": "OR",
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ]
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "Opening",
+   "CL DMD": "Closing",
+   "ABN": "Abn"
+  }
+ },
+ "8203": {
+  "name": "MOV-SH",
+  "desc": "MOV-SH - Motor Operated Valve Self-Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto SP",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Opening",
+   "Closing",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed",
+   "OP-QTY",
+   "CL-QTY",
+   "POS"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Stop",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating,1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "SP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "note": "RTE-OP/RTE-CL (Run Time Error) theo thoi gian - chua mo phong.",
+  "nodes": {
+   "setMode": {
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ],
+    "op": "OR"
+   },
+   "resetMode": {
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ],
+    "op": "OR"
+   },
+   "AutoMode": {
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "ManualMode": {
+    "in": [
+     "AutoMode"
+    ],
+    "op": "NOT"
+   },
+   "openAuto": {
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ],
+    "op": "AND"
+   },
+   "openMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ],
+    "op": "AND"
+   },
+   "OpenReq": {
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ],
+    "op": "OR"
+   },
+   "closeAuto": {
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ],
+    "op": "AND"
+   },
+   "closeMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ],
+    "op": "AND"
+   },
+   "CloseReq": {
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ],
+    "op": "OR"
+   },
+   "stopAuto": {
+    "in": [
+     "AutoMode",
+     "Auto SP"
+    ],
+    "op": "AND"
+   },
+   "stopMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Stop"
+    ],
+    "op": "AND"
+   },
+   "StopReq": {
+    "in": [
+     "stopAuto",
+     "stopMan"
+    ],
+    "op": "OR"
+   },
+   "nLocal": {
+    "in": [
+     "Local"
+    ],
+    "op": "NOT"
+   },
+   "nOPINH": {
+    "in": [
+     "OP INH"
+    ],
+    "op": "NOT"
+   },
+   "nCLINH": {
+    "in": [
+     "CL INH"
+    ],
+    "op": "NOT"
+   },
+   "nCloseReq": {
+    "in": [
+     "CloseReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpenReq": {
+    "in": [
+     "OpenReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpen": {
+    "in": [
+     "Open"
+    ],
+    "op": "NOT"
+   },
+   "nClosed": {
+    "in": [
+     "Closed"
+    ],
+    "op": "NOT"
+   },
+   "OpenSet": {
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nCloseReq",
+     "nOpen"
+    ],
+    "op": "AND"
+   },
+   "OpenReset": {
+    "in": [
+     "Open",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "CloseReq"
+    ],
+    "op": "OR"
+   },
+   "OP_DMD": {
+    "set": "OpenSet",
+    "reset": "OpenReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "CloseSet": {
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nOpenReq",
+     "nClosed"
+    ],
+    "op": "AND"
+   },
+   "CloseReset": {
+    "in": [
+     "Closed",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "OpenReq"
+    ],
+    "op": "OR"
+   },
+   "CL_DMD": {
+    "set": "CloseSet",
+    "reset": "CloseReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "SP_DMD": {
+    "in": [
+     "StopReq",
+     "Local"
+    ],
+    "op": "OR"
+   },
+   "swTorque": {
+    "param": "SW",
+    "val": 1,
+    "op": "PARAM_EQ"
+   },
+   "trqNormal": {
+    "in": [
+     "swTorque",
+     "Closed"
+    ],
+    "op": "AND"
+   },
+   "nTrqNormal": {
+    "in": [
+     "trqNormal"
+    ],
+    "op": "NOT"
+   },
+   "OvTrqFault": {
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ],
+    "op": "AND"
+   },
+   "Abn": {
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ],
+    "op": "OR"
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "OP_DMD",
+   "SP DMD": "SP_DMD",
+   "CL DMD": "CL_DMD",
+   "ABN": "Abn"
+  }
+ },
+ "8205": {
+  "name": "MOV2-SH",
+  "desc": "MOV2-SH - Motor Operated Valve Self-Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto SP",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed",
+   "OP-QTY",
+   "CL-QTY",
+   "POS"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Stop",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating,1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "SP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "note": "RTE-OP/RTE-CL (Run Time Error) theo thoi gian - chua mo phong.",
+  "nodes": {
+   "setMode": {
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ],
+    "op": "OR"
+   },
+   "resetMode": {
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ],
+    "op": "OR"
+   },
+   "AutoMode": {
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "ManualMode": {
+    "in": [
+     "AutoMode"
+    ],
+    "op": "NOT"
+   },
+   "openAuto": {
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ],
+    "op": "AND"
+   },
+   "openMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ],
+    "op": "AND"
+   },
+   "OpenReq": {
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ],
+    "op": "OR"
+   },
+   "closeAuto": {
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ],
+    "op": "AND"
+   },
+   "closeMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ],
+    "op": "AND"
+   },
+   "CloseReq": {
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ],
+    "op": "OR"
+   },
+   "stopAuto": {
+    "in": [
+     "AutoMode",
+     "Auto SP"
+    ],
+    "op": "AND"
+   },
+   "stopMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Stop"
+    ],
+    "op": "AND"
+   },
+   "StopReq": {
+    "in": [
+     "stopAuto",
+     "stopMan"
+    ],
+    "op": "OR"
+   },
+   "nLocal": {
+    "in": [
+     "Local"
+    ],
+    "op": "NOT"
+   },
+   "nOPINH": {
+    "in": [
+     "OP INH"
+    ],
+    "op": "NOT"
+   },
+   "nCLINH": {
+    "in": [
+     "CL INH"
+    ],
+    "op": "NOT"
+   },
+   "nCloseReq": {
+    "in": [
+     "CloseReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpenReq": {
+    "in": [
+     "OpenReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpen": {
+    "in": [
+     "Open"
+    ],
+    "op": "NOT"
+   },
+   "nClosed": {
+    "in": [
+     "Closed"
+    ],
+    "op": "NOT"
+   },
+   "OpenSet": {
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nCloseReq",
+     "nOpen"
+    ],
+    "op": "AND"
+   },
+   "OpenReset": {
+    "in": [
+     "Open",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "CloseReq"
+    ],
+    "op": "OR"
+   },
+   "OP_DMD": {
+    "set": "OpenSet",
+    "reset": "OpenReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "CloseSet": {
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nOpenReq",
+     "nClosed"
+    ],
+    "op": "AND"
+   },
+   "CloseReset": {
+    "in": [
+     "Closed",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "OpenReq"
+    ],
+    "op": "OR"
+   },
+   "CL_DMD": {
+    "set": "CloseSet",
+    "reset": "CloseReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "SP_DMD": {
+    "in": [
+     "StopReq",
+     "Local"
+    ],
+    "op": "OR"
+   },
+   "swTorque": {
+    "param": "SW",
+    "val": 1,
+    "op": "PARAM_EQ"
+   },
+   "trqNormal": {
+    "in": [
+     "swTorque",
+     "Closed"
+    ],
+    "op": "AND"
+   },
+   "nTrqNormal": {
+    "in": [
+     "trqNormal"
+    ],
+    "op": "NOT"
+   },
+   "OvTrqFault": {
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ],
+    "op": "AND"
+   },
+   "Abn": {
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ],
+    "op": "OR"
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "OP_DMD",
+   "SP DMD": "SP_DMD",
+   "CL DMD": "CL_DMD",
+   "ABN": "Abn"
+  }
+ },
+ "824A": {
+  "name": "MOV3-SH",
+  "desc": "MOV3-SH - Motor Operated Valve Self-Hold",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Auto OP",
+   "F-OP",
+   "OP INH",
+   "Auto SP",
+   "Auto CL",
+   "F-CL",
+   "CL INH",
+   "Local",
+   "E-FAIL",
+   "OV TRQ",
+   "Open",
+   "Closed",
+   "OP-QTY",
+   "CL-QTY",
+   "POS"
+  ],
+  "ops": [
+   "OPS.Open",
+   "OPS.Close",
+   "OPS.Stop",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {
+   "SW": {
+    "desc": "Soft SW 0=Position Seating,1=Torque Seating",
+    "val": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "OP DMD",
+   "SP DMD",
+   "CL DMD",
+   "ABN"
+  ],
+  "note": "RTE-OP/RTE-CL (Run Time Error) theo thoi gian - chua mo phong.",
+  "nodes": {
+   "setMode": {
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ],
+    "op": "OR"
+   },
+   "resetMode": {
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ],
+    "op": "OR"
+   },
+   "AutoMode": {
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "ManualMode": {
+    "in": [
+     "AutoMode"
+    ],
+    "op": "NOT"
+   },
+   "openAuto": {
+    "in": [
+     "AutoMode",
+     "Auto OP"
+    ],
+    "op": "AND"
+   },
+   "openMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Open"
+    ],
+    "op": "AND"
+   },
+   "OpenReq": {
+    "in": [
+     "F-OP",
+     "openAuto",
+     "openMan"
+    ],
+    "op": "OR"
+   },
+   "closeAuto": {
+    "in": [
+     "AutoMode",
+     "Auto CL"
+    ],
+    "op": "AND"
+   },
+   "closeMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Close"
+    ],
+    "op": "AND"
+   },
+   "CloseReq": {
+    "in": [
+     "F-CL",
+     "closeAuto",
+     "closeMan"
+    ],
+    "op": "OR"
+   },
+   "stopAuto": {
+    "in": [
+     "AutoMode",
+     "Auto SP"
+    ],
+    "op": "AND"
+   },
+   "stopMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Stop"
+    ],
+    "op": "AND"
+   },
+   "StopReq": {
+    "in": [
+     "stopAuto",
+     "stopMan"
+    ],
+    "op": "OR"
+   },
+   "nLocal": {
+    "in": [
+     "Local"
+    ],
+    "op": "NOT"
+   },
+   "nOPINH": {
+    "in": [
+     "OP INH"
+    ],
+    "op": "NOT"
+   },
+   "nCLINH": {
+    "in": [
+     "CL INH"
+    ],
+    "op": "NOT"
+   },
+   "nCloseReq": {
+    "in": [
+     "CloseReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpenReq": {
+    "in": [
+     "OpenReq"
+    ],
+    "op": "NOT"
+   },
+   "nOpen": {
+    "in": [
+     "Open"
+    ],
+    "op": "NOT"
+   },
+   "nClosed": {
+    "in": [
+     "Closed"
+    ],
+    "op": "NOT"
+   },
+   "OpenSet": {
+    "in": [
+     "OpenReq",
+     "nOPINH",
+     "nLocal",
+     "nCloseReq",
+     "nOpen"
+    ],
+    "op": "AND"
+   },
+   "OpenReset": {
+    "in": [
+     "Open",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "CloseReq"
+    ],
+    "op": "OR"
+   },
+   "OP_DMD": {
+    "set": "OpenSet",
+    "reset": "OpenReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "CloseSet": {
+    "in": [
+     "CloseReq",
+     "nCLINH",
+     "nLocal",
+     "nOpenReq",
+     "nClosed"
+    ],
+    "op": "AND"
+   },
+   "CloseReset": {
+    "in": [
+     "Closed",
+     "StopReq",
+     "Local",
+     "E-FAIL",
+     "OpenReq"
+    ],
+    "op": "OR"
+   },
+   "CL_DMD": {
+    "set": "CloseSet",
+    "reset": "CloseReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "SP_DMD": {
+    "in": [
+     "StopReq",
+     "Local"
+    ],
+    "op": "OR"
+   },
+   "swTorque": {
+    "param": "SW",
+    "val": 1,
+    "op": "PARAM_EQ"
+   },
+   "trqNormal": {
+    "in": [
+     "swTorque",
+     "Closed"
+    ],
+    "op": "AND"
+   },
+   "nTrqNormal": {
+    "in": [
+     "trqNormal"
+    ],
+    "op": "NOT"
+   },
+   "OvTrqFault": {
+    "in": [
+     "OV TRQ",
+     "nTrqNormal"
+    ],
+    "op": "AND"
+   },
+   "Abn": {
+    "in": [
+     "E-FAIL",
+     "OvTrqFault"
+    ],
+    "op": "OR"
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "OP DMD": "OP_DMD",
+   "SP DMD": "SP_DMD",
+   "CL DMD": "CL_DMD",
+   "ABN": "Abn"
+  }
+ },
+ "8200": {
+  "name": "SWGR",
+  "desc": "SWGR - Switchgear",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Lock",
+   "Auto ST",
+   "ST O/R",
+   "ST INH",
+   "Auto SP",
+   "F-SP",
+   "SP INH",
+   "EXT-SP",
+   "Local",
+   "RACK Out",
+   "E-FAIL",
+   "Running",
+   "Stopped",
+   "RUN-QTY",
+   "STP-QTY",
+   "T-Reset"
+  ],
+  "ops": [
+   "OPS.Start",
+   "OPS.Stop",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {},
+  "outputs": [
+   "Auto",
+   "Locked",
+   "ST DMD",
+   "SP DMD",
+   "Tripped",
+   "ABN"
+  ],
+  "note": "RTE-ST/RTE-SP (Run Time Error) theo thoi gian - chua mo phong.",
+  "nodes": {
+   "setMode": {
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ],
+    "op": "OR"
+   },
+   "resetMode": {
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ],
+    "op": "OR"
+   },
+   "AutoMode": {
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "ManualMode": {
+    "in": [
+     "AutoMode"
+    ],
+    "op": "NOT"
+   },
+   "Locked": {
+    "set": "Lock",
+    "reset": "T-Reset",
+    "reset_dominant": false,
+    "op": "SR"
+   },
+   "Tripped": {
+    "set": "E-FAIL",
+    "reset": "T-Reset",
+    "reset_dominant": false,
+    "op": "SR"
+   },
+   "startAuto": {
+    "in": [
+     "AutoMode",
+     "Auto ST"
+    ],
+    "op": "AND"
+   },
+   "startMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Start"
+    ],
+    "op": "AND"
+   },
+   "StartReq": {
+    "in": [
+     "startAuto",
+     "startMan",
+     "ST O/R"
+    ],
+    "op": "OR"
+   },
+   "stopAuto": {
+    "in": [
+     "AutoMode",
+     "Auto SP"
+    ],
+    "op": "AND"
+   },
+   "stopMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Stop"
+    ],
+    "op": "AND"
+   },
+   "StopReq": {
+    "in": [
+     "stopAuto",
+     "stopMan",
+     "F-SP",
+     "EXT-SP"
+    ],
+    "op": "OR"
+   },
+   "nLocal": {
+    "in": [
+     "Local"
+    ],
+    "op": "NOT"
+   },
+   "nSTINH": {
+    "in": [
+     "ST INH"
+    ],
+    "op": "NOT"
+   },
+   "nSPINH": {
+    "in": [
+     "SP INH"
+    ],
+    "op": "NOT"
+   },
+   "nLocked": {
+    "in": [
+     "Locked"
+    ],
+    "op": "NOT"
+   },
+   "nRack": {
+    "in": [
+     "RACK Out"
+    ],
+    "op": "NOT"
+   },
+   "nTrip": {
+    "in": [
+     "Tripped"
+    ],
+    "op": "NOT"
+   },
+   "nStopReq": {
+    "in": [
+     "StopReq"
+    ],
+    "op": "NOT"
+   },
+   "StartSet": {
+    "in": [
+     "StartReq",
+     "nSTINH",
+     "nLocal",
+     "nLocked",
+     "nRack",
+     "nTrip",
+     "nStopReq"
+    ],
+    "op": "AND"
+   },
+   "ST_DMD": {
+    "set": "StartSet",
+    "reset": "stReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "stReset": {
+    "in": [
+     "Running",
+     "StopReq",
+     "Tripped",
+     "Local"
+    ],
+    "op": "OR"
+   },
+   "StopSet": {
+    "in": [
+     "StopReq",
+     "nSPINH"
+    ],
+    "op": "AND"
+   },
+   "SP_DMD": {
+    "set": "StopSet",
+    "reset": "spReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "spReset": {
+    "in": [
+     "Stopped",
+     "StartReq"
+    ],
+    "op": "OR"
+   },
+   "Abn": {
+    "in": [
+     "E-FAIL",
+     "RACK Out"
+    ],
+    "op": "OR"
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "Locked": "Locked",
+   "ST DMD": "ST_DMD",
+   "SP DMD": "SP_DMD",
+   "Tripped": "Tripped",
+   "ABN": "Abn"
+  }
+ },
+ "8201": {
+  "name": "SWGR-L",
+  "desc": "SWGR-L - Switchgear",
+  "inputs": [
+   "Auto",
+   "Manual",
+   "Lock",
+   "Auto ST",
+   "ST O/R",
+   "ST INH",
+   "L-ST INH",
+   "Auto SP",
+   "F-SP",
+   "SP INH",
+   "L-SP INH",
+   "EXT-SP",
+   "Local",
+   "RACK Out",
+   "E-FAIL",
+   "Running",
+   "Stopped",
+   "RUN-QTY",
+   "STP-QTY",
+   "T-Reset"
+  ],
+  "ops": [
+   "OPS.Start",
+   "OPS.Stop",
+   "OPS.Auto",
+   "OPS.Manual"
+  ],
+  "params": {},
+  "outputs": [
+   "Auto",
+   "Locked",
+   "ST DMD",
+   "Link ST",
+   "SP DMD",
+   "Link SP",
+   "Tripped",
+   "ABN"
+  ],
+  "note": "RTE-ST/RTE-SP (Run Time Error) theo thoi gian - chua mo phong.",
+  "nodes": {
+   "setMode": {
+    "in": [
+     "OPS.Auto",
+     "Auto"
+    ],
+    "op": "OR"
+   },
+   "resetMode": {
+    "in": [
+     "OPS.Manual",
+     "Manual"
+    ],
+    "op": "OR"
+   },
+   "AutoMode": {
+    "set": "setMode",
+    "reset": "resetMode",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "ManualMode": {
+    "in": [
+     "AutoMode"
+    ],
+    "op": "NOT"
+   },
+   "Locked": {
+    "set": "Lock",
+    "reset": "T-Reset",
+    "reset_dominant": false,
+    "op": "SR"
+   },
+   "Tripped": {
+    "set": "E-FAIL",
+    "reset": "T-Reset",
+    "reset_dominant": false,
+    "op": "SR"
+   },
+   "startAuto": {
+    "in": [
+     "AutoMode",
+     "Auto ST"
+    ],
+    "op": "AND"
+   },
+   "startMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Start"
+    ],
+    "op": "AND"
+   },
+   "StartReq": {
+    "in": [
+     "startAuto",
+     "startMan",
+     "ST O/R"
+    ],
+    "op": "OR"
+   },
+   "stopAuto": {
+    "in": [
+     "AutoMode",
+     "Auto SP"
+    ],
+    "op": "AND"
+   },
+   "stopMan": {
+    "in": [
+     "ManualMode",
+     "OPS.Stop"
+    ],
+    "op": "AND"
+   },
+   "StopReq": {
+    "in": [
+     "stopAuto",
+     "stopMan",
+     "F-SP",
+     "EXT-SP"
+    ],
+    "op": "OR"
+   },
+   "nLocal": {
+    "in": [
+     "Local"
+    ],
+    "op": "NOT"
+   },
+   "nSTINH": {
+    "in": [
+     "ST INH"
+    ],
+    "op": "NOT"
+   },
+   "nSPINH": {
+    "in": [
+     "SP INH"
+    ],
+    "op": "NOT"
+   },
+   "nLocked": {
+    "in": [
+     "Locked"
+    ],
+    "op": "NOT"
+   },
+   "nRack": {
+    "in": [
+     "RACK Out"
+    ],
+    "op": "NOT"
+   },
+   "nTrip": {
+    "in": [
+     "Tripped"
+    ],
+    "op": "NOT"
+   },
+   "nStopReq": {
+    "in": [
+     "StopReq"
+    ],
+    "op": "NOT"
+   },
+   "StartSet": {
+    "in": [
+     "StartReq",
+     "nSTINH",
+     "nLocal",
+     "nLocked",
+     "nRack",
+     "nTrip",
+     "nStopReq",
+     "nLSTINH"
+    ],
+    "op": "AND"
+   },
+   "ST_DMD": {
+    "set": "StartSet",
+    "reset": "stReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "stReset": {
+    "in": [
+     "Running",
+     "StopReq",
+     "Tripped",
+     "Local"
+    ],
+    "op": "OR"
+   },
+   "StopSet": {
+    "in": [
+     "StopReq",
+     "nSPINH",
+     "nLSPINH"
+    ],
+    "op": "AND"
+   },
+   "SP_DMD": {
+    "set": "StopSet",
+    "reset": "spReset",
+    "reset_dominant": true,
+    "op": "SR"
+   },
+   "spReset": {
+    "in": [
+     "Stopped",
+     "StartReq"
+    ],
+    "op": "OR"
+   },
+   "Abn": {
+    "in": [
+     "E-FAIL",
+     "RACK Out"
+    ],
+    "op": "OR"
+   },
+   "nLSTINH": {
+    "in": [
+     "L-ST INH"
+    ],
+    "op": "NOT"
+   },
+   "nLSPINH": {
+    "in": [
+     "L-SP INH"
+    ],
+    "op": "NOT"
+   }
+  },
+  "out_map": {
+   "Auto": "AutoMode",
+   "Locked": "Locked",
+   "ST DMD": "ST_DMD",
+   "SP DMD": "SP_DMD",
+   "Tripped": "Tripped",
+   "ABN": "Abn",
+   "Link ST": "ST_DMD",
+   "Link SP": "SP_DMD"
+  }
+ }
+}

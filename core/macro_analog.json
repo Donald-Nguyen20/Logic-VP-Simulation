@@ -1,0 +1,1674 @@
+{
+ "100D": {
+  "name": "PID",
+  "desc": "PID Control",
+  "dt": 0.5,
+  "inputs": {
+   "SV": {
+    "init": 0,
+    "desc": "Setpoint"
+   },
+   "PV": {
+    "init": 0,
+    "desc": "Process value (do luong)"
+   },
+   "Auto": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=Auto (chay PID), 0=giu"
+   }
+  },
+  "params": {
+   "Kp": {
+    "val": 1.5,
+    "desc": "He so ty le"
+   },
+   "Ti": {
+    "val": 4.0,
+    "desc": "Hang so tich phan (s)"
+   },
+   "Td": {
+    "val": 0.0,
+    "desc": "Hang so vi phan (s)"
+   },
+   "HL": {
+    "val": 100,
+    "desc": "Gioi han tren dau ra"
+   },
+   "LL": {
+    "val": 0,
+    "desc": "Gioi han duoi dau ra"
+   }
+  },
+  "nodes": {
+   "pid": {
+    "op": "PID",
+    "sv": "SV",
+    "pv": "PV",
+    "kp": "Kp",
+    "ti": "Ti",
+    "td": "Td",
+    "hi": "HL",
+    "lo": "LL",
+    "auto": "Auto"
+   }
+  },
+  "outputs": [
+   "MV"
+  ],
+  "out_map": {
+   "MV": "pid"
+  }
+ },
+ "820E": {
+  "name": "MV",
+  "desc": "MV Station (tram dau ra MV, gioi han toc do + HL/LL)",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=Auto (theo lenh MV vao)"
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV tu ngoai (che do Auto)"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true,
+    "desc": "Tang (che do Manual)"
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true,
+    "desc": "Giam (che do Manual)"
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true,
+    "desc": "Yeu cau cuong buc"
+   },
+   "OR-MV": {
+    "init": 0,
+    "desc": "Gia tri cuong buc"
+   },
+   "HL-MV": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL-MV": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do doi MV (don vi/s)"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do INC/DEC tay (don vi/s)"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "op": "SUB",
+    "in": [
+     "INC",
+     "DEC"
+    ]
+   },
+   "manVal": {
+    "op": "INTEG",
+    "in": [
+     "incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV"
+   },
+   "autoSel": {
+    "op": "SELECT",
+    "sel": "Auto",
+    "a": "MV",
+    "b": "manVal"
+   },
+   "ovrSel": {
+    "op": "SELECT",
+    "sel": "OR-R-MV",
+    "a": "OR-MV",
+    "b": "autoSel"
+   },
+   "limited": {
+    "op": "RATELIM",
+    "in": [
+     "ovrSel"
+    ],
+    "rate": "MSR"
+   },
+   "clamped": {
+    "op": "CLAMP",
+    "in": [
+     "limited"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV"
+   },
+   "abn": {
+    "op": "OR",
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ]
+   }
+  },
+  "outputs": [
+   "MV",
+   "Auto",
+   "ABN"
+  ],
+  "out_map": {
+   "MV": "clamped",
+   "Auto": "Auto",
+   "ABN": "abn"
+  }
+ },
+ "820C": {
+  "name": "SV",
+  "desc": "SV Station (tram setpoint, gioi han toc do + HL/LL)",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto SV": {
+    "init": 50,
+    "desc": "Setpoint tu ngoai (che do Auto)"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-R-SV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-SV": {
+    "init": 0,
+    "desc": "SV cuong buc"
+   },
+   "HL-SV": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL-SV": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "params": {
+   "SSR": {
+    "val": 6.0,
+    "desc": "Toc do doi SV (don vi/s)"
+   },
+   "SMR": {
+    "val": 8.0,
+    "desc": "Toc do INC/DEC tay (don vi/s)"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "op": "SUB",
+    "in": [
+     "INC",
+     "DEC"
+    ]
+   },
+   "manVal": {
+    "op": "INTEG",
+    "in": [
+     "incdec"
+    ],
+    "ki": "SMR",
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "init": 50
+   },
+   "autoSel": {
+    "op": "SELECT",
+    "sel": "Auto",
+    "a": "Auto SV",
+    "b": "manVal"
+   },
+   "ovrSel": {
+    "op": "SELECT",
+    "sel": "OR-R-SV",
+    "a": "OR-SV",
+    "b": "autoSel"
+   },
+   "limited": {
+    "op": "RATELIM",
+    "in": [
+     "ovrSel"
+    ],
+    "rate": "SSR",
+    "init": 50
+   },
+   "clamped": {
+    "op": "CLAMP",
+    "in": [
+     "limited"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV"
+   }
+  },
+  "outputs": [
+   "SV",
+   "Auto"
+  ],
+  "out_map": {
+   "SV": "clamped",
+   "Auto": "Auto"
+  }
+ },
+ "406C": {
+  "name": "I (tich phan) L:para SW:Up",
+  "desc": "I (tich phan) L:para SW:Up (gioi han tu tham so)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao (de tich phan)"
+   },
+   "SW": {
+    "init": 0,
+    "bool": true,
+    "desc": "0=tich phan, 1=bam gia tri T (track)"
+   },
+   "T": {
+    "init": 0,
+    "desc": "Gia tri track (khi SW=1)"
+   }
+  },
+  "params": {
+   "TI1": {
+    "val": 5.0,
+    "desc": "Hang so tich phan (s)"
+   },
+   "HL1": {
+    "val": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL1": {
+    "val": 0,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "nodes": {
+   "Yint": {
+    "op": "INTEG",
+    "in": [
+     "X"
+    ],
+    "ti": "TI1",
+    "hi": "HL1",
+    "lo": "LL1",
+    "preset": "SW",
+    "preset_val": "T"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Yint"
+  }
+ },
+ "406D": {
+  "name": "I (tich phan) L:para SW:Down",
+  "desc": "I (tich phan) L:para SW:Down (gioi han tu tham so)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao (de tich phan)"
+   },
+   "SW": {
+    "init": 0,
+    "bool": true,
+    "desc": "0=tich phan, 1=bam gia tri T (track)"
+   },
+   "T": {
+    "init": 0,
+    "desc": "Gia tri track (khi SW=1)"
+   }
+  },
+  "params": {
+   "TI1": {
+    "val": 5.0,
+    "desc": "Hang so tich phan (s)"
+   },
+   "HL1": {
+    "val": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL1": {
+    "val": 0,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "nodes": {
+   "Yint": {
+    "op": "INTEG",
+    "in": [
+     "X"
+    ],
+    "ti": "TI1",
+    "hi": "HL1",
+    "lo": "LL1",
+    "preset": "SW",
+    "preset_val": "T"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Yint"
+  }
+ },
+ "406E": {
+  "name": "I (tich phan) L:input SW:Up",
+  "desc": "I (tich phan) L:input SW:Up (gioi han tu input)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao (de tich phan)"
+   },
+   "SW": {
+    "init": 0,
+    "bool": true,
+    "desc": "0=tich phan, 1=bam gia tri T (track)"
+   },
+   "T": {
+    "init": 0,
+    "desc": "Gia tri track (khi SW=1)"
+   },
+   "HL": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "params": {
+   "TI1": {
+    "val": 5.0,
+    "desc": "Hang so tich phan (s)"
+   }
+  },
+  "nodes": {
+   "Yint": {
+    "op": "INTEG",
+    "in": [
+     "X"
+    ],
+    "ti": "TI1",
+    "hi": "HL",
+    "lo": "LL",
+    "preset": "SW",
+    "preset_val": "T"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Yint"
+  }
+ },
+ "406F": {
+  "name": "I (tich phan) L:input SW:Down",
+  "desc": "I (tich phan) L:input SW:Down (gioi han tu input)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao (de tich phan)"
+   },
+   "SW": {
+    "init": 0,
+    "bool": true,
+    "desc": "0=tich phan, 1=bam gia tri T (track)"
+   },
+   "T": {
+    "init": 0,
+    "desc": "Gia tri track (khi SW=1)"
+   },
+   "HL": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "params": {
+   "TI1": {
+    "val": 5.0,
+    "desc": "Hang so tich phan (s)"
+   }
+  },
+  "nodes": {
+   "Yint": {
+    "op": "INTEG",
+    "in": [
+     "X"
+    ],
+    "ti": "TI1",
+    "hi": "HL",
+    "lo": "LL",
+    "preset": "SW",
+    "preset_val": "T"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Yint"
+  }
+ },
+ "4040": {
+  "name": "LLG Lead/Lag (T:para, khong SW)",
+  "desc": "LLG Lead/Lag (T:para, khong SW)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   }
+  },
+  "params": {
+   "Tle": {
+    "val": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "val": 5.0,
+    "desc": "Hang so LAG (s)"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "4041": {
+  "name": "LLG Lead/Lag (T:input, khong SW)",
+  "desc": "LLG Lead/Lag (T:input, khong SW)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "Tle": {
+    "init": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "init": 5.0,
+    "desc": "Hang so LAG (s)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "403C": {
+  "name": "LLG Lead/Lag (T:para, SW:Up)",
+  "desc": "LLG Lead/Lag (T:para, SW:Up)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=lead/lag, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "Tle": {
+    "val": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "val": 5.0,
+    "desc": "Hang so LAG (s)"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "403D": {
+  "name": "LLG Lead/Lag (T:para, SW:Down)",
+  "desc": "LLG Lead/Lag (T:para, SW:Down)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=lead/lag, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "Tle": {
+    "val": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "val": 5.0,
+    "desc": "Hang so LAG (s)"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "403E": {
+  "name": "LLG Lead/Lag (T:input, SW:Up)",
+  "desc": "LLG Lead/Lag (T:input, SW:Up)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "Tle": {
+    "init": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "init": 5.0,
+    "desc": "Hang so LAG (s)"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=lead/lag, 0=bypass (Y=X)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "403F": {
+  "name": "LLG Lead/Lag (T:input, SW:Down)",
+  "desc": "LLG Lead/Lag (T:input, SW:Down)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "Tle": {
+    "init": 2.0,
+    "desc": "Hang so LEAD (s)"
+   },
+   "Tla": {
+    "init": 5.0,
+    "desc": "Hang so LAG (s)"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=lead/lag, 0=bypass (Y=X)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "Y": {
+    "op": "LEADLAG",
+    "in": [
+     "X"
+    ],
+    "tle": "Tle",
+    "tla": "Tla",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "820D": {
+  "name": "MV-POS",
+  "desc": "MV Station voi phan hoi vi tri POS",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV (Auto)"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV": {
+    "init": 0,
+    "desc": "MV cuong buc"
+   },
+   "HL-MV": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL-MV": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi thuc"
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do doi MV"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do INC/DEC"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "manVal": {
+    "in": [
+     "incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "INTEG"
+   },
+   "autoSel": {
+    "sel": "Auto",
+    "a": "MV",
+    "b": "manVal",
+    "op": "SELECT"
+   },
+   "ovrSel": {
+    "sel": "OR-R-MV",
+    "a": "OR-MV",
+    "b": "autoSel",
+    "op": "SELECT"
+   },
+   "limited": {
+    "in": [
+     "ovrSel"
+    ],
+    "rate": "MSR",
+    "op": "RATELIM"
+   },
+   "clamped": {
+    "in": [
+     "limited"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "CLAMP"
+   },
+   "MVERR": {
+    "in": [
+     "clamped",
+     "POS"
+    ],
+    "op": "SUB"
+   },
+   "abn": {
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ],
+    "op": "OR"
+   }
+  },
+  "outputs": [
+   "Auto",
+   "MV",
+   "MV ERR",
+   "ABN"
+  ],
+  "out_map": {
+   "Auto": "Auto",
+   "MV": "clamped",
+   "MV ERR": "MVERR",
+   "ABN": "abn"
+  }
+ },
+ "8210": {
+  "name": "MV-FF",
+  "desc": "MV Station voi Feed Forward",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV (Auto)"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV": {
+    "init": 0,
+    "desc": "MV cuong buc"
+   },
+   "HL-MV": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL-MV": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "FF": {
+    "init": 0,
+    "desc": "Tin hieu feed-forward"
+   },
+   "OR-R-MV1": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV1": {
+    "init": 0
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do doi MV"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do INC/DEC"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "manVal": {
+    "in": [
+     "incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "INTEG"
+   },
+   "autoSel": {
+    "sel": "Auto",
+    "a": "ffsum",
+    "b": "manVal",
+    "op": "SELECT"
+   },
+   "ovrSel": {
+    "sel": "OR-R-MV1",
+    "a": "OR-MV1",
+    "b": "autoSel",
+    "op": "SELECT"
+   },
+   "limited": {
+    "in": [
+     "ovrSel"
+    ],
+    "rate": "MSR",
+    "op": "RATELIM"
+   },
+   "clamped": {
+    "in": [
+     "limited"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "CLAMP"
+   },
+   "ffsum": {
+    "in": [
+     "MV",
+     "FF"
+    ],
+    "op": "SUM"
+   },
+   "abn": {
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ],
+    "op": "OR"
+   }
+  },
+  "outputs": [
+   "Auto",
+   "MV",
+   "ABN"
+  ],
+  "out_map": {
+   "Auto": "Auto",
+   "MV": "clamped",
+   "ABN": "abn"
+  }
+ },
+ "820F": {
+  "name": "MV-FF-POS",
+  "desc": "MV Station voi FF va POS",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV (Auto)"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV": {
+    "init": 0,
+    "desc": "MV cuong buc"
+   },
+   "HL-MV": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL-MV": {
+    "init": 0,
+    "desc": "Gioi han duoi"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "FF": {
+    "init": 0,
+    "desc": "Feed-forward"
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi"
+   },
+   "OR-R-MV1": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV1": {
+    "init": 0
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do doi MV"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do INC/DEC"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "manVal": {
+    "in": [
+     "incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "INTEG"
+   },
+   "autoSel": {
+    "sel": "Auto",
+    "a": "ffsum",
+    "b": "manVal",
+    "op": "SELECT"
+   },
+   "ovrSel": {
+    "sel": "OR-R-MV1",
+    "a": "OR-MV1",
+    "b": "autoSel",
+    "op": "SELECT"
+   },
+   "limited": {
+    "in": [
+     "ovrSel"
+    ],
+    "rate": "MSR",
+    "op": "RATELIM"
+   },
+   "clamped": {
+    "in": [
+     "limited"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "CLAMP"
+   },
+   "ffsum": {
+    "in": [
+     "MV",
+     "FF"
+    ],
+    "op": "SUM"
+   },
+   "MVERR": {
+    "in": [
+     "clamped",
+     "POS"
+    ],
+    "op": "SUB"
+   },
+   "abn": {
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ],
+    "op": "OR"
+   }
+  },
+  "outputs": [
+   "Auto",
+   "MV",
+   "MV ERR",
+   "ABN"
+  ],
+  "out_map": {
+   "Auto": "Auto",
+   "MV": "clamped",
+   "MV ERR": "MVERR",
+   "ABN": "abn"
+  }
+ },
+ "8211": {
+  "name": "SV-BIAS",
+  "desc": "SV Station (dat Bias): SV = Auto SV + Bias",
+  "dt": 0.5,
+  "inputs": {
+   "Auto SV": {
+    "init": 50,
+    "desc": "Setpoint co so"
+   },
+   "INC": {
+    "init": 0,
+    "bool": true,
+    "desc": "Tang bias"
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true,
+    "desc": "Giam bias"
+   },
+   "Reset": {
+    "init": 0,
+    "bool": true,
+    "desc": "Xoa bias ve 0"
+   },
+   "HL-Bias": {
+    "init": 20,
+    "desc": "Bias max"
+   },
+   "LL-Bias": {
+    "init": -20,
+    "desc": "Bias min"
+   },
+   "HL-SV": {
+    "init": 100,
+    "desc": "SV max"
+   },
+   "LL-SV": {
+    "init": 0,
+    "desc": "SV min"
+   },
+   "PV": {
+    "init": 0,
+    "desc": "Do luong"
+   }
+  },
+  "params": {
+   "BMR": {
+    "val": 5.0,
+    "desc": "Toc do INC/DEC bias"
+   }
+  },
+  "nodes": {
+   "incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "bias": {
+    "in": [
+     "incdec"
+    ],
+    "ki": "BMR",
+    "hi": "HL-Bias",
+    "lo": "LL-Bias",
+    "preset": "Reset",
+    "preset_val": 0,
+    "op": "INTEG"
+   },
+   "svsum": {
+    "in": [
+     "Auto SV",
+     "bias"
+    ],
+    "op": "SUM"
+   },
+   "sv": {
+    "in": [
+     "svsum"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "op": "CLAMP"
+   }
+  },
+  "outputs": [
+   "SV Bias",
+   "SV"
+  ],
+  "out_map": {
+   "SV Bias": "bias",
+   "SV": "sv"
+  }
+ },
+ "820B": {
+  "name": "SV/MV",
+  "desc": "SV/MV",
+  "dt": 0.5,
+  "inputs": {
+   "Cascade": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto SV": {
+    "init": 50,
+    "desc": "SV ngoai"
+   },
+   "OR-R-SV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-SV": {
+    "init": 0
+   },
+   "HL-SV": {
+    "init": 100
+   },
+   "LL-SV": {
+    "init": 0
+   },
+   "PV": {
+    "init": 0,
+    "desc": "Do luong"
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV"
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV": {
+    "init": 0
+   },
+   "HL-MV": {
+    "init": 100
+   },
+   "LL-MV": {
+    "init": 0
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   }
+  },
+  "params": {
+   "SSR": {
+    "val": 6.0,
+    "desc": "Toc do SV"
+   },
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do MV"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do tay"
+   }
+  },
+  "nodes": {
+   "sv_manVal": {
+    "in": [
+     "sv_incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "init": 50,
+    "op": "INTEG"
+   },
+   "sv_incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "sv_autoSel": {
+    "sel": "Auto",
+    "a": "Auto SV",
+    "b": "sv_manVal",
+    "op": "SELECT"
+   },
+   "sv_ovr": {
+    "sel": "OR-R-SV",
+    "a": "OR-SV",
+    "b": "sv_autoSel",
+    "op": "SELECT"
+   },
+   "sv_lim": {
+    "in": [
+     "sv_ovr"
+    ],
+    "rate": "SSR",
+    "init": 50,
+    "op": "RATELIM"
+   },
+   "sv": {
+    "in": [
+     "sv_lim"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "op": "CLAMP"
+   },
+   "mv_manVal": {
+    "in": [
+     "sv_incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "INTEG"
+   },
+   "mv_autoSel": {
+    "sel": "Auto",
+    "a": "MV",
+    "b": "mv_manVal",
+    "op": "SELECT"
+   },
+   "mv_ovr": {
+    "sel": "OR-R-MV",
+    "a": "OR-MV",
+    "b": "mv_autoSel",
+    "op": "SELECT"
+   },
+   "mv_lim": {
+    "in": [
+     "mv_ovr"
+    ],
+    "rate": "MSR",
+    "op": "RATELIM"
+   },
+   "mv": {
+    "in": [
+     "mv_lim"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "CLAMP"
+   },
+   "abn": {
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ],
+    "op": "OR"
+   }
+  },
+  "outputs": [
+   "Cascade",
+   "Auto",
+   "SV",
+   "MV",
+   "ABN"
+  ],
+  "out_map": {
+   "Cascade": "Cascade",
+   "Auto": "Auto",
+   "SV": "sv",
+   "MV": "mv",
+   "ABN": "abn"
+  }
+ },
+ "820A": {
+  "name": "SV/MV-POS",
+  "desc": "SV/MV-POS",
+  "dt": 0.5,
+  "inputs": {
+   "Cascade": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto SV": {
+    "init": 50,
+    "desc": "SV ngoai"
+   },
+   "OR-R-SV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-SV": {
+    "init": 0
+   },
+   "HL-SV": {
+    "init": 100
+   },
+   "LL-SV": {
+    "init": 0
+   },
+   "PV": {
+    "init": 0,
+    "desc": "Do luong"
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV"
+   },
+   "OR-R-MV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV": {
+    "init": 0
+   },
+   "HL-MV": {
+    "init": 100
+   },
+   "LL-MV": {
+    "init": 0
+   },
+   "INC": {
+    "init": 0,
+    "bool": true
+   },
+   "DEC": {
+    "init": 0,
+    "bool": true
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi"
+   }
+  },
+  "params": {
+   "SSR": {
+    "val": 6.0,
+    "desc": "Toc do SV"
+   },
+   "MSR": {
+    "val": 8.0,
+    "desc": "Toc do MV"
+   },
+   "MMR": {
+    "val": 10.0,
+    "desc": "Toc do tay"
+   }
+  },
+  "nodes": {
+   "sv_manVal": {
+    "in": [
+     "sv_incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "init": 50,
+    "op": "INTEG"
+   },
+   "sv_incdec": {
+    "in": [
+     "INC",
+     "DEC"
+    ],
+    "op": "SUB"
+   },
+   "sv_autoSel": {
+    "sel": "Auto",
+    "a": "Auto SV",
+    "b": "sv_manVal",
+    "op": "SELECT"
+   },
+   "sv_ovr": {
+    "sel": "OR-R-SV",
+    "a": "OR-SV",
+    "b": "sv_autoSel",
+    "op": "SELECT"
+   },
+   "sv_lim": {
+    "in": [
+     "sv_ovr"
+    ],
+    "rate": "SSR",
+    "init": 50,
+    "op": "RATELIM"
+   },
+   "sv": {
+    "in": [
+     "sv_lim"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "op": "CLAMP"
+   },
+   "mv_manVal": {
+    "in": [
+     "sv_incdec"
+    ],
+    "ki": "MMR",
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "INTEG"
+   },
+   "mv_autoSel": {
+    "sel": "Auto",
+    "a": "MV",
+    "b": "mv_manVal",
+    "op": "SELECT"
+   },
+   "mv_ovr": {
+    "sel": "OR-R-MV",
+    "a": "OR-MV",
+    "b": "mv_autoSel",
+    "op": "SELECT"
+   },
+   "mv_lim": {
+    "in": [
+     "mv_ovr"
+    ],
+    "rate": "MSR",
+    "op": "RATELIM"
+   },
+   "mv": {
+    "in": [
+     "mv_lim"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "op": "CLAMP"
+   },
+   "abn": {
+    "in": [
+     "CTL-ABN",
+     "DRV-ABN"
+    ],
+    "op": "OR"
+   },
+   "MVERR": {
+    "in": [
+     "mv",
+     "POS"
+    ],
+    "op": "SUB"
+   }
+  },
+  "outputs": [
+   "Cascade",
+   "Auto",
+   "SV",
+   "MV",
+   "MV ERR",
+   "ABN"
+  ],
+  "out_map": {
+   "Cascade": "Cascade",
+   "Auto": "Auto",
+   "SV": "sv",
+   "MV": "mv",
+   "ABN": "abn",
+   "MV ERR": "MVERR"
+  }
+ }
+}

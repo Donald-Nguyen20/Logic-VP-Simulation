@@ -1,0 +1,212 @@
+# T-Designer Lite — FBD Logic Editor (prototype)
+
+Bản mô phỏng thu nhỏ nguyên lý của T-Designer: vẽ logic điều khiển bằng
+**function block**, nối dây, gán tag, **sinh mã `.DEF`**, **mô phỏng** chạy thử,
+và **đọc lại logic** từ file `.DEF` hoặc PDF đã xuất.
+
+> Công cụ minh họa/giáo dục. KHÔNG nạp chương trình xuống PLC/CPU thật
+> và KHÔNG thay thế phần mềm T-Designer gốc.
+
+---
+
+## 1. Cài đặt
+
+Cần **Python 3.8+**. Mở CMD/PowerShell trong thư mục này rồi chạy:
+
+```
+pip install PySide6
+```
+
+Muốn dùng **Import PDF**, cài thêm (khuyên PyMuPDF):
+
+```
+pip install PyMuPDF
+```
+
+## 2. Chạy
+
+```
+python main.py
+```
+
+## 3. Thư viện khối — ĐÃ NẠP ĐẦY ĐỦ
+
+Bản này đã nạp **toàn bộ 986 khối hàm thật** trích từ dự án của bạn
+(`DEF/SR21E/macro_master.csv`) + 9 khối cơ bản = **995 khối**.
+
+Cột trái có **ô tìm kiếm** (gõ tên, mô tả hoặc mã hex như `8204`) và cây
+**phân nhóm** theo loại:
+
+- Co ban (Primitive): DI, DO, AND, OR, NOT, XOR, FF, TON, MOVE
+- Logic · Toan hoc (Math) · Timer/Counter · Du lieu (Data/Move)
+- Chon/Nut nhan (Selector/PB) · Van/Dong co (Valve/Motor) · Canh bao (Alarm)
+- Chuyen doi (Converter) · Vao/Ra (I/O) · Tuan tu (Sequence) · Khac
+
+Ví dụ: gõ `mov2` sẽ thấy **MOV2-NSH (mã 8204, 14 vào / 4 ra)**.
+
+Tra cứu ngoài app: mở file **`DanhMuc_986_Khoi.csv`** (mở bằng Excel).
+
+## 4. Thao tác
+
+1. **Thêm khối:** bấm đúp khối trong cây bên trái. DI/DO hỏi tag, TON hỏi preset.
+2. **Nối dây:** bấm **cổng RA** (phải) rồi **cổng VÀO** (trái). Mỗi cổng vào 1 dây.
+3. **Di chuyển / Xóa:** kéo khối; chọn rồi nhấn **Delete**.
+4. **Sinh `.DEF`:** nút **Sinh .DEF** → panel dưới.
+5. **Mô phỏng:** nút **Mo phong**, bấm khối **DI** để bật/tắt; khối/dây mức 1 xanh.
+6. **Lưu/Mở:** file `.tdl` (JSON).
+
+## 5. Đọc lại logic
+
+- **Import .DEF** → chọn `DEF/SR21E/TYPE_A_CPUW01/TAG_MCR.DEF` (đọc được 125 macro).
+- **Import PDF** → nếu PDF chứa IL dạng text, tự nhận diện; nếu không, trích text.
+- **Nap SVG…** → trỏ tới `DEF/SR21E/SVG` để dùng ký hiệu SVG cho khối.
+
+## 6. Mức độ mô phỏng & sinh mã
+
+- **9 khối cơ bản**: mô phỏng logic ĐÚNG (AND/OR/NOT/XOR/FF/TON/MOVE...) và
+  sinh Instruction List chuẩn (`A / OR / XOR / OUT / SET / CL / TON`).
+- **986 khối macro thật**: hiển thị đúng SỐ chân vào/ra và tên; khi mô phỏng
+  coi là "hộp đen" (mỗi ngõ ra = OR các ngõ vào) vì logic nội bộ là độc quyền
+  của Toshiba. Khi sinh mã tạo khung gọi khối:
+
+  ```
+  ; ==== MOV2-NSH (macro M2NSH_TG, code 8204) ====
+  .MCR    MOV2-NSH    8204    IN=(...)
+  OUT     Dw001
+  ...
+  .MCREND
+  ```
+
+## 7. Cấu trúc mã nguồn
+
+```
+T_Designer_Lite/
+├─ main.py
+├─ DanhMuc_986_Khoi.csv        # danh mục toàn bộ khối (mo bang Excel)
+├─ core/
+│  ├─ model.py                 # Block/Circuit + Simulator + DefGenerator
+│  ├─ importer.py              # đọc .DEF và PDF
+│  └─ macro_catalog.json       # 986 khối trích từ dự án gốc
+└─ ui/
+   ├─ canvas.py                # BlockItem/WireItem/LogicScene (kéo-thả)
+   └─ app.py                   # cửa sổ chính + palette tìm kiếm
+```
+
+## 8. Đọc file DB dự án + hiển thị kiểu báo cáo 7 cột
+
+Nút **Import DB** mở file `.db` (SQLite) → chọn sheet → dựng lại theo bố cục gốc:
+
+```
+Line Name | From | LID | Logic Chart | LID | To | Line Name
+```
+
+- **Terminal hai mép** với 3 cột con; **đường kẻ dọc + tiêu đề cột**.
+- **Tên tín hiệu (Line Name)** giải mã CHÍNH XÁC qua `CAD_DATA`:
+  tag `HA035AG-11` → PA=HA, sheet=035AG → sheet 867, sig 11 →
+  `CAD_ID[867,11]` = "PULV A PAFL CTRL AUTO CTRL CMD".
+- **From/To** = LOOPNO+SHEETNO của sheet nguồn/đích (vd 16712, 16742) — khớp bản gốc.
+- **Khối logic ở giữa**, **dây vuông góc**.
+
+## 9. Thông tin & TÊN CHÂN thật của khối (từ manual Toshiba)
+
+Từ 2 manual (`VP1-...-00018` TAG Macro, `VP1-...-00019` Macro) tôi trích được
+`core/macro_manual.json` (315 khối có giải thích; 255 khối có **danh sách chân**).
+
+- **Palette + canvas hiển thị tên chân thật** thay vì I1..In/O1. Ví dụ:
+  - **MV-FF (8210)**: 17 vào (Auto, Manual, DLT MV, OR-R-MV1, OR-R-MV2, Hold,
+    OR-MV1, OR-MV2, HL-MV, LL-MV, MV, REF1, REF2, REF3, FF, CTL-ABN, DRV-ABN)
+    / 5 ra (In F-OP1, In F-OP2, Auto, MV, ABN).
+  - **MOV2-NSH (8204)**: 14 vào / 4 ra (Auto, Manual, Auto OP, F-OP…).
+- Khi **Import DB**, khối logic (MV, MOV…) được vẽ đúng số chân + tên theo manual,
+  map PINNO của DB vào đúng chân.
+- **Bấm 1 khối** → dock "Thông tin khối" hiện mã, chân vào/ra, mô tả và giải thích.
+
+Khối chưa có trong manual (hoặc parse tên chân chưa đủ) vẫn hiển thị theo số chân
+thực tế trong DB (nhãn I1..In) — không bị mất chân.
+
+## 10. Hiển thị TAG (KKS) trên khối — như UCS.pdf
+
+Khi **Import DB**, các khối loại TAG (van MOV, MV Station, DI/AI có cảnh báo…)
+hiện **mã tag thiết bị (KKS)** + mô tả **phía trên khối** (chữ đỏ), đọc từ
+`CAD_TAG_FID` (FIDSUFFIX = `Ttag` / `TID` / `TDes1`). Ví dụ khối MV:
+
+```
+10HFE61EZ001
+PULV A PAFL CTRL
+   ┌──────┐
+   │  MV  │
+   └──────┘
+```
+
+Bấm vào khối → dock "Thông tin khối" hiện thêm **Tag (KKS), Tag ID, Mô tả tag**.
+
+Lưu ý: chỉ khối **loại TAG** mới có tag thiết bị (đúng như file gốc); các khối
+số học/logic (A, Tb, AND, OR…) không có tag — điều này khớp với UCS.db và UCS.pdf.
+Trong DB này có **1.244 khối TAG đã gán KKS**; phần gán I/O vật lý
+(module/kênh) thì file chưa có.
+
+## 11. Sửa lỗi kết nối & terminal (quan trọng)
+
+Đã sửa lỗi gốc: net của terminal lấy nhầm từ `CAD_LIN` (bảng này KHÔNG map
+theo block_id) → giờ lấy đúng từ **chân khối (`CAD_BLOCK_PIN`)**. Kết quả:
+
+- **Terminal đầu vào hiện đúng tên + From + LID** (trước bị trống hoặc hiện net
+  nội bộ a1/a2…). Đối chiếu UCS.pdf: khớp từng dòng (vd sheet 620 = trang 1010).
+- **Fanout 1 → nhiều**: một chân ra nối tới nhiều điểm (vd tín hiệu HA212-18 vào
+  3 khối). Mô hình nối theo net (SIGNALID): 1 nguồn → tất cả các chân đọc net đó.
+- Áp dụng cho mọi sheet (869 giờ 15/15 terminal có tên).
+
+## 12. Bộ XEM SHEET TRUNG THỰC (geometry gốc — MỚI)
+
+Khi **Import DB**, app giờ dùng bộ vẽ mới (`core/sheet_render.py` +
+`ui/sheetview.py`) tái dựng sheet **đúng như UCS.pdf**, lấy đầy đủ:
+
+- **Khối** đặt đúng toạ độ gốc, kèm: **số thực thi (đỏ, EXEORDER)**,
+  **nhãn góc** (35-103, A-2…), **tham số dưới khối** (A= 50, degC, R12=99999…),
+  **tag KKS + mô tả** phía trên.
+- **Dây nối vẽ ĐÚNG TOẠ ĐỘ GỐC** từ `CAD_LIN_DETAIL` (mỗi net có thể có
+  nhiều nhánh — fanout 1→nhiều), kèm **tên net (a0, a1…)** trên dây.
+- **Terminal 2 mép** dạng 7 cột: Line Name / From / LID │ Logic │ LID / To / Line Name.
+- **Tên chân theo instance** (ISTD/OSTD) khi có, thay tên chung của manual.
+- **Chữ chú thích** (CAD_TEXT) và **khung tên** (PA-sheet, tiêu đề, mã bản vẽ).
+
+Dữ liệu lấy đúng theo tài liệu **`CAU_TRUC_UCS_DB.md`** (ánh xạ đầy đủ 25 bảng).
+
+Đây là chế độ **xem** (không sửa). Bấm "Moi"/"Mo" để về chế độ soạn thảo.
+
+## 13. Click terminal → NHẢY sheet liên kết (như DCS — MỚI)
+
+Sau khi Import DB và xem 1 sheet, các **terminal có chữ MÀU XANH** (cột From/To,
+LID) là điểm có liên kết chéo. **Bấm vào** → app mở thẳng sheet nguồn/đích:
+
+- **Đầu vào (trái)** → nhảy tới **sheet nguồn** (nơi tín hiệu được tạo ra),
+  giải mã từ LID qua `CAD_DATA` (vd `HAI21D-11` → sheet 1661).
+- **Đầu ra (phải)** → nhảy tới **sheet đích** qua `CAD_ID_CRS`. Nếu đi tới **nhiều
+  sheet**, cột To hiện **TẤT CẢ số trang đích xếp chồng** (như PDF, vd 13515 /
+  13569 / 22045 / 21306); bấm vào sẽ hiện **danh sách để chọn** sheet cần mở.
+- Nút **`< Back`** trên thanh công cụ để quay lại sheet trước (có lịch sử).
+
+Đây chính là cơ chế "double-click tín hiệu để nhảy" của T-Designer/DCS, dựng
+đúng theo cấu trúc DB (LID + `CAD_DATA` + `CAD_ID_CRS`).
+
+## 14. Zoom màn hình logic (MỚI)
+
+- **Lăn chuột** = phóng to / thu nhỏ (zoom vào vị trí con trỏ).
+- **Giữ chuột GIỮA + kéo** = di chuyển (pan) khắp sơ đồ.
+- Nút **Zoom +**, **Zoom -**, **Fit** (vừa màn hình), **100%** trên thanh công cụ.
+- Click trái vẫn dùng để nối dây (editor) / nhảy sheet (xem DB).
+- Khi Import DB, app tự động **Fit** để thấy trọn sheet.
+
+## 15. Sửa bố trí khối (số/tên chân) — đã kiểm TOÀN BỘ khối
+
+Tên & số chân của khối lấy TỪ MANUAL Toshiba (khớp UCS.pdf). Ví dụ SV (820C):
+8 vào (Auto, Manual, Auto SV, OR-R-SV, OR SV, HL-SV, LL-SV, PV) + 2 ra (Auto, SV).
+
+Đã bỏ dùng ISTD/OSTD làm tên chân (dữ liệu này chỉ là mô tả tag lặp lại, vd
+"LO REG LM", và nhiều mục hơn số chân thật → làm khối phình sai). Khối nào manual
+chưa đủ chân thì vẽ theo ĐÚNG số chân thật trong DB (không tên).
+
+**Audit toàn bộ:** đã đối chiếu 152 mã khối đang dùng — **100% vẽ đúng số chân**
+theo DB. Tên chân chỉ hiện khi manual khớp chính xác tổng số chân (38 mã: SV, MV,
+MOV, DDL, ADL…); khối logic/toán (AND/OR/MUL/DIF/timer) vẽ đúng số chân, không
+gán tên (giống ký hiệu nhỏ trong PDF) để tránh tên sai.

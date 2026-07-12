@@ -1,0 +1,987 @@
+﻿Ma(hex),MacroID,Ten ngan,Mo ta,Vao,Ra,Param,Obsolete,Nhom
+8000,DI_TG,,DI NA - Digital Input without Alarm (obs),1,2,1,x,Canh bao (Alarm)
+8001,DIA_TG,,DI A - Digital Input with Alarm (obs),1,2,3,x,Canh bao (Alarm)
+8005,CD_TG,,CAL_D NA - Cal Digital without Alarm (obs),2,2,1,x,Canh bao (Alarm)
+8006,CDA_TG,,CAL_D A - Cal Digital with Alarm (obs),2,2,3,x,Canh bao (Alarm)
+8009,AI_TG,,AI NA - AI without Alarm (obs),1,2,1,x,Canh bao (Alarm)
+800A,AI1FA_TG,,AI FA1 - AI with Fixed Alarm 1-Level (obs),1,4,7,x,Canh bao (Alarm)
+800B,AI2FA_TG,,AI FA2 - AI with Fixed Alarm 2-Level (obs),1,6,13,x,Canh bao (Alarm)
+800C,AI3FA_TG,,AI FA3 - AI with Fixed Alarm 3-Level (obs),1,8,19,x,Canh bao (Alarm)
+800D,AI1VA_TG,,AI VA1 - AI with Variable Alarm 1-Level (obs),3,4,5,x,Canh bao (Alarm)
+800F,AI3VA_TG,,AI VA3 - AI with Variable Alarm 3-Level (obs),7,8,13,x,Canh bao (Alarm)
+8013,CA_TG,,CAL_A NA  - Cal Analog without Alarm (obs),2,2,1,x,Canh bao (Alarm)
+208C,AA3_TS,AIA3,AIA3 - Analog Input Alarm 3 (obs),1,1,5,x,Canh bao (Alarm)
+8228,ALM1F_TG,ALM1F,ALM1F - Analog Input with Fixed Alarm 1-Level,4,4,12,,Canh bao (Alarm)
+8229,ALM1V_TG,ALM1V,ALM1V - Analog Input with Variable Alarm 1-Level,6,4,9,,Canh bao (Alarm)
+822A,ALM2F_TG,ALM2F,ALM2F - Analog Input with Fixed Alarm 2-Level,4,6,20,,Canh bao (Alarm)
+822B,ALM2V_TG,ALM2V,ALM2V - Analog Input with Variable Alarm 2-Level,8,6,15,,Canh bao (Alarm)
+822C,ALM3F_TG,ALM3F,ALM3F - Analog Input with Fixed Alarm 3-Level,4,8,28,,Canh bao (Alarm)
+822D,ALM3V_TG,ALM3V,ALM3V - Analog Input with Variable Alarm 3-Level,10,8,21,,Canh bao (Alarm)
+822E,DALM_TG,DALM,DALM - Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+82FE,82FE_TG,DALM1,DALM1 - Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+8300,8300_TG,DALM2,DALM2 - Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+8239,GDI_TG,GWDI,GWDI - Gateway Digital Input without Alarm,2,2,3,,Canh bao (Alarm)
+82EA,82EA_TG,GWDI1,Geteway Digital Input without Alarm,2,2,3,,Canh bao (Alarm)
+82EE,82EE_TG,GWDI2,Geteway Digital Input without Alarm,2,2,3,,Canh bao (Alarm)
+82F2,82F2_TG,GWDI3,Geteway Digital Input without Alarm,2,2,3,,Canh bao (Alarm)
+823A,GDIA_TG,GWDIA,GWDIA - Gateway Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+82EB,82EB_TG,GWDIA1,Geteway Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+82EF,82EF_TG,GWDIA2,Geteway Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+82F3,82F3_TG,GWDIA3,Geteway Digital Input with Alarm,2,2,5,,Canh bao (Alarm)
+8230,IDIA_TG,IDIA,IDALM - Intelligent Digital Input with Alarm,6,2,6,,Canh bao (Alarm)
+82D5,82D5_TG,SOE,SOE with Alarm,2,2,5,,Canh bao (Alarm)
+20DE,SOE0_TS,SOE0,SOE Initialize(for HCNT),0,0,0,,Canh bao (Alarm)
+20DF,SOE1_TS,SOE1,SOE(for HCNT),0,0,0,,Canh bao (Alarm)
+823C,823C_TG,XFRDIA,X-DIA - Digital Input with Alarm for Transfer,4,4,5,,Canh bao (Alarm)
+802C,CBDS_TG,,CB & DS - CB & Disconnection Switch (obs),12,6,1,x,Chon/Nut nhan (Selector/PB)
+803B,SS1_TG,,SLS1 - Selection Switch 1 (obs),16,9,1,x,Chon/Nut nhan (Selector/PB)
+803C,SS2_TG,,SLS2 - Selection Switch 2 (obs),16,9,1,x,Chon/Nut nhan (Selector/PB)
+805F,SS3_TG,,SLS3 - Selection Switch 3 (obs),26,10,1,x,Chon/Nut nhan (Selector/PB)
+4400,4400_I,4400,PB (2x5),0,0,12,,Chon/Nut nhan (Selector/PB)
+4401,4401_I,4401,PB (1x1),0,0,4,,Chon/Nut nhan (Selector/PB)
+4402,4402_I,4402,PB (1x2 / PB-PB),0,0,6,,Chon/Nut nhan (Selector/PB)
+4403,4403_I,4403,PB (1x3 / PB-PB-PB),0,0,8,,Chon/Nut nhan (Selector/PB)
+4404,4404_I,4404,PB (1x2 / PB-Lamp),0,0,6,,Chon/Nut nhan (Selector/PB)
+4405,4405_I,4405,PB (2x2),0,0,10,,Chon/Nut nhan (Selector/PB)
+4406,4406_I,4406,PB (1x3 / PB-Lamp-PB),0,0,8,,Chon/Nut nhan (Selector/PB)
+4407,4407_I,4407,PB (1x3 / PB-PB-Lamp),0,0,8,,Chon/Nut nhan (Selector/PB)
+509A,F_509A_I,509A,Maximum Value Selector - 2-input,2,1,0,,Chon/Nut nhan (Selector/PB)
+509B,F_509B_I,509B,Maximum Value Selector - 2-input,3,1,0,,Chon/Nut nhan (Selector/PB)
+509C,F_509C_I,509C,Maximum Value Selector - 3-input,3,1,0,,Chon/Nut nhan (Selector/PB)
+509D,F_509D_I,509D,Maximum Value Selector - 3-input,4,1,0,,Chon/Nut nhan (Selector/PB)
+509E,F_509E_I,509E,Maximum Value Selector - 4-input,4,1,0,,Chon/Nut nhan (Selector/PB)
+509F,F_509F_I,509F,Maximum Value Selector - 4-input,5,1,0,,Chon/Nut nhan (Selector/PB)
+5100,F_5100_I,5100,Maximum Value Selector - 5-input,5,1,0,,Chon/Nut nhan (Selector/PB)
+5101,F_5101_I,5101,Maximum Value Selector - 5-input,6,1,0,,Chon/Nut nhan (Selector/PB)
+5102,F_5102_I,5102,Maximum Value Selector - 6-input,6,1,0,,Chon/Nut nhan (Selector/PB)
+5103,F_5103_I,5103,Maximum Value Selector - 6-input,7,1,0,,Chon/Nut nhan (Selector/PB)
+5104,F_5104_I,5104,Maximum Value Selector - 7-input,7,1,0,,Chon/Nut nhan (Selector/PB)
+5105,F_5105_I,5105,Maximum Value Selector - 7-input,8,1,0,,Chon/Nut nhan (Selector/PB)
+5106,F_5106_I,5106,Maximum Value Selector - 8-input,8,1,0,,Chon/Nut nhan (Selector/PB)
+5107,F_5107_I,5107,Maximum Value Selector - 8-input,9,1,0,,Chon/Nut nhan (Selector/PB)
+5108,F_5108_I,5108,Minimum Value Selector - 2-input,2,1,0,,Chon/Nut nhan (Selector/PB)
+5109,F_5109_I,5109,Minimum Value Selector - 2-input,3,1,0,,Chon/Nut nhan (Selector/PB)
+510A,F_510A_I,510A,Minimum Value Selector - 3-input,3,1,0,,Chon/Nut nhan (Selector/PB)
+510B,F_510B_I,510B,Minimum Value Selector - 3-input,4,1,0,,Chon/Nut nhan (Selector/PB)
+510C,F_510C_I,510C,Minimum Value Selector - 4-input,4,1,0,,Chon/Nut nhan (Selector/PB)
+510D,F_510D_I,510D,Minimum Value Selector - 4-input,5,1,0,,Chon/Nut nhan (Selector/PB)
+510E,F_510E_I,510E,Minimum Value Selector - 5-input,5,1,0,,Chon/Nut nhan (Selector/PB)
+510F,F_510F_I,510F,Minimum Value Selector - 5-input,6,1,0,,Chon/Nut nhan (Selector/PB)
+5110,F_5110_I,5110,Minimum Value Selector - 6-input,6,1,0,,Chon/Nut nhan (Selector/PB)
+5111,F_5111_I,5111,Minimum Value Selector - 6-input,7,1,0,,Chon/Nut nhan (Selector/PB)
+5112,F_5112_I,5112,Minimum Value Selector - 7-input,7,1,0,,Chon/Nut nhan (Selector/PB)
+5113,F_5113_I,5113,Minimum Value Selector - 7-input,8,1,0,,Chon/Nut nhan (Selector/PB)
+5114,F_5114_I,5114,Minimum Value Selector - 8-input,8,1,0,,Chon/Nut nhan (Selector/PB)
+5115,F_5115_I,5115,Minimum Value Selector - 8-input,9,1,0,,Chon/Nut nhan (Selector/PB)
+5116,F_5116_I,5116,Middle Value Selector,3,1,0,,Chon/Nut nhan (Selector/PB)
+5117,F_5117_I,5117,Middle Value Selector,4,1,0,,Chon/Nut nhan (Selector/PB)
+513D,513D_I,513D,Analog Switch,3,1,0,,Chon/Nut nhan (Selector/PB)
+513E,513E_I,513E,Digital Switch,3,1,0,,Chon/Nut nhan (Selector/PB)
+514F,F_514F_I,514F,Middle Value Selector(Balance Compensation),5,2,0,,Chon/Nut nhan (Selector/PB)
+0058,ASW_T,ANALOG-SWITCH,ASW - Analog Switch (obs),3,1,0,x,Chon/Nut nhan (Selector/PB)
+20FA,F_ASH_TS,ASH,Analog Switch(for HCNT),3,1,0,,Chon/Nut nhan (Selector/PB)
+4018,D_CONS_I,D-CONST,DSW - Digital Switch,0,1,2,,Chon/Nut nhan (Selector/PB)
+1030,DSW_TS,Digital-Switch,DSW - Switching Digital Signal (obs),3,1,0,x,Chon/Nut nhan (Selector/PB)
+004A,HS_T,HIGH-SELECTOR,>H - High Value Selector (obs),2,1,0,x,Chon/Nut nhan (Selector/PB)
+4042,HIS1_I,HISEL1,> - High Value Selector (in:Left & Downside),2,1,0,,Chon/Nut nhan (Selector/PB)
+4043,HIS2_I,HISEL2,> - High Value Selector (in:Left & Upside),2,1,0,,Chon/Nut nhan (Selector/PB)
+4044,HIS3_I,HISEL3,> - High Value Selector (in:Upside & Downside),2,1,0,,Chon/Nut nhan (Selector/PB)
+821D,LBP1_TG,LBP-1,LPB-1 - PB with Indicator 1,1,1,4,,Chon/Nut nhan (Selector/PB)
+821E,LBP2_TG,LBP-2,LPB-2 - PB with Indicator 2,2,2,5,,Chon/Nut nhan (Selector/PB)
+821F,LBP3_TG,LBP-3,LPB-3 - PB with Indicator 3,3,3,6,,Chon/Nut nhan (Selector/PB)
+8220,LBP4_TG,LBP-4,LPB-4 - PB with Indicator 4,4,4,7,,Chon/Nut nhan (Selector/PB)
+8221,LBP5_TG,LBP-5,LPB-5 - PB with Indicator 5,5,5,8,,Chon/Nut nhan (Selector/PB)
+8222,LBP6_TG,LBP-6,LPB-6 - PB with Indicator 6,6,6,9,,Chon/Nut nhan (Selector/PB)
+8223,LBP7_TG,LBP-7,LPB-7 - PB with Indicator 7,7,7,10,,Chon/Nut nhan (Selector/PB)
+8224,LBP8_TG,LBP-8,LPB-8 - PB with Indicator 8,8,8,11,,Chon/Nut nhan (Selector/PB)
+004B,LS_T,LOW-SELECTOR,<L - Low Value Selector (obs),2,1,0,x,Chon/Nut nhan (Selector/PB)
+4045,LOS1_I,LOWSEL1,< - Low Value Selector (in:Left & Downside),2,1,0,,Chon/Nut nhan (Selector/PB)
+4046,LOS2_I,LOWSEL2,< - Low Value Selector (in:Left & Upside),2,1,0,,Chon/Nut nhan (Selector/PB)
+4047,LOS3_I,LOWSEL3,< - Low Value Selector (in:Upside & Downside),2,1,0,,Chon/Nut nhan (Selector/PB)
+4067,F_MAX_I,MAX,MAX - Maximum Value Selector,3,1,0,,Chon/Nut nhan (Selector/PB)
+100B,MED_TS,MEDIUM,MED - Middle Value Selector (obs),3,1,0,x,Chon/Nut nhan (Selector/PB)
+4069,F_MID_I,MID,MID - Midium Value Selector,3,1,0,,Chon/Nut nhan (Selector/PB)
+4068,F_MIN_I,MIN,MIN - Minimum Value Selector,3,1,0,,Chon/Nut nhan (Selector/PB)
+8216,SEL2_TG,SEL-2PB,SEL-2PB - Selector 2,4,2,5,,Chon/Nut nhan (Selector/PB)
+8217,SEL3_TG,SEL-3PB,SEL-3PB - Selector 3,6,3,6,,Chon/Nut nhan (Selector/PB)
+8218,SEL4_TG,SEL-4PB,SEL-4PB - Selector 4,8,4,7,,Chon/Nut nhan (Selector/PB)
+8219,SEL5_TG,SEL-5PB,SEL-5PB - Selector 5,10,5,8,,Chon/Nut nhan (Selector/PB)
+821A,SEL6_TG,SEL-6PB,SEL-6PB - Selector 6,12,6,9,,Chon/Nut nhan (Selector/PB)
+821B,SEL7_TG,SEL-7PB,SEL-7PB - Selector 7,14,7,10,,Chon/Nut nhan (Selector/PB)
+821C,SEL8_TG,SEL-8PB,SEL-8PB - Selector 8,16,8,11,,Chon/Nut nhan (Selector/PB)
+82D0,82D0_TG,SELABN,Selection with ABN input,17,8,11,,Chon/Nut nhan (Selector/PB)
+4123,F_4123_I,SORT,Sorting without switch,1,2,2,,Chon/Nut nhan (Selector/PB)
+4124,F_4124_I,SORT,Sorting with switch,2,2,2,,Chon/Nut nhan (Selector/PB)
+8200,SWGR_TG,SWGR,SWGR - Switchgear,18,8,11,,Chon/Nut nhan (Selector/PB)
+8201,SWGRL_TG,SWGR-L,SWGR-L - Switchgear Linkage,20,10,13,,Chon/Nut nhan (Selector/PB)
+4048,TRA1_I,TRANS1,T - Transfer 1 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+4049,TRA2_I,TRANS2,T - Transfer 2 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+404A,TRA3_I,TRANS3,T - Transfer 3 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+404B,TRA4_I,TRANS4,T - Transfer 4 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+404C,TRA5_I,TRANS5,T - Transfer 5 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+404D,TRA6_I,TRANS6,T - Transfer 6 (Analog Switch),3,1,1,,Chon/Nut nhan (Selector/PB)
+8242,8242_TG,XFRSEL8,LAMP & PB - Selector for Transfer,17,8,11,,Chon/Nut nhan (Selector/PB)
+8240,8240_TG,XFRSWGR,X-SWGR - Switchgear for Transfer,17,6,9,,Chon/Nut nhan (Selector/PB)
+5133,F_5133_I,5133,Level Converter,3,1,0,,Chuyen doi (Converter)
+5134,F_5134_I,5134,Level Converter,4,1,0,,Chuyen doi (Converter)
+5143,5143_I,5143,Real -> Integer Converter,1,1,0,,Chuyen doi (Converter)
+5144,5144_I,5144,Real -> Integer Converter,2,1,0,,Chuyen doi (Converter)
+5145,5145_I,5145,Real -> Integer Converter,1,2,0,,Chuyen doi (Converter)
+5146,5146_I,5146,Real -> Integer Converter,2,2,0,,Chuyen doi (Converter)
+5147,5147_I,5147,Real -> Integer Converter,1,1,0,,Chuyen doi (Converter)
+5148,5148_I,5148,Real -> Integer Converter,2,1,0,,Chuyen doi (Converter)
+5149,5149_I,5149,Real -> Integer Converter,1,2,0,,Chuyen doi (Converter)
+514A,514A_I,514A,Real -> Integer Converter,2,2,0,,Chuyen doi (Converter)
+514B,514B_I,514B,Integer -> Real Converter,1,1,0,,Chuyen doi (Converter)
+514C,514C_I,514C,Integer -> Real Converter,2,1,0,,Chuyen doi (Converter)
+20BF,ABC1_TS,ABC,ABC - ASCII -> Binary Converter (obs),1,1,1,x,Chuyen doi (Converter)
+20C0,BAC1_TS,BAC,BAC - Binary -> ASCII Converter (obs),1,1,1,x,Chuyen doi (Converter)
+40D3,40D3_I,BCD-WORD,CBD - Binary -> BCD Converter,1,1,0,,Chuyen doi (Converter)
+1029,CBD_TS,BCD-WORD,CBD - Binary -> BCD Converter (obs),1,1,0,x,Chuyen doi (Converter)
+40D2,40D2_I,CBF,CBF - Integer -> Real Converter,1,1,0,,Chuyen doi (Converter)
+4153,4153_I,CBF2,Combine Two 16 bit data into 32 bit data,2,1,0,,Chuyen doi (Converter)
+20EC,CBF2_TS,CBF2,CFB2 - 2 Integer -> 1 Real Converter (obs),2,1,0,x,Chuyen doi (Converter)
+40D1,40D1_I,CFB,CFB - Real -> Integer Converter,1,1,0,,Chuyen doi (Converter)
+20EB,CFB2_TS,CFB2,CBF2 - 1 Real -> 2 Integer Converter (obs),1,2,0,x,Chuyen doi (Converter)
+40B7,D2I_I,D2I,DtoI - Digital -> Integer Converter,16,1,0,,Chuyen doi (Converter)
+20A2,FCN1_TS,FCN1,FCN1 - ICI -> C900 Floating Converter (obs),2,4,0,x,Chuyen doi (Converter)
+20A3,FCN2_TS,FCN2,FCN2 - C900 -> ICI Floating Converter (obs),2,3,0,x,Chuyen doi (Converter)
+20E9,FCN3_TS,FCN3,FCN3 - ICI -> C900 Floating Converter (obs),2,3,0,x,Chuyen doi (Converter)
+20EA,FCN4_TS,FCN4,FCN4 - C900 -> ICI Floating Converter (obs),1,3,0,x,Chuyen doi (Converter)
+4102,F_4102_I,FDCL,Frequency Digital Converter Module Interface,3,5,5,,Chuyen doi (Converter)
+1020,CFB_TS,FLORT-INT,CFB - Real -> Integer Converter (obs),1,1,0,x,Chuyen doi (Converter)
+40B6,I2D_I,I2D,ItoD - Integer -> Digital Converter,1,16,0,,Chuyen doi (Converter)
+1021,CBF_TS,INT-FLORT,CBF - Integer -> Real Converter (obs),1,1,0,x,Chuyen doi (Converter)
+40D4,40D4_I,WORD-BCD,CDB - BCD -> Binary Converter,1,1,0,,Chuyen doi (Converter)
+102A,CDB_TS,WORD-BCD,CDB - BCD -> Binary Converter (obs),1,1,0,x,Chuyen doi (Converter)
+8047,S4_TG,,STR_M MV - Setter 4 (Mod Ctrl MV) (obs),11,3,8,x,Du lieu (Data/Move)
+4129,F_4129_I,4129,Config Macro for MISO Transfer Function Macro1,0,0,87,,Du lieu (Data/Move)
+412A,F_412A_I,412A,Config Macro for MISO Transfer Function Macro2,0,0,87,,Du lieu (Data/Move)
+412B,F_412B_I,412B,Config Macro for MISO Transfer Function Macro3,0,0,81,,Du lieu (Data/Move)
+4408,4408_I,4408,Table1 (data:2x3),0,0,8,,Du lieu (Data/Move)
+4409,4409_I,4409,Table1 (data:2x4),0,0,10,,Du lieu (Data/Move)
+440A,440A_I,440A,Table1 (data:2x5),0,0,12,,Du lieu (Data/Move)
+440B,440B_I,440B,Table1 (data:2x6),0,0,14,,Du lieu (Data/Move)
+440C,440C_I,440C,Table2 (data:3x 1),0,0,7,,Du lieu (Data/Move)
+440D,440D_I,440D,Table2 (data:3x 2),0,0,10,,Du lieu (Data/Move)
+440E,440E_I,440E,Table2 (data:3x 3),0,0,13,,Du lieu (Data/Move)
+440F,440F_I,440F,Table2 (data:3x 4),0,0,16,,Du lieu (Data/Move)
+4410,4410_I,4410,Table2 (data:3x 5),0,0,19,,Du lieu (Data/Move)
+4411,4411_I,4411,Table2 (data:3x 6),0,0,22,,Du lieu (Data/Move)
+4412,4412_I,4412,Table2 (data:3x 7),0,0,25,,Du lieu (Data/Move)
+4413,4413_I,4413,Table2 (data:3x 8),0,0,28,,Du lieu (Data/Move)
+4414,4414_I,4414,Table2 (data:3x 9),0,0,31,,Du lieu (Data/Move)
+4415,4415_I,4415,Table2 (data:3x10),0,0,34,,Du lieu (Data/Move)
+4416,4416_I,4416,Table2 (data:3x11),0,0,37,,Du lieu (Data/Move)
+4417,4417_I,4417,Table2 (data:3x12),0,0,40,,Du lieu (Data/Move)
+4418,4418_I,4418,Table3 (data:6x 6),0,0,43,,Du lieu (Data/Move)
+4419,4419_I,4419,Table3 (data:6x 7),0,0,49,,Du lieu (Data/Move)
+441A,441A_I,441A,Table3 (data:6x 8),0,0,55,,Du lieu (Data/Move)
+441B,441B_I,441B,Table3 (data:6x 9),0,0,61,,Du lieu (Data/Move)
+441C,441C_I,441C,Table3 (data:6x10),0,0,67,,Du lieu (Data/Move)
+441D,441D_I,441D,Table4 (data:2x8 / title:1),0,0,19,,Du lieu (Data/Move)
+441E,441E_I,441E,Table4 (data:2x8 / title:2),0,0,21,,Du lieu (Data/Move)
+441F,441F_I,441F,Table4 (data:3x8 / title:2),0,0,31,,Du lieu (Data/Move)
+4420,4420_I,4420,Table5 (data:6x2),0,0,19,,Du lieu (Data/Move)
+4421,4421_I,4421,Table5 (data:6x3),0,0,25,,Du lieu (Data/Move)
+4422,4422_I,4422,Table5 (data:6x4),0,0,31,,Du lieu (Data/Move)
+4423,4423_I,4423,Table5 (data:6x5),0,0,37,,Du lieu (Data/Move)
+4424,4424_I,4424,Table6 (data:8x2),0,0,25,,Du lieu (Data/Move)
+4425,4425_I,4425,Table6 (data:8x3),0,0,33,,Du lieu (Data/Move)
+4426,4426_I,4426,Table6 (data:8x4),0,0,41,,Du lieu (Data/Move)
+4427,4427_I,4427,Table6 (data:8x5),0,0,49,,Du lieu (Data/Move)
+4428,4428_I,4428,Table2 (data:3x13),0,0,43,,Du lieu (Data/Move)
+501B,501B_I,501B,AND Register,2,1,0,,Du lieu (Data/Move)
+501C,501C_I,501C,AND Register,3,1,0,,Du lieu (Data/Move)
+501D,501D_I,501D,AND Register,2,2,0,,Du lieu (Data/Move)
+501E,501E_I,501E,AND Register,3,2,0,,Du lieu (Data/Move)
+501F,501F_I,501F,OR Register,2,1,0,,Du lieu (Data/Move)
+5020,5020_I,5020,OR Register,3,1,0,,Du lieu (Data/Move)
+5021,5021_I,5021,OR Register,2,2,0,,Du lieu (Data/Move)
+5022,5022_I,5022,OR Register,3,2,0,,Du lieu (Data/Move)
+5023,5023_I,5023,Exclusive OR Register,2,1,0,,Du lieu (Data/Move)
+5024,5024_I,5024,Exclusive OR Register,3,1,0,,Du lieu (Data/Move)
+5025,5025_I,5025,Exclusive OR Register,2,2,0,,Du lieu (Data/Move)
+5026,5026_I,5026,Exclusive OR Register,3,2,0,,Du lieu (Data/Move)
+5027,5027_I,5027,Register Clear,0,1,0,,Du lieu (Data/Move)
+5028,5028_I,5028,Register Clear,1,1,0,,Du lieu (Data/Move)
+5135,5135_I,5135,Data Transfer (Digital),1,1,0,,Du lieu (Data/Move)
+5136,5136_I,5136,Data Transfer (Analog),1,1,0,,Du lieu (Data/Move)
+5142,F_5142_I,5142,Bump Less Transfer,4,1,0,,Du lieu (Data/Move)
+005F,ATA_T,ANALOG-TO-ANALOG,ATA - Data Transfer (Analog) (obs),1,1,0,x,Du lieu (Data/Move)
+40BC,40BC_I,AR,AR - AND Register (2-input),2,1,0,,Du lieu (Data/Move)
+40BD,40BD_I,AR,AR - AND Register (1-input & 1-para),1,1,1,,Du lieu (Data/Move)
+1006,AR_TS,AR,AR - AND Register (obs),2,1,0,x,Du lieu (Data/Move)
+409E,ATA_I,ATA,ATA - Data Transfer (Analog),1,1,0,,Du lieu (Data/Move)
+20AA,F_BMP2_TS,BMP2,BMP2 - Bumpless Transfer 2 (obs),3,1,2,x,Du lieu (Data/Move)
+0047,BMP_T,BUMPLESS-TRANSFER,BMP - Bumpless Transfer (obs),3,1,1,x,Du lieu (Data/Move)
+005E,DTD_T,DIGITAL-TO-DIGITAL,DTD - Data Transfer (Digital) (obs),1,1,0,x,Du lieu (Data/Move)
+409D,DTD_I,DTD,DTD - Data Transfer (Digital),1,1,0,,Du lieu (Data/Move)
+820E,MV_TG,MV,MV - MV Station,13,3,13,,Du lieu (Data/Move)
+8210,MVF_TG,MV-FF,MV-FF - MV Station with FF,17,5,13,,Du lieu (Data/Move)
+820D,MVPOS_TG,MV-POS,MV-POS - MV Station with POS,14,4,17,,Du lieu (Data/Move)
+40BE,40BE_I,ORR,OR - OR Register (2-input),2,1,0,,Du lieu (Data/Move)
+40BF,40BF_I,ORR,OR - OR Register (1-input & 1-para),1,1,1,,Du lieu (Data/Move)
+1007,ORR_TS,ORR,ORR - OR Register (obs),2,1,0,x,Du lieu (Data/Move)
+4100,F_4100_I,PLUL,Power Load Unbalance Detection Module Interface,1,16,5,,Du lieu (Data/Move)
+40C2,40C2_I,RCK,RCK - Register Check,1,1,0,,Du lieu (Data/Move)
+40C3,40C3_I,RCK,RCR - Register Check with AR,1,1,1,,Du lieu (Data/Move)
+40C4,40C4_I,RCK,RCX - Register Check with XOR,1,1,1,,Du lieu (Data/Move)
+414A,F_414A_I,SEND_REG,Send Register Data,2,0,1,,Du lieu (Data/Move)
+820B,SM_TG,SV/MV,SV/MV - SV & MV Station,18,6,19,,Du lieu (Data/Move)
+820A,SMP_TG,SV/MV-POS,SV/MV-POS - SV & MV Station with POS,19,7,23,,Du lieu (Data/Move)
+40AE,F_TBL1_I,TBL1,TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:U),3,1,6,,Du lieu (Data/Move)
+40AF,F_TBL2_I,TBL2,TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:U),3,1,6,,Du lieu (Data/Move)
+40B0,F_TBL3_I,TBL3,TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:U),3,1,6,,Du lieu (Data/Move)
+40B1,F_TBL4_I,TBL4,TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:D),3,1,6,,Du lieu (Data/Move)
+40B2,F_TBL5_I,TBL5,TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:D),3,1,6,,Du lieu (Data/Move)
+40B3,F_TBL6_I,TBL6,TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:D),3,1,6,,Du lieu (Data/Move)
+4073,F_T_B1_I,TRAN-BMP1,Tb - Bumpless Transfer (X1:L /X2:D /SW:U),3,1,4,,Du lieu (Data/Move)
+4074,F_T_B2_I,TRAN-BMP2,Tb - Bumpless Transfer (X1:D /X2:L /SW:U),3,1,4,,Du lieu (Data/Move)
+4075,F_T_B3_I,TRAN-BMP3,Tb - Bumpless Transfer (X1:U /X2:L /SW:U),3,1,4,,Du lieu (Data/Move)
+4076,F_T_B4_I,TRAN-BMP4,Tb - Bumpless Transfer (X1:L /X2:D /SW:D),3,1,4,,Du lieu (Data/Move)
+4090,F_T_B5_I,TRAN-BMP5,Tb - Bumpless Transfer (X1:D /X2:L /SW:D),3,1,4,,Du lieu (Data/Move)
+4091,F_T_B6_I,TRAN-BMP6,Tb - Bumpless Transfer (X1:U /X2:L /SW:D),3,1,4,,Du lieu (Data/Move)
+40D8,40D8_I,XFR,XFR,2,1,1,,Du lieu (Data/Move)
+8241,8241_TG,XFRDUAL,X-DUAL - Dual Gate Sensor for Transfer,10,4,7,,Du lieu (Data/Move)
+8247,8247_TG,XFRMV,X-MV - MV Station for Transfer,18,4,7,,Du lieu (Data/Move)
+8246,8246_TG,XFRSV,X-SV - SV Station for Transfer,18,4,7,,Du lieu (Data/Move)
+8245,8245_TG,XFRSV/MV,X-SV/MV - SV & MV Station for Transfer,19,7,10,,Du lieu (Data/Move)
+8248,8248_TG,XFRTRIPL,X-TRIPLE - Triple Gate Sensor for Transfer,16,5,8,,Du lieu (Data/Move)
+40C0,40C0_I,XOR,XOR - XOR Register (2-input),2,1,0,,Du lieu (Data/Move)
+40C1,40C1_I,XOR,XOR - XOR Register (1-input & 1-para),1,1,1,,Du lieu (Data/Move)
+1008,XOR_TS,XOR,XOR - Exclusive OR Register (obs),2,1,0,x,Du lieu (Data/Move)
+8014,CA1FA_TG,,CAL_A FA1 - Cal_A with Fixed ALM 1-Level (obs),2,4,7,x,Khac (Other)
+8015,CA2FA_TG,,CAL_A FA2 - Cal_A with Fixed ALM 2-Level (obs),2,6,13,x,Khac (Other)
+8016,CA3FA_TG,,CAL_A FA3 - Cal_A with Fixed ALM 3-Level (obs),2,8,19,x,Khac (Other)
+8017,CA1VA_TG,,CAL_A VA1 - Cal_A with Variable ALM 1-Lvl (obs),4,4,5,x,Khac (Other)
+801A,HMID_TG,,HMI_D - HMI Digital (obs),0,1,1,x,Khac (Other)
+801B,HMIA_TG,,HMI_A - HMI Analog (obs),0,1,1,x,Khac (Other)
+8026,SV1_TG,,SOV_SO - Single SOV Energize Open (obs),12,4,1,x,Khac (Other)
+8027,SV2_TG,,SOV_SC - Single SOV Energize Close (obs),12,4,1,x,Khac (Other)
+8039,S2_TG,,STR_D NOINT - Setter 2 (Digital)(No Logic) (obs),5,3,3,x,Khac (Other)
+803A,S3_TG,,STR_A - Setter 3 (Analog) (obs),2,2,3,x,Khac (Other)
+803D,SV3_TG,,SOV_D - Double SOV (obs),12,5,1,x,Khac (Other)
+8046,CB_TG,,CB - Circuit Breaker (obs),5,4,1,x,Khac (Other)
+805C,S5_TG,,STR_M SV - Setter 5 (Mod Ctrl SV) (obs),8,3,8,x,Khac (Other)
+805E,MC10_TG,,MDC-A SV - Mod Ctrl (SV) (obs),8,3,4,x,Khac (Other)
+409F,F_2BAL_I,2BAL,2BAL - Two Balance Function,5,2,17,,Khac (Other)
+40A0,F_3BAL_I,3BAL,3BAL - Three Balance Function,7,3,18,,Khac (Other)
+40F5,F_40F5_I,40F5,Thermal Stress Predict Calculation 2,10,11,38,,Khac (Other)
+40F6,F_40F6_I,40F6,Method of Least Squares,6,9,2,,Khac (Other)
+40FC,F_40FC_I,40FC,Transient Phenomena Record,10,0,2,,Khac (Other)
+413E,F_413E_I,413E,Transient Phenomena Record 2,4,0,2,,Khac (Other)
+5017,5017_I,5017,Device Set,0,1,0,,Khac (Other)
+5018,5018_I,5018,Device Set,1,1,0,,Khac (Other)
+5019,5019_I,5019,Device Clear,0,1,0,,Khac (Other)
+501A,501A_I,501A,Device Clear,1,1,0,,Khac (Other)
+5029,5029_I,5029,Rotate,2,1,0,,Khac (Other)
+502A,502A_I,502A,Rotate,3,1,0,,Khac (Other)
+502B,502B_I,502B,Rotate,2,2,0,,Khac (Other)
+502C,502C_I,502C,Rotate,3,2,0,,Khac (Other)
+502D,502D_I,502D,Word Check,1,1,0,,Khac (Other)
+502E,502E_I,502E,Word Check,2,1,0,,Khac (Other)
+506B,F_506B_I,506B,Square Root,1,1,0,,Khac (Other)
+506C,F_506C_I,506C,Square Root,2,1,0,,Khac (Other)
+506D,F_506D_I,506D,Square Root,1,2,0,,Khac (Other)
+506E,F_506E_I,506E,Square Root,2,2,0,,Khac (Other)
+506F,F_506F_I,506F,Absolute,1,1,0,,Khac (Other)
+5070,F_5070_I,5070,Absolute,2,1,0,,Khac (Other)
+5071,F_5071_I,5071,Absolute,1,2,0,,Khac (Other)
+5072,F_5072_I,5072,Absolute,2,2,0,,Khac (Other)
+5073,F_5073_I,5073,Sign Inversion,1,1,0,,Khac (Other)
+5074,F_5074_I,5074,Sign Inversion,2,1,0,,Khac (Other)
+5075,F_5075_I,5075,Sign Inversion,1,2,0,,Khac (Other)
+5076,F_5076_I,5076,Sign Inversion,2,2,0,,Khac (Other)
+5077,F_5077_I,5077,Trigonometric Function (Sine),1,1,0,,Khac (Other)
+5078,F_5078_I,5078,Trigonometric Function (Sine),2,1,0,,Khac (Other)
+5079,F_5079_I,5079,Trigonometric Function (Cosine),1,1,0,,Khac (Other)
+507A,F_507A_I,507A,Trigonometric Function (Cosine),2,1,0,,Khac (Other)
+507B,F_507B_I,507B,Proportional,3,1,0,,Khac (Other)
+507C,F_507C_I,507C,Proportional,4,1,0,,Khac (Other)
+5080,F_5080_I,5080,First Order Lag,2,1,0,,Khac (Other)
+5081,F_5081_I,5081,First Order Lag,3,1,0,,Khac (Other)
+5082,F_5082_I,5082,Differential,2,1,0,,Khac (Other)
+5083,F_5083_I,5083,Differential,3,1,0,,Khac (Other)
+5084,F_5084_I,5084,Lead/Lag,6,1,0,,Khac (Other)
+5085,F_5085_I,5085,Lead/Lag,5,1,0,,Khac (Other)
+5086,F_5086_I,5086,Lead/Lag,6,1,0,,Khac (Other)
+5087,F_5087_I,5087,Dead Time,4,1,0,,Khac (Other)
+5088,F_5088_I,5088,Dead Time,2,1,1,,Khac (Other)
+5089,F_5089_I,5089,Dead Time,3,1,1,,Khac (Other)
+508A,F_508A_I,508A,Compare (Positive),3,1,0,,Khac (Other)
+508B,F_508B_I,508B,Compare (Positive),4,1,0,,Khac (Other)
+508C,F_508C_I,508C,Compare (Negative),3,1,0,,Khac (Other)
+508D,F_508D_I,508D,Compare (Negative),4,1,0,,Khac (Other)
+5140,F_5140_I,5140,Sort,2,2,0,,Khac (Other)
+5141,F_5141_I,5141,Sort,3,2,0,,Khac (Other)
+5150,5150_I,5150,Analog Direct Input,2,1,0,,Khac (Other)
+5151,5151_I,5151,Analog Direct Input,3,1,0,,Khac (Other)
+5152,5152_I,5152,Analog Direct Output,3,0,0,,Khac (Other)
+5153,5153_I,5153,Analog Direct Output,4,0,0,,Khac (Other)
+5154,5154_I,5154,No Operation,0,0,0,,Khac (Other)
+5155,5155_I,5155,End,0,0,0,,Khac (Other)
+5156,5156_I,5156,Signal Generator,0,1,1,,Khac (Other)
+5157,5157_I,5157,Signal Generator,0,1,1,,Khac (Other)
+4052,A_CO_I,A-CONST,A - Variable Signal Generator,0,1,3,,Khac (Other)
+4064,F_ABS_I,ABS,|X| - Absolute Value,1,1,0,,Khac (Other)
+0048,ABS_T,ABSOLUTE,|X| - Absolute (obs),1,1,0,x,Khac (Other)
+4151,F_4151_I,ACOS,Inverse Trigonometric Function(arccosine),1,1,0,,Khac (Other)
+8227,ADL_TG,ADL,ADL - Analog Data Link,2,2,3,,Khac (Other)
+005D,AM_T,ANALOG-MEMORY,AM - Analog Memory (obs),4,1,3,x,Khac (Other)
+8273,8273_TG,ANN,ANN - Annunciator,2,4,4,,Khac (Other)
+4150,F_4150_I,ASIN,Inverse Trigonometric Function(arcsine),1,1,0,,Khac (Other)
+8209,CIRB_TG,CIRB,CB - Circuit Breaker,7,5,7,,Khac (Other)
+40FD,40FD_I,CMCR1,CMCR-Type1,0,2,3,,Khac (Other)
+40FE,40FE_I,CMCR2,CMCR-Type2,1,2,3,,Khac (Other)
+40FF,40FF_I,CMCR3,CMCR-Type3,5,5,3,,Khac (Other)
+0059,CPP_T,COMPARE(+),H - Compare (Positive) (obs),1,1,2,x,Khac (Other)
+005A,CPM_T,COMPARE(-),L - Compare (Negative) (obs),1,1,2,x,Khac (Other)
+414D,F_414D_I,COS,Trigonometric Function (cosine),1,1,0,,Khac (Other)
+2007,F_COS_TS,COS_TS,COS - Trigonometric Function (Cosine) (obs),1,1,0,x,Khac (Other)
+20A9,F_CRH_TS,CRH,CRH - Change Rate High (obs),1,1,2,x,Khac (Other)
+40AB,F_CRH1_I,CRH1,CRH - Change Rate High (S & R:para),1,1,4,,Khac (Other)
+40AC,F_CRH2_I,CRH2,CRH - Change Rate High (S & R:input),3,1,1,,Khac (Other)
+405F,F_D_S1_I,D-SUM1,DSUM - Digital Summing (2-input),2,1,3,,Khac (Other)
+4060,F_D_S2_I,D-SUM2,DSUM - Digital Summing (3-input),3,1,4,,Khac (Other)
+4061,F_D_S3_I,D-SUM3,DSUM - Digital Summing (4-input),4,1,5,,Khac (Other)
+4062,F_D_S4_I,D-SUM4,DSUM - Digital Summing (5-input),5,1,6,,Khac (Other)
+4063,F_D_S5_I,D-SUM5,DSUM - Digital Summing (6-input),6,1,7,,Khac (Other)
+822F,DDL_TG,DDL,DDL - Digital Data Link,2,2,3,,Khac (Other)
+82FD,82FD_TG,DDL1,DDL1 - Digital Data Link,2,2,3,,Khac (Other)
+82FF,82FF_TG,DDL2,DDL2 - Digital Data Link,2,2,3,,Khac (Other)
+0052,DT_T,DEAD-TIME,DT - Dead Time (obs),2,1,2,x,Khac (Other)
+4021,DIF1_I,DIF1,- - Difference (Left - Downside),2,1,0,,Khac (Other)
+4022,DIF2_I,DIF2,- - Difference (Downside - Left),2,1,0,,Khac (Other)
+4023,DIF3_I,DIF3,- - Difference (Left - Upside),2,1,0,,Khac (Other)
+4024,DIF4_I,DIF4,- - Difference (Upside - Left),2,1,0,,Khac (Other)
+4025,DIF5_I,DIF5,- - Difference (Upside - Downside),2,1,0,,Khac (Other)
+4026,DIF6_I,DIF6,- - Difference (Downside - Upside),2,1,0,,Khac (Other)
+0050,DIF_T,DIFFERENTIAL(1),D - Differential (obs),2,1,1,x,Khac (Other)
+824B,824B_TG,DOSC,HMI DO-SC - HMI Digital Self Clear,0,1,3,,Khac (Other)
+40D5,40D5_I,DSW,DSW,3,1,1,,Khac (Other)
+20ED,DT1_TS,DT1,DT1 - Dead Time 1 (obs),2,1,2,x,Khac (Other)
+8214,DUAL_TG,DUAL,DUAL - Dual Gate Sensor,5,4,12,,Khac (Other)
+20A8,DVH_TS,DVH,DVH - Deviation High (obs),2,1,2,x,Khac (Other)
+40A8,F_DVH1_I,DVH1,DVH - Deviation High (in:Left & Downside),2,1,4,,Khac (Other)
+40A9,F_DVH2_I,DVH2,DVH - Deviation High (in:Left & Upside),2,1,4,,Khac (Other)
+40AA,F_DVH3_I,DVH3,DVH - Deviation High (in:Upside & Downside),2,1,4,,Khac (Other)
+102E,EDT_TS,EDIT,EDT - Edit Event Cyclic Data (obs),0,4,0,x,Khac (Other)
+40A5,EVF_I,EVER-OFF,0 - Ever Off,0,1,0,,Khac (Other)
+40A4,EVO_I,EVER-ON,1 - Ever On,0,1,0,,Khac (Other)
+405D,F_EXP1_I,EXP1,EX - Exponential of X,1,1,0,,Khac (Other)
+102B,F_EX_TS,EXPONENTIAL,EXP - Exponential of X (obs),1,1,0,x,Khac (Other)
+411F,F_411F_I,FDCL,FDCL Module Interface,3,5,6,,Khac (Other)
+4157,F_4157_I,FDCL1,FDCL1 Module Interface,4,5,6,,Khac (Other)
+40CF,GO_TS,GO,Branch instruction,1,0,1,,Khac (Other)
+82E9,82E9_TG,GWDIAP,GWDIA with Poor,3,2,5,,Khac (Other)
+82ED,82ED_TG,GWDIAP1,GWDIA with Poor,3,2,5,,Khac (Other)
+82F1,82F1_TG,GWDIAP2,GWDIA with Poor,3,2,5,,Khac (Other)
+82F5,82F5_TG,GWDIAP3,GWDIA with Poor,3,2,5,,Khac (Other)
+82E8,82E8_TG,GWDIP,GWDI with Poor,3,2,3,,Khac (Other)
+82EC,82EC_TG,GWDIP1,GWDI with Poor,3,2,3,,Khac (Other)
+82F0,82F0_TG,GWDIP2,GWDI with Poor,3,2,3,,Khac (Other)
+82F4,82F4_TG,GWDIP3,GWDI with Poor,3,2,3,,Khac (Other)
+1040,F_INC_TS,INC,INC - Inching (obs),1,1,2,x,Khac (Other)
+4077,F_IPOL_I,INPOL,INPOL - Interpolator,2,2,39,,Khac (Other)
+40E6,40E6_I,IO_BIF207,BIF207,2,7,5,,Khac (Other)
+40E7,40E7_I,IO_BIF415,BIF415,4,15,7,,Khac (Other)
+20C5,JPLT_TS,JPLT,JPLT - Jumper Lift (obs),5,1,0,x,Khac (Other)
+8234,LACK_TG,LACK,ACK - Acknowledge,3,5,3,,Khac (Other)
+4036,F_LAG1_I,LAG1,F(t) - First Order LAG (T:para / SW:Upside),2,1,2,,Khac (Other)
+4037,F_LAG2_I,LAG2,F(t) - First Order LAG (T:para / SW:Downside),2,1,2,,Khac (Other)
+4038,F_LAG3_I,LAG3,F(t) - First Order LAG (T:input / SW:Upside),3,1,1,,Khac (Other)
+4039,F_LAG4_I,LAG4,F(t) - First Order LAG (T:input / SW:Downside),3,1,1,,Khac (Other)
+403A,F_LAG5_I,LAG5,F(t) - First Order LAG (T:para / without SW),1,1,2,,Khac (Other)
+403B,F_LAG6_I,LAG6,F(t) - First Order LAG (T:input / without SW),2,1,1,,Khac (Other)
+411A,F_411A_I,LCFI,Low Cycle Fatigue Index Calculation,4,6,11,,Khac (Other)
+005B,LLAG_T,LEAD-LAG,LLAG - Lead/Lag (obs),2,1,4,x,Khac (Other)
+1024,LH_TS,LH-OUT,LH - Latch Output (obs),1,1,0,x,Khac (Other)
+403C,F_LLG1_I,LLG1,LLG - Lead/Lag (T:para / SW:Upside),2,1,6,,Khac (Other)
+403D,F_LLG2_I,LLG2,LLG - Lead/Lag (T:para / SW:Downside),2,1,6,,Khac (Other)
+403E,F_LLG3_I,LLG3,LLG - Lead/Lag (T:input / SW:Upside),4,1,4,,Khac (Other)
+403F,F_LLG4_I,LLG4,LLG - Lead/Lag (T:input / SW:Downside),4,1,4,,Khac (Other)
+4040,F_LLG5_I,LLG5,LLG - Lead/Lag (T:para / without SW),1,1,6,,Khac (Other)
+4041,F_LLG6_I,LLG6,LLG - Lead/Lag (T:input / without SW),3,1,4,,Khac (Other)
+4156,F_4156_I,LN,Natural Logarithm,1,1,0,,Khac (Other)
+2009,F_LN_TS,LN_TS,LN - Natural Logarithm (obs),1,1,0,x,Khac (Other)
+4155,F_4155_I,LOG,Common Logarithm,1,1,0,,Khac (Other)
+200A,F_LOG_TS,LOG_TS,LOG - Common Logarithm (obs),1,1,0,x,Khac (Other)
+4117,F_4117_I,MLS-X,Method of Least Squares(One input:X),2,9,3,,Khac (Other)
+4079,F_NEG_I,NEG,-1 - Negative,1,1,0,,Khac (Other)
+1015,NEG_TS,NEGATIVE,NEG - Sign Inversion (obs),1,1,0,x,Khac (Other)
+40BA,OFV_I,OFV,ORV - Override of Real Value,2,2,0,,Khac (Other)
+40B9,OIV_I,OIV,OIV - Override of Integer Value,2,2,0,,Khac (Other)
+40B8,OLV_I,OLV,OLV - Override of Logic Value,2,2,0,,Khac (Other)
+1028,PCK_TS,PARITY-CHECK,PCK - Parity Check (obs),1,1,0,x,Khac (Other)
+4019,PG_I,PG,PG - Pulse Generator,1,1,3,,Khac (Other)
+411D,F_411D_I,PLUL,PLUL Module Interface,1,16,6,,Khac (Other)
+4126,F_4126_I,PLUL,PLUL Module Interface,4,16,7,,Khac (Other)
+4148,F_4148_I,PLUL,PLUL Module Interface (SB),7,16,7,,Khac (Other)
+4152,F_4152_I,PLUL,PLUL interface,8,16,7,,Khac (Other)
+4016,PO_I,PO,PO - Pulse Output (T:para / R:disp),1,1,2,,Khac (Other)
+4146,PO_NT_I,PO,PO - Pulse Output (T:para / R:disp)(NT),1,1,2,,Khac (Other)
+4085,PO2_I,PO2,PO - Pulse Output (T:input / R:disp),2,1,1,,Khac (Other)
+4086,PO3_I,PO3,PO - Pulse Output (T:para / R:output),1,2,2,,Khac (Other)
+4087,PO4_I,PO4,PO - Pulse Output (T:input / R:output),2,2,1,,Khac (Other)
+4034,F_POW_I,POW,POW - Exponential (Power),1,1,2,,Khac (Other)
+406A,F_PRP1_I,PROP1,P - Proportional (PG:para),1,1,2,,Khac (Other)
+406B,F_PRP2_I,PROP2,P - Proportional (PG:input),2,1,1,,Khac (Other)
+0054,P_T,PROPORTIONAL,P - Proportional (obs),1,1,2,x,Khac (Other)
+1038,PLS_TS,PULSE-OUT,PLS - Pulse Output (obs),2,1,1,x,Khac (Other)
+2087,F_RFSC_TS,RFSC,RFSC - RFSC (obs),6,3,1,x,Khac (Other)
+20BA,F_ROC_TS,ROC,CAL ROC - Rate of Change (obs),3,2,1,x,Khac (Other)
+4033,F_ROOT_I,ROOT,ROOT - Square Root,1,1,0,,Khac (Other)
+40D6,40D6_I,ROT,ROT,2,1,0,,Khac (Other)
+1014,ROT_TS,ROTATE,ROT - Bit Rotation (by word) (obs),2,1,0,x,Khac (Other)
+414B,F_414B_I,SEND_LOG,Send Log Data,2,0,1,,Khac (Other)
+20A1,SGX_TS,SIGNAL-GENERATE(X),SGX - Signal Generate(X) (obs),0,1,1,x,Khac (Other)
+414C,F_414C_I,SIN,Trigonometric Function (sine),1,1,0,,Khac (Other)
+2006,F_SIN_TS,SIN_TS,SIN - Trigonometric Function (Sine) (obs),1,1,0,x,Khac (Other)
+20BB,F_SMT_TS,SMT,CAL SMT - Smoothing (obs),3,2,1,x,Khac (Other)
+1022,F_SRT_TS,SORT,SORT - Sort (obs),1,2,1,x,Khac (Other)
+0049,SQRT_T,SQUAREROOT,ROOT - Square Root (obs),1,1,0,x,Khac (Other)
+4116,F_4116_I,STR,Setter,11,3,8,,Khac (Other)
+401A,SUM1_I,SUM1,SUM - Summing (in:Left & Downside),2,1,0,,Khac (Other)
+401B,SUM2_I,SUM2,SUM - Summing (in:Left & Upside),2,1,0,,Khac (Other)
+401C,SUM3_I,SUM3,SUM - Summing (in:Upside & Downside),2,1,0,,Khac (Other)
+4030,F_SUG1_I,SUMGAIN1,SWG - Summing with Gain (in:Left & Downside),2,1,3,,Khac (Other)
+4031,F_SUG2_I,SUMGAIN2,SWG - Summing with Gain (in:Left & Upside),2,1,3,,Khac (Other)
+4032,F_SUG3_I,SUMGAIN3,SWG - Summing with Gain (in:Upside & Downside),2,1,3,,Khac (Other)
+820C,SV_TG,SV,SV - SV Station,8,2,13,,Khac (Other)
+8211,SVBIS_TG,SV-BIAS,SV-BIAS - SV Station (Bias Set),7,2,9,,Khac (Other)
+8304,8304_TG,SV-CI,SV Station(Change Inhibit),10,2,13,,Khac (Other)
+4107,F_4107_I,Sum(++++),Summing(4inputs:++++),4,1,0,,Khac (Other)
+4108,F_4108_I,Sum(+++-),Summing(4inputs:+++-),4,1,0,,Khac (Other)
+4109,F_4109_I,Sum(++--),Summing(4inputs:++--),4,1,0,,Khac (Other)
+410A,F_410A_I,Sum(+---),Summing(4inputs:+---),4,1,0,,Khac (Other)
+2008,F_TAN_TS,TAN_TS,TAN - Trigonometric Function (Tangent) (obs),1,1,0,x,Khac (Other)
+4017,TDWO_I,TDWO,TDWO - Pulse Output-Wipe Out (T:para / R:disp),1,1,2,,Khac (Other)
+4147,TDWO_NT_I,TDWO,TDWO - Pulse Output-Wipe Out (T:para/R:disp)(NT),1,1,2,,Khac (Other)
+4088,TDWO2_I,TDWO2,TDWO - Pulse Output-Wipe Out (T:input / R:disp),2,1,1,,Khac (Other)
+4089,TDWO3_I,TDWO3,TDWO - Pulse Output-Wipe Out (T:para / R:output),1,2,2,,Khac (Other)
+408A,TDWO4_I,TDWO4,TDWO - Pulse Output-Wipe Out (T:input /R:output),2,2,1,,Khac (Other)
+20BC,F_TMAX_TS,TMAX,CAL TMAX - Timed Maximum (obs),4,2,0,x,Khac (Other)
+20BE,F_TMG_TS,TMG,CAL TMG - Calculation Timing (obs),2,1,0,x,Khac (Other)
+20BD,F_TMIN_TS,TMIN,CAL TMIN - Timed Minimum (obs),4,2,0,x,Khac (Other)
+40AD,F_TPC_I,TPC,TPC - TEMP/PRESS Compensation,3,1,2,,Khac (Other)
+20AB,F_TPCPS_TS,TPCPS,TPCPS - Compensation of Temperature (obs),3,1,1,x,Khac (Other)
+411C,F_411C_I,TR,Transient Phenomenon Record,10,0,3,,Khac (Other)
+8215,TRIPL_TG,TRIPLE,TRIPLE - Triple Gate Sensor,7,6,13,,Khac (Other)
+411B,F_411B_I,TSO,Turbine Start Optimization Calculation,12,4,11,,Khac (Other)
+4119,F_4119_I,TSP,Thermal Stress Predict Calculation,10,11,39,,Khac (Other)
+40DF,40DF_I,UDI,UDI - User DI,0,1,0,,Khac (Other)
+40DE,40DE_I,ULOG,ULOG - User Log,3,0,0,,Khac (Other)
+411E,F_411E_I,VPCL,VPCL Module Interface,16,16,7,,Khac (Other)
+4154,F_4154_I,VPCLH,VPCL Module Interface(High speed transmission),17,16,7,,Khac (Other)
+1027,WCK_TS,WORD-CHECK,WCK - Word Check (obs),1,1,0,x,Khac (Other)
+102C,F_XZ_TS,X-TO-Z-POWER,PWR - Exponential (Power) (obs),1,1,1,x,Khac (Other)
+8035,DGS1_TG,,DGS-A - Dual Gate Sensor 1 (obs),5,4,4,x,Logic
+8036,TGS1_TG,,TGS-A - Triple Gate Sensor 1 (obs),7,4,6,x,Logic
+8063,TGS2_TG,,TGS-M - Triple Gate Sensor 2 (obs),7,4,6,x,Logic
+0001,AND2_1,2AND(1),AND - 2-input (obs),2,1,0,x,Logic
+0004,AND2_2,2AND(2),AND - 2-input with NOT (01) (obs),2,1,0,x,Logic
+0005,AND2_3,2AND(2),AND - 2-input with NOT (02) (obs),2,1,0,x,Logic
+0006,AND2_4,2AND(2),AND - 2-input with NOT (03) (obs),2,1,0,x,Logic
+001D,OR2_1,2OR(1),OR - 2-input (obs),2,1,0,x,Logic
+0020,OR2_2,2OR(2),OR - 2-input with NOT (01) (obs),2,1,0,x,Logic
+0021,OR2_3,2OR(2),OR - 2-input with NOT (02) (obs),2,1,0,x,Logic
+0022,OR2_4,2OR(2),OR - 2-input with NOT (03) (obs),2,1,0,x,Logic
+400E,2OUT3_I,2OUT3,<|2 - Two Out of Three,3,1,0,,Logic
+0002,AND3_1,3AND(1),AND - 3-input (obs),3,1,0,x,Logic
+0007,AND3_2,3AND(2),AND - 3-input with NOT (01) (obs),3,1,0,x,Logic
+0008,AND3_3,3AND(2),AND - 3-input with NOT (02) (obs),3,1,0,x,Logic
+0009,AND3_4,3AND(2),AND - 3-input with NOT (03) (obs),3,1,0,x,Logic
+000A,AND3_5,3AND(2),AND - 3-input with NOT (04) (obs),3,1,0,x,Logic
+000B,AND3_6,3AND(2),AND - 3-input with NOT (05) (obs),3,1,0,x,Logic
+000C,AND3_7,3AND(2),AND - 3-input with NOT (06) (obs),3,1,0,x,Logic
+000D,AND3_8,3AND(2),AND - 3-input with NOT (07) (obs),3,1,0,x,Logic
+001E,OR3_1,3OR(1),OR - 3-input (obs),3,1,0,x,Logic
+0023,OR3_2,3OR(2),OR - 3-input with NOT (01) (obs),3,1,0,x,Logic
+0024,OR3_3,3OR(2),OR - 3-input with NOT (02) (obs),3,1,0,x,Logic
+0025,OR3_4,3OR(2),OR - 3-input with NOT (03) (obs),3,1,0,x,Logic
+0026,OR3_5,3OR(2),OR - 3-input with NOT (04) (obs),3,1,0,x,Logic
+0027,OR3_6,3OR(2),OR - 3-input with NOT (05) (obs),3,1,0,x,Logic
+0028,OR3_7,3OR(2),OR - 3-input with NOT (06) (obs),3,1,0,x,Logic
+0029,OR3_8,3OR(2),OR - 3-input with NOT (07) (obs),3,1,0,x,Logic
+4127,F_4127_I,4127,Config Macro for Steam Temperature Control1,0,0,57,,Logic
+4128,F_4128_I,4128,Config Macro for Steam Temperature Control2,0,0,55,,Logic
+0003,AND4_1,4AND(1),AND - 4-input (obs),4,1,0,x,Logic
+000E,AND4_2,4AND(2),AND - 4-input with NOT (01) (obs),4,1,0,x,Logic
+000F,AND4_3,4AND(2),AND - 4-input with NOT (02) (obs),4,1,0,x,Logic
+0010,AND4_4,4AND(2),AND - 4-input with NOT (03) (obs),4,1,0,x,Logic
+0011,AND4_5,4AND(2),AND - 4-input with NOT (04) (obs),4,1,0,x,Logic
+0012,AND4_6,4AND(2),AND - 4-input with NOT (05) (obs),4,1,0,x,Logic
+0013,AND4_7,4AND(2),AND - 4-input with NOT (06) (obs),4,1,0,x,Logic
+0014,AND4_8,4AND(2),AND - 4-input with NOT (07) (obs),4,1,0,x,Logic
+0015,AND4_9,4AND(2),AND - 4-input with NOT (08) (obs),4,1,0,x,Logic
+0016,AND4_10,4AND(2),AND - 4-input with NOT (09) (obs),4,1,0,x,Logic
+0017,AND4_11,4AND(2),AND - 4-input with NOT (10) (obs),4,1,0,x,Logic
+0018,AND4_12,4AND(2),AND - 4-input with NOT (11) (obs),4,1,0,x,Logic
+0019,AND4_13,4AND(2),AND - 4-input with NOT (12) (obs),4,1,0,x,Logic
+001A,AND4_14,4AND(2),AND - 4-input with NOT (13) (obs),4,1,0,x,Logic
+001B,AND4_15,4AND(2),AND - 4-input with NOT (14) (obs),4,1,0,x,Logic
+001C,AND4_16,4AND(2),AND - 4-input with NOT (15) (obs),4,1,0,x,Logic
+001F,OR4_1,4OR(1),OR - 4-input (obs),4,1,0,x,Logic
+002A,OR4_2,4OR(2),OR - 4-input with NOT (01) (obs),4,1,0,x,Logic
+002B,OR4_3,4OR(2),OR - 4-input with NOT (02) (obs),4,1,0,x,Logic
+002C,OR4_4,4OR(2),OR - 4-input with NOT (03) (obs),4,1,0,x,Logic
+002D,OR4_5,4OR(2),OR - 4-input with NOT (04) (obs),4,1,0,x,Logic
+002E,OR4_6,4OR(2),OR - 4-input with NOT (05) (obs),4,1,0,x,Logic
+002F,OR4_7,4OR(2),OR - 4-input with NOT (06) (obs),4,1,0,x,Logic
+0030,OR4_8,4OR(2),OR - 4-input with NOT (07) (obs),4,1,0,x,Logic
+0031,OR4_9,4OR(2),OR - 4-input with NOT (08) (obs),4,1,0,x,Logic
+0032,OR4_10,4OR(2),OR - 4-input with NOT (09) (obs),4,1,0,x,Logic
+0033,OR4_11,4OR(2),OR - 4-input with NOT (10) (obs),4,1,0,x,Logic
+0034,OR4_12,4OR(2),OR - 4-input with NOT (11) (obs),4,1,0,x,Logic
+0035,OR4_13,4OR(2),OR - 4-input with NOT (12) (obs),4,1,0,x,Logic
+0036,OR4_14,4OR(2),OR - 4-input with NOT (13) (obs),4,1,0,x,Logic
+0037,OR4_15,4OR(2),OR - 4-input with NOT (14) (obs),4,1,0,x,Logic
+0038,OR4_16,4OR(2),OR - 4-input with NOT (15) (obs),4,1,0,x,Logic
+5000,5000_I,5000,And Logic 1-input,1,1,0,,Logic
+5001,5001_I,5001,And Logic 2-input,2,1,0,,Logic
+5002,5002_I,5002,And Logic 3-input,3,1,0,,Logic
+5003,5003_I,5003,And Logic 4-input,4,1,0,,Logic
+5004,5004_I,5004,And Logic 5-input,5,1,0,,Logic
+5005,5005_I,5005,And Logic 6-input,6,1,0,,Logic
+5006,5006_I,5006,And Logic 7-input,7,1,0,,Logic
+5007,5007_I,5007,And Logic 8-input,8,1,0,,Logic
+5008,5008_I,5008,Or Logic 1-input,1,1,0,,Logic
+5009,5009_I,5009,Or Logic 2-input,2,1,0,,Logic
+500A,500A_I,500A,Or Logic 3-input,3,1,0,,Logic
+500B,500B_I,500B,Or Logic 4-input,4,1,0,,Logic
+500C,500C_I,500C,Or Logic 5-input,5,1,0,,Logic
+500D,500D_I,500D,Or Logic 6-input,6,1,0,,Logic
+500E,500E_I,500E,Or Logic 7-input,7,1,0,,Logic
+500F,500F_I,500F,Or Logic 8-input,8,1,0,,Logic
+5010,5010_I,5010,Exclusive OR - 2-input,2,1,0,,Logic
+5011,5011_I,5011,Exclusive OR - 3-input,3,1,0,,Logic
+5012,5012_I,5012,Exclusive OR - 4-input,4,1,0,,Logic
+5013,5013_I,5013,Exclusive OR - 5-input,5,1,0,,Logic
+5014,5014_I,5014,Exclusive OR - 6-input,6,1,0,,Logic
+5015,5015_I,5015,Exclusive OR - 7-input,7,1,0,,Logic
+5016,5016_I,5016,Exclusive OR - 8-input,8,1,0,,Logic
+502F,502F_I,502F,Flip Flop (Reset Priority),2,1,0,,Logic
+5030,5030_I,5030,Flip Flop (Set Priority),2,1,0,,Logic
+5031,5031_I,5031,Flip Flop (Reset Priority),2,1,0,,Logic
+512F,F_512F_I,512F,Dead Band,2,1,0,,Logic
+5130,F_5130_I,5130,Dead Band,3,1,0,,Logic
+5131,F_5131_I,5131,Dead Band,2,2,0,,Logic
+5132,F_5132_I,5132,Dead Band,3,2,0,,Logic
+513F,513F_I,513F,Two Out of Three,3,1,0,,Logic
+514D,514D_I,514D,FF with Reset Priority for Triple,4,1,0,,Logic
+514E,514E_I,514E,FF with Set Priority for Triple,4,1,0,,Logic
+0060,AND5_1,5AND(1),AND - 5-input (obs),5,1,0,x,Logic
+0064,OR5_1,5OR(1),OR - 5-input (obs),5,1,0,x,Logic
+0061,AND6_1,6AND(1),AND - 6-input (obs),6,1,0,x,Logic
+0065,OR6_1,6OR(1),OR - 6-input (obs),6,1,0,x,Logic
+0062,AND7_1,7AND(1),AND - 7-input (obs),7,1,0,x,Logic
+0066,OR7_1,7OR(1),OR - 7-input (obs),7,1,0,x,Logic
+0063,AND8_1,8AND(1),AND - 8-input (obs),8,1,0,x,Logic
+0067,OR8_1,8OR(1),OR - 8-input (obs),8,1,0,x,Logic
+4000,AND2_I,AND2,AND - 2-input,2,1,0,,Logic
+4130,AND2E_I,AND2,AND - 2-input(Variable - input type),2,1,0,,Logic
+4001,AND3_I,AND3,AND - 3-input,3,1,0,,Logic
+4131,AND3E_I,AND3,AND - 3-input(Variable - input type),3,1,0,,Logic
+4002,AND4_I,AND4,AND - 4-input,4,1,0,,Logic
+4132,AND4E_I,AND4,AND - 4-input(Variable - input type),4,1,0,,Logic
+4003,AND5_I,AND5,AND - 5-input,5,1,0,,Logic
+4133,AND5E_I,AND5,AND - 5-input(Variable - input type),5,1,0,,Logic
+4004,AND6_I,AND6,AND - 6-input,6,1,0,,Logic
+4134,AND6E_I,AND6,AND - 6-input(Variable - input type),6,1,0,,Logic
+4005,AND7_I,AND7,AND - 7-input,7,1,0,,Logic
+4135,AND7E_I,AND7,AND - 7-input(Variable - input type),7,1,0,,Logic
+4006,AND8_I,AND8,AND - 8-input,8,1,0,,Logic
+4136,AND8E_I,AND8,AND - 8-input(Variable - input type),8,1,0,,Logic
+20A0,ANN_TS,ANN,ANN - Annunciator (obs),5,5,0,x,Logic
+004E,DB_T,DEAD-BAND,DB - Dead Band (obs),1,1,1,x,Logic
+100C,DBZ_TS,DEAD-BAND-ZONE,DBZ - Dead Band (Jump Type) (obs),1,1,1,x,Logic
+4065,F_DBA1_I,DEADBAND1,DB - Dead Band,1,1,3,,Logic
+4066,F_DBA2_I,DEADBAND2,DBZ - Dead Band (Jump Type),1,1,3,,Logic
+40D0,40D0_I,ENTRY,Entry,0,0,0,,Logic
+2002,ENT_TS,ENT_TS,ENTRY - Entry,0,0,0,,Logic
+40E8,F_40E8_I,EUIN,EU CONVERSION for Input,0,0,54,,Logic
+40E9,F_40E9_I,EUOUT,EU CONVERSION for Output,0,0,53,,Logic
+003F,XO_T,EXCLUSIVE-OR,XO - Exclusive OR (obs),2,1,0,x,Logic
+003E,FF_T,FLIP-FLOP,FF - Flip Flop (obs),2,1,0,x,Logic
+4118,F_4118_I,MLS-X&Y,Method of Least Squares(Two inputs:X and Y),6,9,3,,Logic
+4010,NOT_I,NOT,NOT - Logical NOT,1,1,0,,Logic
+0039,NOT_T,NOT,NOT - Logical NOT (obs),1,1,0,x,Logic
+4007,OR2_I,OR2,OR - 2-input,2,1,0,,Logic
+4137,OR2E_I,OR2,OR - 2-input(Variable - input type),2,1,0,,Logic
+4008,OR3_I,OR3,OR - 3-input,3,1,0,,Logic
+4138,OR3E_I,OR3,OR - 3-input(Variable - input type),3,1,0,,Logic
+4009,OR4_I,OR4,OR - 4-input,4,1,0,,Logic
+4139,OR4E_I,OR4,OR - 4-input(Variable - input type),4,1,0,,Logic
+400A,OR5_I,OR5,OR - 5-input,5,1,0,,Logic
+413A,OR5E_I,OR5,OR - 5-input(Variable - input type),5,1,0,,Logic
+400B,OR6_I,OR6,OR - 6-input,6,1,0,,Logic
+413B,OR6E_I,OR6,OR - 6-input(Variable - input type),6,1,0,,Logic
+400C,OR7_I,OR7,OR - 7-input,7,1,0,,Logic
+413C,OR7E_I,OR7,OR - 7-input(Variable - input type),7,1,0,,Logic
+400D,OR8_I,OR8,OR - 8-input,8,1,0,,Logic
+413D,OR8E_I,OR8,OR - 8-input(Variable - input type),8,1,0,,Logic
+0056,PIF_T,PIF,PIF - P and I with Forward Signal (obs),4,1,4,x,Logic
+40F7,40F7_I,RESTART,RESTART,2,1,0,,Logic
+4120,4120_I,Reset,Reset,1,0,0,,Logic
+404E,SHI1_I,SIGHI1,H/ - Signal Monitor (High) (S & R:para),1,1,4,,Logic
+404F,SHI2_I,SIGHI2,H/ - Signal Monitor (High) (S & R:input),3,1,1,,Logic
+4050,SLO1_I,SIGLOW1,/L - Signal Monitor (Low) (S & R:para),1,1,4,,Logic
+4051,SLO2_I,SIGLOW2,/L - Signal Monitor (Low) (S & R:input),3,1,1,,Logic
+0057,SG_T,SIGNAL-GENERATE,SG - Signal Generator (obs),0,1,1,x,Logic
+400F,XOR_I,XOR,XOR - Exclusive OR,2,1,0,,Logic
+40B4,1SH1_I,1SH1,1SS(ON) - One Scan Shot (On Trigger),1,1,0,,Timer/Counter
+40B5,1SH2_I,1SH2,1SS(OFF) - One Scan Shot (Off Trigger),1,1,0,,Timer/Counter
+40C7,40C7_I,40C7,Counter1,2,1,3,,Timer/Counter
+40C8,40C8_I,40C8,Counter2,2,1,2,,Timer/Counter
+20FF,F_4AD1_TS,4AD1,4 Adder(1)(for HCNT),4,1,0,,Timer/Counter
+2100,F_4AD2_TS,4AD2,4 Adder(2)(for HCNT),4,1,0,,Timer/Counter
+2101,F_4AD3_TS,4AD3,4 Adder(3)(for HCNT),4,1,0,,Timer/Counter
+2102,F_4AD4_TS,4AD4,4 Adder(4)(for HCNT),4,1,0,,Timer/Counter
+5032,F_5032_I,5032,On Delay Timer,2,1,0,,Timer/Counter
+5033,F_5033_I,5033,Off Delay Timer,2,1,0,,Timer/Counter
+5034,F_5034_I,5034,One Shot Timer 1,2,1,0,,Timer/Counter
+5035,F_5035_I,5035,One Shot Timer 2,2,1,0,,Timer/Counter
+5036,5036_I,5036,Counter 2,4,1,0,,Timer/Counter
+5037,5037_I,5037,Counter,2,1,0,,Timer/Counter
+5038,5038_I,5038,Counter,3,1,0,,Timer/Counter
+5039,5039_I,5039,Counter,2,2,0,,Timer/Counter
+503A,503A_I,503A,Counter,3,2,0,,Timer/Counter
+210C,ABC2_TS,ABC2,Conversion from ASCII to binary(for HCNT),1,2,1,,Timer/Counter
+20C8,ADI_TS,ADI,Analog Direct Input(for HCNT),1,1,2,,Timer/Counter
+20C9,ADO_TS,ADO,Analog Direct Output(for HCNT),2,0,2,,Timer/Counter
+2105,F_AIM_TS,AIM,Analog Input module(for HCNT),3,4,8,,Timer/Counter
+4114,F_4114_I,AIM-CNT,Analog Input Module(Count deviation),3,5,12,,Timer/Counter
+210D,F_AIM1_TS,AIM1,Analog Input module1-EU deviation(for HCNT),3,5,8,,Timer/Counter
+210E,F_AIM2_TS,AIM2,Analog Input module2-Count deviation(for HCNT),3,5,8,,Timer/Counter
+2106,F_AOM_TS,AOM,Analog Output module(for HCNT),3,1,4,,Timer/Counter
+210B,BAC2_TS,BAC2,Conversion from binary to ASCII(for HCNT),1,2,1,,Timer/Counter
+2109,CDR_TS,CDR,Conversion from device to register(for HCNT),16,1,0,,Timer/Counter
+0040,CNT1_T,COUNT(1),CNT1 - Counter 1 (obs),2,1,1,x,Timer/Counter
+0041,CNT2_T,COUNT(2),CNT2 - Counter 2 (obs),2,1,1,x,Timer/Counter
+20FC,F_CPMH_TS,CPMH,Comparator (-)(for HCNT),1,1,2,,Timer/Counter
+20FB,F_CPPH_TS,CPPH,Comparator (+)(for HCNT),1,1,2,,Timer/Counter
+210A,CRD_TS,CRD,Conversion from register to device(for HCNT),1,16,0,,Timer/Counter
+405E,F_DTM1_I,DEADTIME1,DEAD TIME - Pure Delay (without SW),1,1,3,,Timer/Counter
+408B,F_DTM2_I,DEADTIME2,DEAD TIME - Pure Delay (SW:Upside),2,1,3,,Timer/Counter
+408C,F_DTM3_I,DEADTIME3,DEAD TIME - Pure Delay (SW:Downside),2,1,3,,Timer/Counter
+4013,DI_I,DI,DI - Delay Initiation (T:para / R:disp),1,1,2,,Timer/Counter
+4103,F_4103_I,DI,Delay Initiation(Real number counter),1,1,2,,Timer/Counter
+4143,DI_NT_I,DI,DI - Delay Initiation (T:para / R:disp)(NT),1,1,2,,Timer/Counter
+407C,DI2_I,DI2,DI - Delay Initiation (T:input / R:disp),2,1,1,,Timer/Counter
+407D,DI3_I,DI3,DI - Delay Initiation (T:para / R:output),1,2,2,,Timer/Counter
+407E,DI4_I,DI4,DI - Delay Initiation (T:input / R:output),2,2,1,,Timer/Counter
+4014,DIL_I,DIL,DIL - Delay Initiation (L) (T:para / R:disp),1,1,2,,Timer/Counter
+4144,DIL_NT_I,DIL,DIL - Delay Initiation (L) (T:para / R:disp)(NT),1,1,2,,Timer/Counter
+407F,DIL2_I,DIL2,DIL - Delay Initiation (L) (T:input / R:disp),2,1,1,,Timer/Counter
+4080,DIL3_I,DIL3,DIL - Delay Initiation (L) (T:para / R:output),1,2,2,,Timer/Counter
+4081,DIL4_I,DIL4,DIL - Delay Initiation (L) (T:input / R:output),2,2,1,,Timer/Counter
+20FD,F_DLMH_TS,DLMH,Rate Limiter(for HCNT),2,1,2,,Timer/Counter
+4015,DT_I,DT,DT - Delay Termination (T:para / R:disp),1,1,2,,Timer/Counter
+4104,F_4104_I,DT,Delay Termination(Real number counter),1,1,2,,Timer/Counter
+4145,DT_NT_I,DT,DT - Delay Termination (T:para / R:disp)(NT),1,1,2,,Timer/Counter
+4082,DT2_I,DT2,DT - Delay Termination (T:input / R:disp),2,1,1,,Timer/Counter
+4083,DT3_I,DT3,DT - Delay Termination (T:para / R:output),1,2,2,,Timer/Counter
+4084,DT4_I,DT4,DT - Delay Termination (T:input / R:output),2,2,1,,Timer/Counter
+20CA,ELOG_TS,ELOG,Error Log(for HCNT),3,0,0,,Timer/Counter
+20F9,FFSH_TS,FFSH,Flip Flop(for HCNT),2,1,0,,Timer/Counter
+2104,F_FLL_TS,FLL,Lower Limitter(for HCNT),1,2,1,,Timer/Counter
+2110,F_FLL2_TS,FLL2,Lower Limitter2-External parameter(for HCNT),2,2,0,,Timer/Counter
+2103,F_FUL_TS,FUL,Upper Limitter(for HCNT),1,2,1,,Timer/Counter
+210F,F_FUL2_TS,FUL2,Upper Limitter2-External parameter(for HCNT),2,2,0,,Timer/Counter
+20FE,F_IH_TS,IH,Integrator(for HCNT),3,1,3,,Timer/Counter
+20F3,F_LCFI_TS,LCFI,Low Cycle Fatigue Index Calculation(for HCNT),4,6,10,,Timer/Counter
+2117,F_LDLG_TS,LDLG,Lead lag(for HCNT),2,1,12,,Timer/Counter
+2107,F_LLAG_TS,LLAG,Lead Lag(for HCNT),2,1,4,,Timer/Counter
+1026,TONL_TS,LONG-TIMER,TONL - Long Timer (obs),1,1,1,x,Timer/Counter
+1037,TONLC_TS,LONG-TIMER-CNT,TONL - Long Timer for Triple (obs),3,1,1,x,Timer/Counter
+20CC,MCR0_TS,MCR0,User Macro0 ASM386(for HCNT),1,0,1,,Timer/Counter
+20CD,MCR1_TS,MCR1,User Macro1 ASM386(for HCNT),1,0,2,,Timer/Counter
+20CE,MCR2_TS,MCR2,User Macro2 ASM386(for HCNT),1,0,3,,Timer/Counter
+20CF,MCR3_TS,MCR3,User Macro3 ASM386(for HCNT),1,0,4,,Timer/Counter
+20D0,MCR4_TS,MCR4,User Macro4 ASM386(for HCNT),1,0,5,,Timer/Counter
+20D1,MCR5_TS,MCR5,User Macro5 ASM386(for HCNT),1,0,6,,Timer/Counter
+20D2,MCR6_TS,MCR6,User Macro6 ASM386(for HCNT),1,0,7,,Timer/Counter
+20D3,MCR7_TS,MCR7,User Macro7 ASM386(for HCNT),1,0,8,,Timer/Counter
+20D4,MCR8_TS,MCR8,User Macro8 ASM386(for HCNT),1,0,9,,Timer/Counter
+20F4,F_MLS_TS,MLS,Method of Least Squares(for HCNT),2,9,2,,Timer/Counter
+2116,F_NCFL_TS,NCFL,Notch filter(for HCNT),2,3,18,,Timer/Counter
+1034,TOFC_TS,OFF-DELAY-CNT,<- - Off Delay Timer for Triple (obs),2,1,1,x,Timer/Counter
+003B,TOF_T,OFF-DELAY-TIME,<- - Off Delay Timer (obs),1,1,1,x,Timer/Counter
+1033,TONC_TS,ON-DELAY-CNT,-> - On Delay Timer for Triple (obs),2,1,1,x,Timer/Counter
+003A,TON_T,ON-DELAY-TIME,-> - On Delay Timer (obs),1,1,1,x,Timer/Counter
+1035,SSC1_TS,ONE-SHOT-CNT(1),SS1 - One Shot Timer for Triple 1 (obs),2,1,1,x,Timer/Counter
+1036,SSC2_TS,ONE-SHOT-CNT(2),SS2 - One Shot Timer for Triple 2 (obs),2,1,1,x,Timer/Counter
+003C,SS1_T,ONE-SHOT-TIME(1),SS1 - One Shot Timer 1 (obs),1,1,1,x,Timer/Counter
+003D,SS2_T,ONE-SHOT-TIME(2),SS2 - One Shot Timer 2 (obs),1,1,1,x,Timer/Counter
+2112,F_PLU_TS,PLU,Power Load Unbalance Detection(for HCNT),3,5,22,,Timer/Counter
+4105,F_4105_I,PO,Pulse Output(Real number counter),1,1,2,,Timer/Counter
+20CB,RESET_TS,RESET,Reset(for HCNT),1,0,0,,Timer/Counter
+407A,F_SA_D_I,SAMP-D,Z^(-n) - Sampling Delay Gate,1,1,2,,Timer/Counter
+20F7,F_S12H_TS,SS12H,One Shot Timer12(for HCNT),1,1,1,,Timer/Counter
+20E3,F_SS1H_TS,SS1H,One Shot Timer1(for HCNT),1,1,1,,Timer/Counter
+20F8,F_S22H_TS,SS22H,One Shot Timer22(for HCNT),1,1,1,,Timer/Counter
+20E4,F_SS2H_TS,SS2H,One Shot Timer2(for HCNT),1,1,1,,Timer/Counter
+209F,SSAT_TS,SSAT,SS - Single shot timer(1s or less) (obs),1,1,1,x,Timer/Counter
+2113,F_STR_TS,STR,Setter(for HCNT),11,3,6,,Timer/Counter
+4106,F_4106_I,TDWO,Pulse Output-Wipe Out(Real number counter),1,1,2,,Timer/Counter
+20F2,F_THS_TS,THS,Thermal Stress(for HCNT),2,10,28,,Timer/Counter
+209D,TOFAT_TS,TOFAT,TOF - Off delay timer (1s or less) (obs),1,1,1,x,Timer/Counter
+20E2,F_TOFH_TS,TOFH,Off Delay Timer(for HCNT),1,1,1,,Timer/Counter
+20F6,F_TFH2_TS,TOFH2,Off Delay Timer2(for HCNT),1,1,1,,Timer/Counter
+209A,TONAT_TS,TONAT,TON - On delay timer (1s or less) (obs),1,1,1,x,Timer/Counter
+20E1,F_TONH_TS,TONH,On Delay Timer(for HCNT),1,1,1,,Timer/Counter
+20F5,F_TOH2_TS,TONH2,On Delay Timer2(for HCNT),1,1,1,,Timer/Counter
+20E7,F_TS1H_TS,TS1H,One Shot Timer1(for HCNT),2,1,1,,Timer/Counter
+20E8,F_TS2H_TS,TS2H,One Shot Timer2(for HCNT),2,1,1,,Timer/Counter
+2108,F_TSET_TS,TSET,Time Set(for HCNT),2,1,1,,Timer/Counter
+2115,F_TSO_TS,TSO,Turbine start optimization(for HCNT),12,4,10,,Timer/Counter
+2114,F_TSP_TS,TSP,Thermal stress predict(for HCNT),10,10,38,,Timer/Counter
+20E6,F_TTFH_TS,TTFH,Off Delay Timer(for HCNT),2,1,1,,Timer/Counter
+20E5,F_TTNH_TS,TTNH,On Delay Timer(for HCNT),2,1,1,,Timer/Counter
+803E,MC1_TG,,MDC-D PID - Mod Ctrl (Conventional PID) (obs),12,6,12,x,Toan hoc (Math)
+8078,MC1A_TG,,MDC-D PID_ND - Mod Ctrl (PID_ND) (obs),12,6,15,x,Toan hoc (Math)
+102F,23_TS,2OUT-OF-3,2/3 - Two Out of Three (obs),3,1,0,x,Toan hoc (Math)
+503B,F_503B_I,503B,Addition - 2-input,2,1,1,,Toan hoc (Math)
+503C,F_503C_I,503C,Addition - 2-input,3,1,1,,Toan hoc (Math)
+503D,F_503D_I,503D,Addition - 3-input,3,1,2,,Toan hoc (Math)
+503E,F_503E_I,503E,Addition - 3-input,4,1,2,,Toan hoc (Math)
+503F,F_503F_I,503F,Addition - 4-input,4,1,3,,Toan hoc (Math)
+5040,F_5040_I,5040,Addition - 4-input,5,1,3,,Toan hoc (Math)
+5041,F_5041_I,5041,Addition - 5-input,5,1,4,,Toan hoc (Math)
+5042,F_5042_I,5042,Addition - 5-input,6,1,4,,Toan hoc (Math)
+5043,F_5043_I,5043,Addition - 6-input,6,1,5,,Toan hoc (Math)
+5044,F_5044_I,5044,Addition - 6-input,7,1,5,,Toan hoc (Math)
+5045,F_5045_I,5045,Addition - 7-input,7,1,6,,Toan hoc (Math)
+5046,F_5046_I,5046,Addition - 7-input,8,1,6,,Toan hoc (Math)
+5047,F_5047_I,5047,Addition - 8-input,8,1,7,,Toan hoc (Math)
+5048,F_5048_I,5048,Addition - 8-input,9,1,7,,Toan hoc (Math)
+5049,F_5049_I,5049,Addition - 2-input,2,1,0,,Toan hoc (Math)
+504A,F_504A_I,504A,Subtraction - 2-input,2,1,0,,Toan hoc (Math)
+504B,F_504B_I,504B,Multiplication - 2-input,2,1,0,,Toan hoc (Math)
+504C,F_504C_I,504C,Multiplication - 2-input,3,1,0,,Toan hoc (Math)
+504D,F_504D_I,504D,Multiplication - 3-input,3,1,0,,Toan hoc (Math)
+504E,F_504E_I,504E,Multiplication - 3-input,4,1,0,,Toan hoc (Math)
+504F,F_504F_I,504F,Multiplication - 4-input,4,1,0,,Toan hoc (Math)
+5050,F_5050_I,5050,Multiplication - 4-input,5,1,0,,Toan hoc (Math)
+5051,F_5051_I,5051,Multiplication - 5-input,5,1,0,,Toan hoc (Math)
+5052,F_5052_I,5052,Multiplication - 5-input,6,1,0,,Toan hoc (Math)
+5053,F_5053_I,5053,Multiplication - 6-input,6,1,0,,Toan hoc (Math)
+5054,F_5054_I,5054,Multiplication - 6-input,7,1,0,,Toan hoc (Math)
+5055,F_5055_I,5055,Multiplication - 7-input,7,1,0,,Toan hoc (Math)
+5056,F_5056_I,5056,Multiplication - 7-input,8,1,0,,Toan hoc (Math)
+5057,F_5057_I,5057,Multiplication - 8-input,8,1,0,,Toan hoc (Math)
+5058,F_5058_I,5058,Multiplication - 8-input,9,1,0,,Toan hoc (Math)
+5059,F_5059_I,5059,Division - 2-input,2,1,0,,Toan hoc (Math)
+505A,F_505A_I,505A,Division - 2-input,3,1,0,,Toan hoc (Math)
+505B,F_505B_I,505B,Division - 3-input,3,1,0,,Toan hoc (Math)
+505C,F_505C_I,505C,Division - 3-input,4,1,0,,Toan hoc (Math)
+505D,F_505D_I,505D,Division - 4-input,4,1,0,,Toan hoc (Math)
+505E,F_505E_I,505E,Division - 4-input,5,1,0,,Toan hoc (Math)
+505F,F_505F_I,505F,Division - 5-input,5,1,0,,Toan hoc (Math)
+5060,F_5060_I,5060,Division - 5-input,6,1,0,,Toan hoc (Math)
+5061,F_5061_I,5061,Division - 6-input,6,1,0,,Toan hoc (Math)
+5062,F_5062_I,5062,Division - 6-input,7,1,0,,Toan hoc (Math)
+5063,F_5063_I,5063,Division - 7-input,7,1,0,,Toan hoc (Math)
+5064,F_5064_I,5064,Division - 7-input,8,1,0,,Toan hoc (Math)
+5065,F_5065_I,5065,Division - 8-input,8,1,0,,Toan hoc (Math)
+5066,F_5066_I,5066,Division - 8-input,9,1,0,,Toan hoc (Math)
+5067,F_5067_I,5067,Multiplication with Gain,3,1,0,,Toan hoc (Math)
+5068,F_5068_I,5068,Multiplication with Gain,4,1,0,,Toan hoc (Math)
+5069,F_5069_I,5069,Division with Gain,3,1,0,,Toan hoc (Math)
+506A,F_506A_I,506A,Division with Gain,4,1,0,,Toan hoc (Math)
+507D,F_507D_I,507D,Integral,6,1,0,,Toan hoc (Math)
+507E,F_507E_I,507E,Integral,2,1,0,,Toan hoc (Math)
+507F,F_507F_I,507F,Integral,3,1,0,,Toan hoc (Math)
+5092,F_5092_I,5092,Upper Limiter,2,1,0,,Toan hoc (Math)
+5093,F_5093_I,5093,Upper Limiter,3,1,0,,Toan hoc (Math)
+5094,F_5094_I,5094,Upper Limiter,2,2,0,,Toan hoc (Math)
+5095,F_5095_I,5095,Upper Limiter,3,2,0,,Toan hoc (Math)
+5096,F_5096_I,5096,Lower Limiter,2,1,0,,Toan hoc (Math)
+5097,F_5097_I,5097,Lower Limiter,3,1,0,,Toan hoc (Math)
+5098,F_5098_I,5098,Lower Limiter,2,2,0,,Toan hoc (Math)
+5099,F_5099_I,5099,Lower Limiter,3,2,0,,Toan hoc (Math)
+5118,F_5118_I,5118,Average - 2-input,2,1,0,,Toan hoc (Math)
+5119,F_5119_I,5119,Average - 2-input,3,1,0,,Toan hoc (Math)
+511A,F_511A_I,511A,Average - 3-input,3,1,0,,Toan hoc (Math)
+511B,F_511B_I,511B,Average - 3-input,4,1,0,,Toan hoc (Math)
+511C,F_511C_I,511C,Average - 4-input,4,1,0,,Toan hoc (Math)
+511D,F_511D_I,511D,Average - 4-input,5,1,0,,Toan hoc (Math)
+511E,F_511E_I,511E,Average - 5-input,5,1,0,,Toan hoc (Math)
+511F,F_511F_I,511F,Average - 5-input,6,1,0,,Toan hoc (Math)
+5120,F_5120_I,5120,Average - 6-input,6,1,0,,Toan hoc (Math)
+5121,F_5121_I,5121,Average - 6-input,7,1,0,,Toan hoc (Math)
+5122,F_5122_I,5122,Average - 7-input,7,1,0,,Toan hoc (Math)
+5123,F_5123_I,5123,Average - 7-input,8,1,0,,Toan hoc (Math)
+5124,F_5124_I,5124,Average - 8-input,8,1,0,,Toan hoc (Math)
+5125,F_5125_I,5125,Average - 8-input,9,1,0,,Toan hoc (Math)
+5126,F_5126_I,5126,Change Rate Limiter,4,1,0,,Toan hoc (Math)
+5127,F_5127_I,5127,Change Rate Limiter,3,1,0,,Toan hoc (Math)
+5128,F_5128_I,5128,Change Rate Limiter,4,1,0,,Toan hoc (Math)
+5129,F_5129_I,5129,Change Rate Limiter,3,2,0,,Toan hoc (Math)
+512A,F_512A_I,512A,Change Rate Limiter,4,2,0,,Toan hoc (Math)
+512B,F_512B_I,512B,Function Generator - 6-points,1,1,12,,Toan hoc (Math)
+512C,F_512C_I,512C,Function Generator - 6-points,2,1,12,,Toan hoc (Math)
+512D,F_512D_I,512D,Function Generator,1,1,65,,Toan hoc (Math)
+512E,F_512E_I,512E,Function Generator,2,1,65,,Toan hoc (Math)
+0042,ADD_T,ADDITION,+ - Addition (obs),2,1,0,x,Toan hoc (Math)
+401D,F_AVE1_I,AVE1,SUM/2 - Average of Two (in:Left & Downside),2,1,0,,Toan hoc (Math)
+401E,F_AVE2_I,AVE2,SUM/2 - Average of Two (in:Left & Upside),2,1,0,,Toan hoc (Math)
+401F,F_AVE3_I,AVE3,SUM/2 - Average of Two (in:Upside & Downside),2,1,0,,Toan hoc (Math)
+4020,F_AVE4_I,AVE4,SUM/3 - Average of Three,3,1,0,,Toan hoc (Math)
+20B9,F_CAV_TS,CAV,CAL CAV - Continuous Average (obs),3,2,1,x,Toan hoc (Math)
+4070,F_DER1_I,DERIV1,d/dt - Derivative (L:para / SW:Upside),2,1,6,,Toan hoc (Math)
+4071,F_DER2_I,DERIV2,d/dt - Derivative (L:para / SW:Downside),2,1,6,,Toan hoc (Math)
+4072,F_DER3_I,DERIV3,d/dt - Derivative (L:para / without SW),1,1,6,,Toan hoc (Math)
+408D,F_DER4_I,DERIV4,d/dt - Differential (L:input / SW:Upside),4,1,3,,Toan hoc (Math)
+408E,F_DER5_I,DERIV5,d/dt - Differential (L:input / SW:Downside),4,1,3,,Toan hoc (Math)
+408F,F_DER6_I,DERIV6,d/dt - Differential (L:input / without SW),3,1,3,,Toan hoc (Math)
+0051,DLIM_T,DIFFERENTIAL(2),DLIM - Differential with Limiter (obs),2,1,4,x,Toan hoc (Math)
+402A,F_DIV1_I,DIVID1,A/B - Dividing (A:Left / B:Downside),2,1,0,,Toan hoc (Math)
+402B,F_DIV2_I,DIVID2,A/B - Dividing (A:Downside / B:Left),2,1,0,,Toan hoc (Math)
+402C,F_DIV3_I,DIVID3,A/B - Dividing (A:Left / B:Upside),2,1,0,,Toan hoc (Math)
+402D,F_DIV4_I,DIVID4,A/B - Dividing (A:Upside / B:Left),2,1,0,,Toan hoc (Math)
+402E,F_DIV5_I,DIVID5,A/B - Dividing (A:Upside / B:Downside),2,1,0,,Toan hoc (Math)
+402F,F_DIV6_I,DIVID6,A/B - Dividing (A:Downside / B:Upside),2,1,0,,Toan hoc (Math)
+0046,DIV_T,DIVISION,/ - Division (obs),2,1,1,x,Toan hoc (Math)
+004F,FNG_T,F(x),F(x) - Function Generator (obs),1,1,12,x,Toan hoc (Math)
+1025,FF1_TS,FF-LH-OUT,FF1 - Flip Flop (Latch Type) (obs),2,1,0,x,Toan hoc (Math)
+4011,FLIP1_I,FLIP1,F/F(R) - Flip Flop (Reset Priority),2,1,0,,Toan hoc (Math)
+4141,FLIP1_NT_I,FLIP1,F/F(R) - Flip Flop (Reset Priority)(NT),2,1,0,,Toan hoc (Math)
+4012,FLIP2_I,FLIP2,F/F(S) - Flip Flop (Set Priority),2,1,0,,Toan hoc (Math)
+4142,FLIP2_NT_I,FLIP2,F/F(S) - Flip Flop (Set Priority)(NT),2,1,0,,Toan hoc (Math)
+407B,FLIP3_I,FLIP3,F/F(R)(HWB) - Flip Flop (Reset Priority & HWB),2,1,0,,Toan hoc (Math)
+40BB,40BB_I,FLIP4,F/F(S)(HWB) - Flip Flop (Set Priority & HWB),2,1,0,,Toan hoc (Math)
+4035,FNG_I,FNG,F(x) - Function Generator (Parameter),1,1,35,,Toan hoc (Math)
+1005,FNG_TS,FNG,FNG - Function Generator (obs),1,1,31,x,Toan hoc (Math)
+209B,FNGAT_TS,FNGAT,49FNG - Function Generator (49 points) (obs),1,1,99,x,Toan hoc (Math)
+1023,FFS_TS,Flip-Flop,FF/S - Flip Flop (Set Priority) (obs),2,1,0,x,Toan hoc (Math)
+004C,HI_T,HIGH-LIMIT,>|H - Upper Limiter (obs),1,1,1,x,Toan hoc (Math)
+4053,F_HIL1_I,HILIM1,|> - High Limiter (HL:para),1,1,3,,Toan hoc (Math)
+4054,F_HIL2_I,HILIM2,|> - High Limiter (HL:input),2,1,1,,Toan hoc (Math)
+410D,F_410D_I,HL-input,High Limiter(HL input with comparison output),2,2,1,,Toan hoc (Math)
+410C,F_410C_I,HL-param,High Limiter(HL parameter with comparison output),1,2,3,,Toan hoc (Math)
+406C,F_INL1_I,INTEGLIM1,I - Integral with Limit (L:para / SW:Upside),3,1,5,,Toan hoc (Math)
+406D,F_INL2_I,INTEGLIM2,I - Integral with Limit (L:para / SW:Downside),3,1,5,,Toan hoc (Math)
+406E,F_INL3_I,INTEGLIM3,I - Integral with Limit (L:input / SW:Upside),5,1,2,,Toan hoc (Math)
+406F,F_INL4_I,INTEGLIM4,I - Integral with Limit (L:input / SW:Downside),5,1,2,,Toan hoc (Math)
+0053,I_T,INTEGRAL,I - Integral (obs),3,1,3,x,Toan hoc (Math)
+410B,F_410B_I,LDLG,Lead/Lag(with velocity limit),2,1,15,,Toan hoc (Math)
+410F,F_410F_I,LL-input,Low Limiter(LL input with comparison output),2,2,1,,Toan hoc (Math)
+410E,F_410E_I,LL-param,Low Limiter(LL parameter with comparison output),1,2,3,,Toan hoc (Math)
+1016,LLG_TS,LLG,LLG - Lead/Lag (No Upper/Lower Limit) (obs),2,1,2,x,Toan hoc (Math)
+100E,LMI_TS,LMI,LMI - Integral with Limiter (obs),3,1,2,x,Toan hoc (Math)
+004D,LOW_T,LOW-LIMIT,<|L - Lower Limiter (obs),1,1,1,x,Toan hoc (Math)
+4055,F_LOL1_I,LOWLIM1,<| - Low Limiter (LL:para),1,1,3,,Toan hoc (Math)
+4056,F_LOL2_I,LOWLIM2,<| - Low Limiter (LL:input),2,1,1,,Toan hoc (Math)
+20B6,F_LWA_TS,LWA,CAL LWA - Load Weighted Average (obs),6,2,0,x,Toan hoc (Math)
+20B8,F_LWI_TS,LWI,CAL LWI - Load Weighted Integration (obs),6,2,1,x,Toan hoc (Math)
+4027,F_MUL1_I,MULTI1,* - Multiplying (in:Left & Downside),2,1,0,,Toan hoc (Math)
+4028,F_MUL2_I,MULTI2,* - Multiplying (in:Left & Upside),2,1,0,,Toan hoc (Math)
+4029,F_MUL3_I,MULTI3,* - Multiplying (in:Upside & Downside),2,1,0,,Toan hoc (Math)
+0045,MLT_T,MULTIPLICATION,* - Multiplication (obs),2,1,1,x,Toan hoc (Math)
+820F,MVFP_TG,MV-FF-POS,MV-FF-POS - MV Station with FF & POS,18,6,17,,Toan hoc (Math)
+8305,8305_TG,MV-FF-POS-CI,MV Station with FF&POS(Change Inhibit),20,6,17,,Toan hoc (Math)
+0055,PID_T,PID,PID - Position PID (obs),3,1,5,x,Toan hoc (Math)
+100D,PID_TS,PID-TOSHIBA,PID1 - PID Control (obs),3,1,3,x,Toan hoc (Math)
+20AD,PID2_TS,PID2,PID2 - PID Control 2 (obs),2,3,23,x,Toan hoc (Math)
+4093,F_P3_1_I,PID3_1,PID3(SV-PV) - Velocity PID (SV/PV),2,3,27,,Toan hoc (Math)
+4094,F_P3_2_I,PID3_2,PID3(PV-SV) - Velocity PID (SV/PV),2,3,27,,Toan hoc (Math)
+4095,F_P3_3_I,PID3_3,PID3(SV-PV) - Velocity PID (SV/PV/Gs/Ti/Gd/Gp),6,3,23,,Toan hoc (Math)
+4096,F_P3_4_I,PID3_4,PID3(PV-SV) - Velocity PID (SV/PV/Gs/Ti/Gd/Gp),6,3,23,,Toan hoc (Math)
+4097,F_P3_5_I,PID3_5,PID3(SV-PV) - Velocity PID (SV/PV/Gs),3,3,26,,Toan hoc (Math)
+4098,F_P3_6_I,PID3_6,PID3(PV-SV) - Velocity PID (SV/PV/Gs),3,3,26,,Toan hoc (Math)
+4099,F_P3_7_I,PID3_7,PID3(SV-PV) - Velocity PID (SV/PV/Ti),3,3,26,,Toan hoc (Math)
+409A,F_P3_8_I,PID3_8,PID3(PV-SV) - Velocity PID (SV/PV/Ti),3,3,26,,Toan hoc (Math)
+409B,F_P3_9_I,PID3_9,PID3(SV-PV) - Velocity PID (SV/PV/Gp),3,3,26,,Toan hoc (Math)
+409C,F_P3_A_I,PID3_A,PID3(PV-SV) - Velocity PID (SV/PV/Gp),3,3,26,,Toan hoc (Math)
+005C,DLM_T,RATE-LIMIT,V|> - Velocity Limiter (obs),2,1,2,x,Toan hoc (Math)
+4057,F_RAL1_I,RATELIM1,RL - Velocity Limiter (R:para / SW:Upside),2,1,4,,Toan hoc (Math)
+4058,F_RAL2_I,RATELIM2,RL - Velocity Limiter (R:para / SW:Downside),2,1,4,,Toan hoc (Math)
+4059,F_RAL3_I,RATELIM3,RL - Velocity Limiter (R:para / without SW),1,1,4,,Toan hoc (Math)
+405A,F_RAL4_I,RATELIM4,RL - Velocity Limiter (R:input / SW:Upside),4,1,1,,Toan hoc (Math)
+405B,F_RAL5_I,RATELIM5,RL - Velocity Limiter (R:input / SW:Downside),4,1,1,,Toan hoc (Math)
+405C,F_RAL6_I,RATELIM6,RL - Velocity Limiter (R:input / without SW),3,1,1,,Toan hoc (Math)
+0043,SUB_T,SUBTRACTION,- - Subtraction (obs),2,1,0,x,Toan hoc (Math)
+0044,SUM_T,SUM,*+ - Addition and Subtraction (obs),2,1,2,x,Toan hoc (Math)
+1031,FFR3_TS,TRIPLE-FFR,FF/R - FF with Reset Priority for Triple (obs),4,1,0,x,Toan hoc (Math)
+1032,FFS3_TS,TRIPLE-FFS,FF/S - FF with Set Priority for Triple (obs),4,1,0,x,Toan hoc (Math)
+20B5,F_TWA_TS,TWA,CAL TWA - Time Weighted Average (obs),4,2,0,x,Toan hoc (Math)
+20B7,F_TWI_TS,TWI,CAL TWI - Time Weighted Integration (obs),4,2,1,x,Toan hoc (Math)
+8037,SQM_TG,,GSQ - Group Sequence Master (obs),8,9,1,x,Tuan tu (Sequence)
+82C5,82C5_TG,AA352,SEQ-S - Sequence Master (Step) with Bypass,12,5,5,,Tuan tu (Sequence)
+82C4,82C4_TG,GSQ,SEQ-M - Sequence Master (Mode) with Bypass,11,11,8,,Tuan tu (Sequence)
+8225,SEQM_TG,SEQ-M,SEQ-M - Sequence Master (Mode),9,9,8,,Tuan tu (Sequence)
+8226,SEQS_TG,SEQ-S,SEQ-S - Sequence Master (Step),9,3,5,,Tuan tu (Sequence)
+20C4,F_STPX_TS,STPX,STP - Master Step Control (obs),7,5,1,x,Tuan tu (Sequence)
+8243,8243_TG,XFRSEQM,X-SEQM - Group Sequence (Master) for Transfer,10,5,8,,Tuan tu (Sequence)
+8244,8244_TG,XFRSEQS,X-SEQS - Group Sequence (Step) for Transfer,7,1,4,,Tuan tu (Sequence)
+8020,MOV1_TG,,MOV_D - MOV:Digital Inching Non-Self Hold (obs),16,5,1,x,Van/Dong co (Valve/Motor)
+8021,MOV2_TG,,MOV_DS - MOV:Digital Inching Self Hold (obs),17,5,1,x,Van/Dong co (Valve/Motor)
+8022,MOV3_TG,,MOV_P - MOV:Position Seating Non-Self Hold (obs),14,5,1,x,Van/Dong co (Valve/Motor)
+8023,MOV4_TG,,MOV_PS - MOV:Position Seating Self Hold (obs),15,5,1,x,Van/Dong co (Valve/Motor)
+8028,ML_TG,,MC_L - Motor (M/C Linkage) (obs),16,9,1,x,Van/Dong co (Valve/Motor)
+8029,MNL_TG,,MC - Motor (M/C Non-Linkage) (obs),14,7,1,x,Van/Dong co (Valve/Motor)
+802A,MML_TG,,MCC_L - Motor (MCC Linkage) (obs),15,9,1,x,Van/Dong co (Valve/Motor)
+802B,MMNL_TG,,MCC - Motor (MCC Non-Linkage) (obs),13,7,1,x,Van/Dong co (Valve/Motor)
+8042,MOV5_TG,,MOV_T - MOV:Torque Seating Non-Self Hold (obs),14,5,1,x,Van/Dong co (Valve/Motor)
+8043,MOV6_TG,,MOV_TS - MOV:Torque Seating Self Hold (obs),15,5,1,x,Van/Dong co (Valve/Motor)
+40CA,40CA_I,40CA,MV - Move,2,1,0,,Van/Dong co (Valve/Motor)
+40F4,F_40F4_I,40F4,Data Move Set Value,2,1,1,,Van/Dong co (Valve/Motor)
+40FB,40FB_I,40FB,Data Move Set Value 2,2,1,2,,Van/Dong co (Valve/Motor)
+5137,5137_I,5137,Move Data,1,1,0,,Van/Dong co (Valve/Motor)
+5138,5138_I,5138,Move Data,2,1,0,,Van/Dong co (Valve/Motor)
+5139,F_5139_I,5139,Move Data (Load),2,1,0,,Van/Dong co (Valve/Motor)
+513A,F_513A_I,513A,Move Data (Load),3,1,0,,Van/Dong co (Valve/Motor)
+513B,F_513B_I,513B,Move Data (Store),2,1,0,,Van/Dong co (Valve/Motor)
+513C,F_513C_I,513C,Move Data (Store),3,1,0,,Van/Dong co (Valve/Motor)
+8206,DSOV_TG,D-SOV,D-SOV - Double Solenoid Valve,13,6,9,,Van/Dong co (Valve/Motor)
+1002,MV2_TS,LOAD,MV2 - Move Data (Load) (obs),2,1,0,x,Van/Dong co (Valve/Motor)
+8249,8249_TG,M3NSH,MOV3-NSH - Motor Operated Valve 3 Non-Self Hold,14,4,10,,Van/Dong co (Valve/Motor)
+824A,824A_TG,M3SH,MOV3-SH - Motor Operated Valve 3 Self Hold,17,7,12,,Van/Dong co (Valve/Motor)
+20B3,F_MAF_TS,MAF,MAF - Moving Average Function (obs),5,3,11,x,Van/Dong co (Valve/Motor)
+8202,MNSH_TG,MOV-NSH,MOV-NSH - Motor Operated Valve Non-Self Hold,14,4,7,,Van/Dong co (Valve/Motor)
+8203,MSH_TG,MOV-SH,MOV-SH - Motor Operated Valve Self Hold,19,7,10,,Van/Dong co (Valve/Motor)
+8204,M2NSH_TG,MOV2-NSH,MOV2-NSH - Motor Operated Valve 2 Non-Self Hold,14,4,8,,Van/Dong co (Valve/Motor)
+8205,M2SH_TG,MOV2-SH,MOV2-SH - Motor Operated Valve 2 Self Hold,17,7,11,,Van/Dong co (Valve/Motor)
+1001,MV1_TS,MOVE,MV1 - Move Data (obs),2,1,0,x,Van/Dong co (Valve/Motor)
+20E0,MVE_TS,MVE,Data Move E-register(for HCNT),2,0,0,,Van/Dong co (Valve/Motor)
+4111,4111_I,MVE,Data Move(Diagnostic information),2,0,0,,Van/Dong co (Valve/Motor)
+4110,F_4110_I,MVS,Data Move(Set value:User memory),2,1,2,,Van/Dong co (Valve/Motor)
+4112,4112_I,MVS2,Data Move2(Set value:EHC module),2,1,3,,Van/Dong co (Valve/Motor)
+8208,SSEC_TG,S-SOV-EC,S-SOV-EC - Single Solenoid Valve Energize Close,13,5,9,,Van/Dong co (Valve/Motor)
+8207,SSEO_TG,S-SOV-EO,S-SOV-EO - Single Solenoid Valve Energize Open,13,5,9,,Van/Dong co (Valve/Motor)
+1003,MV3_TS,STORE,MV3 - Move Data (Store) (obs),2,1,0,x,Van/Dong co (Valve/Motor)
+1004,XFR_TS,TRANSFER,XFR - Move Block Data (obs),2,1,1,x,Van/Dong co (Valve/Motor)
+2111,F_VPC_TS,VPC,Valve Position Control(for HCNT),6,6,6,,Van/Dong co (Valve/Motor)
+4101,F_4101_I,VPCL,Valve Position Control Module Interface,12,15,6,,Van/Dong co (Valve/Motor)
+20C6,XFRL2_TS,XFRL2,XFRL2 - Move Block Data (Load) (obs),2,1,2,x,Van/Dong co (Valve/Motor)
+20C7,XFRL3_TS,XFRL3,XFRL3 - Move Block Data (Store) (obs),2,1,2,x,Van/Dong co (Valve/Motor)
+823D,823D_TG,XFRMOV-NSH,X-MOV-NSH - MOV Non-Self Hold for Transfer,13,4,7,,Van/Dong co (Valve/Motor)
+823E,823E_TG,XFRMOV-SH,X-MOV-SH - MOV Self Hold for Transfer,16,5,8,,Van/Dong co (Valve/Motor)
+823F,823F_TG,XFRSOV,X-SOV - Solenoid Valve for Transfer,11,4,7,,Van/Dong co (Valve/Motor)
+508E,508E_I,508E,Analog Input Check,3,1,0,,Vao/Ra (I/O)
+508F,508F_I,508F,Analog Input Check,4,1,0,,Vao/Ra (I/O)
+5090,5090_I,5090,Analog Input Check,3,2,0,,Vao/Ra (I/O)
+5091,5091_I,5091,Analog Input Check,4,2,0,,Vao/Ra (I/O)
+4113,F_4113_I,AIM-EU,Analog Input Module(EU deviation),3,5,12,,Vao/Ra (I/O)
+4115,F_4115_I,AOM,Analog Output Module,3,1,7,,Vao/Ra (I/O)
+823B,GAI_TG,GWAI,GW-AI - Gateway Analog Input,2,2,3,,Vao/Ra (I/O)
+8238,IHMA_TG,HMIA,HMI AO - HMI Analog,0,1,2,,Vao/Ra (I/O)
+8237,IHMD_TG,HMID,HMI DO - HMI Digital,0,1,2,,Vao/Ra (I/O)
+8231,IAI_TG,IAI,I-AI - Intelligent Analog Input,9,6,16,,Vao/Ra (I/O)
+8233,IAO_TG,IAO,I-AO(2) - Intelligent Analog Output for Duplex,10,1,7,,Vao/Ra (I/O)
+8236,IAOS_TG,IAOS,I-AO(1) - Intelligent Analog Output for Single,5,1,7,,Vao/Ra (I/O)
+8232,IDO_TG,IDO,I-DO(2) - Intelligent Digital Output for Duplex,8,1,4,,Vao/Ra (I/O)
+8235,IDOS_TG,IDOS,I-DO(1) - Intelligent Digital Output for Single,4,1,4,,Vao/Ra (I/O)
+40E4,40E4_I,IO_AI,Analog Input,0,2,7,,Vao/Ra (I/O)
+40F0,40F0_I,IO_AI,Analog Input,0,2,7,,Vao/Ra (I/O)
+40E5,40E5_I,IO_AO,Analog Output,1,0,7,,Vao/Ra (I/O)
+40F1,40F1_I,IO_AO,Analog Output,1,0,7,,Vao/Ra (I/O)
+40E2,40E2_I,IO_DI,Digital Input,0,2,5,,Vao/Ra (I/O)
+40E3,40E3_I,IO_DO,Digital Output,1,0,5,,Vao/Ra (I/O)
+2003,UDIN_TS,UDIN,UDIN - User Digital Input (obs),0,1,0,x,Vao/Ra (I/O)
+40E0,40E0_I,UDO0,UDO0 - User DO 0,2,0,0,,Vao/Ra (I/O)
+40E1,40E1_I,UDO1,UDO1 - User DO 1,2,0,0,,Vao/Ra (I/O)
+2004,UDO1_TS,UDO1,UDO1 - User Digital Output 1 (obs),2,1,0,x,Vao/Ra (I/O)
+2005,UDO2_TS,UDO2,UDO2 - User Digital Output 2 (obs),2,1,0,x,Vao/Ra (I/O)
