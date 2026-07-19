@@ -325,18 +325,18 @@ class LogicScene(QGraphicsScene):
             if self.pending is None:
                 if kind == "out":
                     self.pending = (it.b.id, idx)
-                    self.status("Da chon ngo ra. Bam vao 1 cong vao de noi.")
+                    self.status("Output selected. Click an input port to connect.")
                 else:
-                    self.status("Hay bam vao CONG RA (ben phai) truoc.")
+                    self.status("Click an OUTPUT port (right) first.")
             else:
                 if kind == "in":
                     self.circuit.connect(self.pending[0], self.pending[1], it.b.id, idx)
                     self.pending = None
                     self.rebuild()
-                    self.status("Da noi day.")
+                    self.status("Wire connected.")
                 else:
                     self.pending = (it.b.id, idx)
-                    self.status("Doi ngo ra nguon.")
+                    self.status("Change source output.")
             return
         super().mousePressEvent(ev)
 

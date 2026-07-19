@@ -1,0 +1,966 @@
+{
+"509A": {
+"op": "MAX",
+"name": "Maximum Value Selector - 2-input"
+},
+"509B": {
+"op": "MAX",
+"name": "Maximum Value Selector - 2-input"
+},
+"509C": {
+"op": "MAX",
+"name": "Maximum Value Selector - 3-input"
+},
+"509D": {
+"op": "MAX",
+"name": "Maximum Value Selector - 3-input"
+},
+"509E": {
+"op": "MAX",
+"name": "Maximum Value Selector - 4-input"
+},
+"509F": {
+"op": "MAX",
+"name": "Maximum Value Selector - 4-input"
+},
+"5100": {
+"op": "MAX",
+"name": "Maximum Value Selector - 5-input"
+},
+"5101": {
+"op": "MAX",
+"name": "Maximum Value Selector - 5-input"
+},
+"5102": {
+"op": "MAX",
+"name": "Maximum Value Selector - 6-input"
+},
+"5103": {
+"op": "MAX",
+"name": "Maximum Value Selector - 6-input"
+},
+"5104": {
+"op": "MAX",
+"name": "Maximum Value Selector - 7-input"
+},
+"5105": {
+"op": "MAX",
+"name": "Maximum Value Selector - 7-input"
+},
+"5106": {
+"op": "MAX",
+"name": "Maximum Value Selector - 8-input"
+},
+"5107": {
+"op": "MAX",
+"name": "Maximum Value Selector - 8-input"
+},
+"5108": {
+"op": "MIN",
+"name": "Minimum Value Selector - 2-input"
+},
+"5109": {
+"op": "MIN",
+"name": "Minimum Value Selector - 2-input"
+},
+"510A": {
+"op": "MIN",
+"name": "Minimum Value Selector - 3-input"
+},
+"510B": {
+"op": "MIN",
+"name": "Minimum Value Selector - 3-input"
+},
+"510C": {
+"op": "MIN",
+"name": "Minimum Value Selector - 4-input"
+},
+"510D": {
+"op": "MIN",
+"name": "Minimum Value Selector - 4-input"
+},
+"510E": {
+"op": "MIN",
+"name": "Minimum Value Selector - 5-input"
+},
+"510F": {
+"op": "MIN",
+"name": "Minimum Value Selector - 5-input"
+},
+"5110": {
+"op": "MIN",
+"name": "Minimum Value Selector - 6-input"
+},
+"5111": {
+"op": "MIN",
+"name": "Minimum Value Selector - 6-input"
+},
+"5112": {
+"op": "MIN",
+"name": "Minimum Value Selector - 7-input"
+},
+"5113": {
+"op": "MIN",
+"name": "Minimum Value Selector - 7-input"
+},
+"5114": {
+"op": "MIN",
+"name": "Minimum Value Selector - 8-input"
+},
+"5115": {
+"op": "MIN",
+"name": "Minimum Value Selector - 8-input"
+},
+"5116": {
+"op": "MID",
+"name": "Middle Value Selector"
+},
+"5117": {
+"op": "MID",
+"name": "Middle Value Selector"
+},
+"513D": {
+"op": "SELECT",
+"name": "Analog Switch"
+},
+"514F": {
+"op": "MID",
+"name": "Middle Value Selector(Balance Compensation)"
+},
+"20FA": {
+"op": "SELECT",
+"name": "Analog Switch(for HCNT)"
+},
+"4042": {
+"op": "MAX",
+"name": "> - High Value Selector (in:Left & Downside)"
+},
+"4043": {
+"op": "MAX",
+"name": "> - High Value Selector (in:Left & Upside)"
+},
+"4044": {
+"op": "MAX",
+"name": "> - High Value Selector (in:Upside & Downside)"
+},
+"4045": {
+"op": "MIN",
+"name": "< - Low Value Selector (in:Left & Downside)"
+},
+"4046": {
+"op": "MIN",
+"name": "< - Low Value Selector (in:Left & Upside)"
+},
+"4047": {
+"op": "MIN",
+"name": "< - Low Value Selector (in:Upside & Downside)"
+},
+"4067": {
+"op": "MAX",
+"name": "MAX - Maximum Value Selector"
+},
+"4069": {
+"op": "MID",
+"name": "MID - Midium Value Selector"
+},
+"4068": {
+"op": "MIN",
+"name": "MIN - Minimum Value Selector"
+},
+"4048": {
+"op": "SELECT",
+"name": "T - Transfer 1 (Analog Switch)"
+},
+"4049": {
+"op": "SELECT",
+"name": "T - Transfer 2 (Analog Switch)"
+},
+"404A": {
+"op": "SELECT",
+"name": "T - Transfer 3 (Analog Switch)"
+},
+"404B": {
+"op": "SELECT",
+"name": "T - Transfer 4 (Analog Switch)"
+},
+"404C": {
+"op": "SELECT",
+"name": "T - Transfer 5 (Analog Switch)"
+},
+"404D": {
+"op": "SELECT",
+"name": "T - Transfer 6 (Analog Switch)"
+},
+"8242": {
+"op": "SELECT",
+"name": "LAMP & PB - Selector for Transfer"
+},
+"8240": {
+"op": "SELECT",
+"name": "X-SWGR - Switchgear for Transfer"
+},
+"5133": {
+"op": "PASS",
+"name": "Level Converter"
+},
+"5134": {
+"op": "PASS",
+"name": "Level Converter"
+},
+"5143": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5144": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5145": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5146": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5147": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5148": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"5149": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"514A": {
+"op": "PASS",
+"name": "Real -> Integer Converter"
+},
+"514B": {
+"op": "PASS",
+"name": "Integer -> Real Converter"
+},
+"514C": {
+"op": "PASS",
+"name": "Integer -> Real Converter"
+},
+"40D3": {
+"op": "PASS",
+"name": "CBD - Binary -> BCD Converter"
+},
+"40D2": {
+"op": "PASS",
+"name": "CBF - Integer -> Real Converter"
+},
+"40D1": {
+"op": "PASS",
+"name": "CFB - Real -> Integer Converter"
+},
+"40B7": {
+"op": "PASS",
+"name": "DtoI - Digital -> Integer Converter"
+},
+"4102": {
+"op": "PASS",
+"name": "Frequency Digital Converter Module Interface"
+},
+"40B6": {
+"op": "PASS",
+"name": "ItoD - Integer -> Digital Converter"
+},
+"40D4": {
+"op": "PASS",
+"name": "CDB - BCD -> Binary Converter"
+},
+"4129": {
+"op": "SELECT",
+"name": "Config Macro for MISO Transfer Function Macro1"
+},
+"412A": {
+"op": "SELECT",
+"name": "Config Macro for MISO Transfer Function Macro2"
+},
+"412B": {
+"op": "SELECT",
+"name": "Config Macro for MISO Transfer Function Macro3"
+},
+"5136": {
+"op": "PASS",
+"name": "Data Transfer (Analog)"
+},
+"5142": {
+"op": "SELECT",
+"name": "Bump Less Transfer"
+},
+"409E": {
+"op": "PASS",
+"name": "ATA - Data Transfer (Analog)"
+},
+"40AE": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:U)"
+},
+"40AF": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:U)"
+},
+"40B0": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:U)"
+},
+"40B1": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:D)"
+},
+"40B2": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:D)"
+},
+"40B3": {
+"op": "SELECT",
+"name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:D)"
+},
+"4073": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:U)"
+},
+"4074": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:U)"
+},
+"4075": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:U)"
+},
+"4076": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:D)"
+},
+"4090": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:D)"
+},
+"4091": {
+"op": "SELECT",
+"name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:D)"
+},
+"8241": {
+"op": "SELECT",
+"name": "X-DUAL - Dual Gate Sensor for Transfer"
+},
+"8247": {
+"op": "SELECT",
+"name": "X-MV - MV Station for Transfer"
+},
+"8246": {
+"op": "SELECT",
+"name": "X-SV - SV Station for Transfer"
+},
+"8245": {
+"op": "SELECT",
+"name": "X-SV/MV - SV & MV Station for Transfer"
+},
+"8248": {
+"op": "SELECT",
+"name": "X-TRIPLE - Triple Gate Sensor for Transfer"
+},
+"506F": {
+"op": "ABS",
+"name": "Absolute"
+},
+"5070": {
+"op": "ABS",
+"name": "Absolute"
+},
+"5071": {
+"op": "ABS",
+"name": "Absolute"
+},
+"5072": {
+"op": "ABS",
+"name": "Absolute"
+},
+"4064": {
+"op": "ABS",
+"name": "|X| - Absolute Value"
+},
+"8227": {
+"op": "PASS",
+"name": "ADL - Analog Data Link"
+},
+"405F": {
+"op": "ADD",
+"name": "DSUM - Digital Summing (2-input)"
+},
+"4060": {
+"op": "ADD",
+"name": "DSUM - Digital Summing (3-input)"
+},
+"4061": {
+"op": "ADD",
+"name": "DSUM - Digital Summing (4-input)"
+},
+"4062": {
+"op": "ADD",
+"name": "DSUM - Digital Summing (5-input)"
+},
+"4063": {
+"op": "ADD",
+"name": "DSUM - Digital Summing (6-input)"
+},
+"4021": {
+"op": "SUB",
+"name": "- - Difference (Left - Downside)"
+},
+"4022": {
+"op": "SUB",
+"name": "- - Difference (Downside - Left)"
+},
+"4023": {
+"op": "SUB",
+"name": "- - Difference (Left - Upside)"
+},
+"4024": {
+"op": "SUB",
+"name": "- - Difference (Upside - Left)"
+},
+"4025": {
+"op": "SUB",
+"name": "- - Difference (Upside - Downside)"
+},
+"4026": {
+"op": "SUB",
+"name": "- - Difference (Downside - Upside)"
+},
+"401A": {
+"op": "ADD",
+"name": "SUM - Summing (in:Left & Downside)"
+},
+"401B": {
+"op": "ADD",
+"name": "SUM - Summing (in:Left & Upside)"
+},
+"401C": {
+"op": "ADD",
+"name": "SUM - Summing (in:Upside & Downside)"
+},
+"4030": {
+"op": "ADD",
+"name": "SWG - Summing with Gain (in:Left & Downside)"
+},
+"4031": {
+"op": "ADD",
+"name": "SWG - Summing with Gain (in:Left & Upside)"
+},
+"4032": {
+"op": "ADD",
+"name": "SWG - Summing with Gain (in:Upside & Downside)"
+},
+"4107": {
+"op": "ADD",
+"name": "Summing(4inputs:++++)"
+},
+"4108": {
+"op": "ADD",
+"name": "Summing(4inputs:+++-)"
+},
+"4109": {
+"op": "ADD",
+"name": "Summing(4inputs:++--)"
+},
+"410A": {
+"op": "ADD",
+"name": "Summing(4inputs:+---)"
+},
+"512F": {
+"op": "PASS",
+"name": "Dead Band"
+},
+"5130": {
+"op": "PASS",
+"name": "Dead Band"
+},
+"5131": {
+"op": "PASS",
+"name": "Dead Band"
+},
+"5132": {
+"op": "PASS",
+"name": "Dead Band"
+},
+"4065": {
+"op": "PASS",
+"name": "DB - Dead Band"
+},
+"4066": {
+"op": "PASS",
+"name": "DBZ - Dead Band (Jump Type)"
+},
+"20FF": {
+"op": "ADD",
+"name": "4 Adder(1)(for HCNT)"
+},
+"2100": {
+"op": "ADD",
+"name": "4 Adder(2)(for HCNT)"
+},
+"2101": {
+"op": "ADD",
+"name": "4 Adder(3)(for HCNT)"
+},
+"2102": {
+"op": "ADD",
+"name": "4 Adder(4)(for HCNT)"
+},
+"2104": {
+"op": "PASS",
+"name": "Lower Limitter(for HCNT)"
+},
+"2110": {
+"op": "PASS",
+"name": "Lower Limitter2-External parameter(for HCNT)"
+},
+"2103": {
+"op": "PASS",
+"name": "Upper Limitter(for HCNT)"
+},
+"210F": {
+"op": "PASS",
+"name": "Upper Limitter2-External parameter(for HCNT)"
+},
+"503B": {
+"op": "ADD",
+"name": "Addition - 2-input"
+},
+"503C": {
+"op": "ADD",
+"name": "Addition - 2-input"
+},
+"503D": {
+"op": "ADD",
+"name": "Addition - 3-input"
+},
+"503E": {
+"op": "ADD",
+"name": "Addition - 3-input"
+},
+"503F": {
+"op": "ADD",
+"name": "Addition - 4-input"
+},
+"5040": {
+"op": "ADD",
+"name": "Addition - 4-input"
+},
+"5041": {
+"op": "ADD",
+"name": "Addition - 5-input"
+},
+"5042": {
+"op": "ADD",
+"name": "Addition - 5-input"
+},
+"5043": {
+"op": "ADD",
+"name": "Addition - 6-input"
+},
+"5044": {
+"op": "ADD",
+"name": "Addition - 6-input"
+},
+"5045": {
+"op": "ADD",
+"name": "Addition - 7-input"
+},
+"5046": {
+"op": "ADD",
+"name": "Addition - 7-input"
+},
+"5047": {
+"op": "ADD",
+"name": "Addition - 8-input"
+},
+"5048": {
+"op": "ADD",
+"name": "Addition - 8-input"
+},
+"5049": {
+"op": "ADD",
+"name": "Addition - 2-input"
+},
+"504A": {
+"op": "SUB",
+"name": "Subtraction - 2-input"
+},
+"504B": {
+"op": "MUL",
+"name": "Multiplication - 2-input"
+},
+"504C": {
+"op": "MUL",
+"name": "Multiplication - 2-input"
+},
+"504D": {
+"op": "MUL",
+"name": "Multiplication - 3-input"
+},
+"504E": {
+"op": "MUL",
+"name": "Multiplication - 3-input"
+},
+"504F": {
+"op": "MUL",
+"name": "Multiplication - 4-input"
+},
+"5050": {
+"op": "MUL",
+"name": "Multiplication - 4-input"
+},
+"5051": {
+"op": "MUL",
+"name": "Multiplication - 5-input"
+},
+"5052": {
+"op": "MUL",
+"name": "Multiplication - 5-input"
+},
+"5053": {
+"op": "MUL",
+"name": "Multiplication - 6-input"
+},
+"5054": {
+"op": "MUL",
+"name": "Multiplication - 6-input"
+},
+"5055": {
+"op": "MUL",
+"name": "Multiplication - 7-input"
+},
+"5056": {
+"op": "MUL",
+"name": "Multiplication - 7-input"
+},
+"5057": {
+"op": "MUL",
+"name": "Multiplication - 8-input"
+},
+"5058": {
+"op": "MUL",
+"name": "Multiplication - 8-input"
+},
+"5059": {
+"op": "DIV",
+"name": "Division - 2-input"
+},
+"505A": {
+"op": "DIV",
+"name": "Division - 2-input"
+},
+"505B": {
+"op": "DIV",
+"name": "Division - 3-input"
+},
+"505C": {
+"op": "DIV",
+"name": "Division - 3-input"
+},
+"505D": {
+"op": "DIV",
+"name": "Division - 4-input"
+},
+"505E": {
+"op": "DIV",
+"name": "Division - 4-input"
+},
+"505F": {
+"op": "DIV",
+"name": "Division - 5-input"
+},
+"5060": {
+"op": "DIV",
+"name": "Division - 5-input"
+},
+"5061": {
+"op": "DIV",
+"name": "Division - 6-input"
+},
+"5062": {
+"op": "DIV",
+"name": "Division - 6-input"
+},
+"5063": {
+"op": "DIV",
+"name": "Division - 7-input"
+},
+"5064": {
+"op": "DIV",
+"name": "Division - 7-input"
+},
+"5065": {
+"op": "DIV",
+"name": "Division - 8-input"
+},
+"5066": {
+"op": "DIV",
+"name": "Division - 8-input"
+},
+"5067": {
+"op": "MUL",
+"name": "Multiplication with Gain"
+},
+"5068": {
+"op": "MUL",
+"name": "Multiplication with Gain"
+},
+"5069": {
+"op": "DIV",
+"name": "Division with Gain"
+},
+"506A": {
+"op": "DIV",
+"name": "Division with Gain"
+},
+"5092": {
+"op": "PASS",
+"name": "Upper Limiter"
+},
+"5093": {
+"op": "PASS",
+"name": "Upper Limiter"
+},
+"5094": {
+"op": "PASS",
+"name": "Upper Limiter"
+},
+"5095": {
+"op": "PASS",
+"name": "Upper Limiter"
+},
+"5096": {
+"op": "PASS",
+"name": "Lower Limiter"
+},
+"5097": {
+"op": "PASS",
+"name": "Lower Limiter"
+},
+"5098": {
+"op": "PASS",
+"name": "Lower Limiter"
+},
+"5099": {
+"op": "PASS",
+"name": "Lower Limiter"
+},
+"5118": {
+"op": "AVG",
+"name": "Average - 2-input"
+},
+"5119": {
+"op": "AVG",
+"name": "Average - 2-input"
+},
+"511A": {
+"op": "AVG",
+"name": "Average - 3-input"
+},
+"511B": {
+"op": "AVG",
+"name": "Average - 3-input"
+},
+"511C": {
+"op": "AVG",
+"name": "Average - 4-input"
+},
+"511D": {
+"op": "AVG",
+"name": "Average - 4-input"
+},
+"511E": {
+"op": "AVG",
+"name": "Average - 5-input"
+},
+"511F": {
+"op": "AVG",
+"name": "Average - 5-input"
+},
+"5120": {
+"op": "AVG",
+"name": "Average - 6-input"
+},
+"5121": {
+"op": "AVG",
+"name": "Average - 6-input"
+},
+"5122": {
+"op": "AVG",
+"name": "Average - 7-input"
+},
+"5123": {
+"op": "AVG",
+"name": "Average - 7-input"
+},
+"5124": {
+"op": "AVG",
+"name": "Average - 8-input"
+},
+"5125": {
+"op": "AVG",
+"name": "Average - 8-input"
+},
+"401D": {
+"op": "AVG",
+"name": "SUM/2 - Average of Two (in:Left & Downside)"
+},
+"401E": {
+"op": "AVG",
+"name": "SUM/2 - Average of Two (in:Left & Upside)"
+},
+"401F": {
+"op": "AVG",
+"name": "SUM/2 - Average of Two (in:Upside & Downside)"
+},
+"4020": {
+"op": "AVG",
+"name": "SUM/3 - Average of Three"
+},
+"402A": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Left / B:Downside)"
+},
+"402B": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Downside / B:Left)"
+},
+"402C": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Left / B:Upside)"
+},
+"402D": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Upside / B:Left)"
+},
+"402E": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Upside / B:Downside)"
+},
+"402F": {
+"op": "DIV",
+"name": "A/B - Dividing (A:Downside / B:Upside)"
+},
+"4035": {
+"op": "FUNC",
+"name": "F(x) - Function Generator (Parameter)"
+},
+"4053": {
+"op": "PASS",
+"name": "|> - High Limiter (HL:para)"
+},
+"4054": {
+"op": "PASS",
+"name": "|> - High Limiter (HL:input)"
+},
+"410D": {
+"op": "PASS",
+"name": "High Limiter(HL input with comparison output)"
+},
+"410C": {
+"op": "PASS",
+"name": "High Limiter(HL parameter with comparison output)"
+},
+"410F": {
+"op": "PASS",
+"name": "Low Limiter(LL input with comparison output)"
+},
+"410E": {
+"op": "PASS",
+"name": "Low Limiter(LL parameter with comparison output)"
+},
+"4055": {
+"op": "PASS",
+"name": "<| - Low Limiter (LL:para)"
+},
+"4056": {
+"op": "PASS",
+"name": "<| - Low Limiter (LL:input)"
+},
+"4027": {
+"op": "MUL",
+"name": "* - Multiplying (in:Left & Downside)"
+},
+"4028": {
+"op": "MUL",
+"name": "* - Multiplying (in:Left & Upside)"
+},
+"4029": {
+"op": "MUL",
+"name": "* - Multiplying (in:Upside & Downside)"
+},
+"4057": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:para / SW:Upside)"
+},
+"4058": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:para / SW:Downside)"
+},
+"4059": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:para / without SW)"
+},
+"405A": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:input / SW:Upside)"
+},
+"405B": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:input / SW:Downside)"
+},
+"405C": {
+"op": "PASS",
+"name": "RL - Velocity Limiter (R:input / without SW)"
+},
+"8243": {
+"op": "SELECT",
+"name": "X-SEQM - Group Sequence (Master) for Transfer"
+},
+"8244": {
+"op": "SELECT",
+"name": "X-SEQS - Group Sequence (Step) for Transfer"
+},
+"823D": {
+"op": "SELECT",
+"name": "X-MOV-NSH - MOV Non-Self Hold for Transfer"
+},
+"823E": {
+"op": "SELECT",
+"name": "X-MOV-SH - MOV Self Hold for Transfer"
+},
+"823F": {
+"op": "SELECT",
+"name": "X-SOV - Solenoid Valve for Transfer"
+},
+"4052": {
+"op": "CONST",
+"name": "SG - Variable Signal Generator (hang so A)"
+},
+"406A": {
+"op": "GAIN",
+"name": "P - Proportional (PG:para)"
+},
+"406B": {
+"op": "MUL",
+"name": "P - Proportional (PG:input)"
+},
+"407A": {
+"op": "PASS",
+"name": "Z^(-n) - Sampling Delay Gate"
+},
+"405E": {
+"op": "PASS",
+"name": "DEAD TIME - Pure Delay (without SW)"
+}
+}

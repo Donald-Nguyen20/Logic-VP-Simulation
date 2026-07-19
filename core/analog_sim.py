@@ -149,6 +149,23 @@ class AnalogSim:
                     r = ((tla * yprev + (tle + dt) * x - tle * xprev) / denom) if denom > 0 else x
                     self.state[name] = r
                 self.state[name + ".x"] = x
+            elif op == "DERIV":
+                x = val(nd["in"][0])
+                td = self._P(nd.get("td", 1.0)); gg = self._P(nd.get("g", 1.0))
+                if nd.get("sw") is not None and val(nd["sw"]) < 0.5:
+                    r = x                                   # SW=0: bypass Y=X
+                    self.state[name] = 0.0
+                    self.state[name + ".dx"] = x
+                else:
+                    dprev = self.state.get(name, 0.0)
+                    xprev = self.state.get(name + ".dx", x)
+                    a = td / (td + dt) if (td + dt) > 0 else 0.0
+                    d = a * (dprev + x - xprev)             # loc thong cao: TD*s/(1+TD*s)
+                    self.state[name] = d
+                    self.state[name + ".dx"] = x
+                    r = gg * d
+                    hi = self._P(nd.get("hi", 1e12)); lo = self._P(nd.get("lo", -1e12))
+                    r = min(max(r, lo), hi)
             elif op == "PID":
                 sv = val(nd["sv"]); pv = val(nd["pv"])
                 kp = self._P(nd.get("kp", 1.0)); ti = self._P(nd.get("ti", 0.0))

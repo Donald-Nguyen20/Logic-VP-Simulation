@@ -1670,5 +1670,311 @@
    "ABN": "abn",
    "MV ERR": "MVERR"
   }
+ },
+ "4070": {
+  "name": "d/dt (L:para SW:Up)",
+  "desc": "d/dt (L:para SW:Up) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=vi phan, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   },
+   "HL1": {
+    "val": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL1": {
+    "val": -100,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL1",
+    "lo": "LL1",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "4071": {
+  "name": "d/dt (L:para SW:Down)",
+  "desc": "d/dt (L:para SW:Down) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=vi phan, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   },
+   "HL1": {
+    "val": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL1": {
+    "val": -100,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL1",
+    "lo": "LL1",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "4072": {
+  "name": "d/dt (L:para khong SW)",
+  "desc": "d/dt (L:para khong SW) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   },
+   "HL1": {
+    "val": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL1": {
+    "val": -100,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL1",
+    "lo": "LL1"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "408D": {
+  "name": "d/dt (L:input SW:Up)",
+  "desc": "d/dt (L:input SW:Up) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "HL": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL": {
+    "init": -100,
+    "desc": "Gioi han duoi"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=vi phan, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL",
+    "lo": "LL",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "408E": {
+  "name": "d/dt (L:input SW:Down)",
+  "desc": "d/dt (L:input SW:Down) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "HL": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL": {
+    "init": -100,
+    "desc": "Gioi han duoi"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "1=vi phan, 0=bypass (Y=X)"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL",
+    "lo": "LL",
+    "sw": "SW"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
+ },
+ "408F": {
+  "name": "d/dt (L:input khong SW)",
+  "desc": "d/dt (L:input khong SW) - Derivative (vi phan co loc)",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Dau vao"
+   },
+   "HL": {
+    "init": 100,
+    "desc": "Gioi han tren"
+   },
+   "LL": {
+    "init": -100,
+    "desc": "Gioi han duoi"
+   }
+  },
+  "params": {
+   "TD1": {
+    "val": 2.0,
+    "desc": "Hang so vi phan TD (s)"
+   },
+   "G1": {
+    "val": 1.0,
+    "desc": "He so khuech dai G"
+   }
+  },
+  "nodes": {
+   "Y": {
+    "op": "DERIV",
+    "in": [
+     "X"
+    ],
+    "td": "TD1",
+    "g": "G1",
+    "hi": "HL",
+    "lo": "LL"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "Y"
+  }
  }
 }

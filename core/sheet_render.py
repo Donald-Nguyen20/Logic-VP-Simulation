@@ -50,6 +50,7 @@ class SBlock:
         self.tag = ""
         self.tdes = ""
         self.sym = ""          # ten SYMBOL (de tim file SVG)
+        self.parammap = {}      # {paramno:int -> gia tri} de dat dung o placeholder
         self.pins = []          # [(x, y, is_out, name, connected)] toa do DB
         self.box = None         # (x_left, y_bot, x_right, y_top)
 
@@ -216,6 +217,7 @@ def build_sheet(path, sheet_id):
             pr = params.get(bid, {})
             b.label = pr.get("1", "")
             b.params = [pr[k] for k in sorted(pr, key=lambda z: int(z)) if k != "1" and pr[k]]
+            b.parammap = {int(k): pr[k] for k in pr if str(k).isdigit()}
             b.tag = tag_of.get(bid, "")
             b.tdes = tdes_of.get(bid, "")
             # PARAM1 cua khoi tag = mã KKS, trung voi Ttag -> bo di, chi hien 1 ma KKS
@@ -249,6 +251,7 @@ def build_sheet(path, sheet_id):
 
 def _compute_pins(b, pinlist, net_ends, bx, by, mdef=None):
     connected = {pn for pn, sig in pinlist if sig}
+    pinsig = {pn: D._clean(sig) for pn, sig in pinlist}
     # ---- Nguon chuan: dinh nghia macro (offset + ten + canh + khung) ----
     if mdef and mdef.get("pins"):
         for pn_s, info in sorted(mdef["pins"].items(), key=lambda kv: int(kv[0])):
@@ -256,7 +259,7 @@ def _compute_pins(b, pinlist, net_ends, bx, by, mdef=None):
             px = bx + float(info["dx"])
             py = by + float(info["dy"])
             is_out = (info.get("side") == "out")
-            b.pins.append((px, py, is_out, info.get("name", ""), pn in connected))
+            b.pins.append((px, py, is_out, info.get("name", ""), pn in connected, pinsig.get(pn, "")))
         b.n_in = mdef.get("in_num", 0)
         b.n_out = mdef.get("out_num", 0)
         box = mdef.get("box")
@@ -272,7 +275,7 @@ def _compute_pins(b, pinlist, net_ends, bx, by, mdef=None):
         if not (sig and net_ends.get(sig)):
             continue
         px, py = min(net_ends[sig], key=lambda p: abs(p[0] - bx) + abs(p[1] - by))
-        raw.append((pinno, px, py))
+        raw.append((pinno, px, py, D._clean(sig)))
     if not raw:
         return
     xsr = [p[1] for p in raw]
@@ -289,10 +292,10 @@ def _compute_pins(b, pinlist, net_ends, bx, by, mdef=None):
     b.n_in, b.n_out = len(ins), len(outs)
     for i, p in enumerate(ins):
         nm = b.in_names[i] if i < len(b.in_names) else ""
-        b.pins.append((p[1], p[2], False, nm, True))
+        b.pins.append((p[1], p[2], False, nm, True, p[3]))
     for j, p in enumerate(outs):
         nm = b.out_names[j] if j < len(b.out_names) else ""
-        b.pins.append((p[1], p[2], True, nm, True))
+        b.pins.append((p[1], p[2], True, nm, True, p[3]))
     allx = [p[0] for p in b.pins]; ally = [p[1] for p in b.pins]
     xl, xr = min(allx), max(allx)
     if xr - xl < 8:

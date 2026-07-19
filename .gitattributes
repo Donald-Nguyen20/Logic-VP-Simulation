@@ -1,0 +1,6 @@
+# Chuan hoa xuong dong: file text luu LF trong repo va tren dia
+* text=auto eol=lf
+
+# File nhi phan - khong dong cham
+*.png binary
+*.db binary

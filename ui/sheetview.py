@@ -15,13 +15,14 @@ SC = 8.0            # ti le DB-unit -> pixel
 MARGIN_L = 440      # be rong vung cot Line Name/From/LID trai
 MARGIN_R = 440      # vung phai
 MARGIN_T = 60
-COL_BLK = QColor("#33415c")
-COL_BODY = QColor("#f5f7fa")
-COL_WIRE = QColor("#4a5a75")
-COL_GRID = QColor("#c0c8d4")
-COL_RED = QColor("#c00000")
-COL_NET = QColor("#1560b0")
-COL_TXT = QColor("#12305a")
+COL_BLK = QColor("#2C3E5C")
+COL_BODY = QColor("#F4F7FC")
+COL_WIRE = QColor("#5C6B84")
+COL_GRID = QColor("#D2DAE6")
+COL_RED = QColor("#D64545")
+COL_NET = QColor("#1E66C7")
+COL_TXT = QColor("#223047")
+COL_SYM = QColor("#3B6FE0")   # accent indigo cho ky hieu (hien dai)
 
 
 # --- Bo ky hieu rieng (trich tu SVG -> core/symbol_shapes.json) de ve khoi giong PDF ---
@@ -51,8 +52,62 @@ class SheetScene(QGraphicsScene):
         self.on_block_click = None   # callback(code, name) khi click 1 khoi
         self._hits = []              # [(QRectF, term)]
         self._block_hits = []        # [(QRectF, code, name)]
-        self.svg_mode = False        # True = ve ky hieu SVG giong PDF
+        self._term_hits = []         # [(QRectF, net, linename)] moi terminal (de chuot phai xem node)
+        self.svg_mode = True         # luon ve bang bo ky hieu (native)
+        # --- mo phong tren trang ---
+        self.sim_values = None       # {net: 0/1/None} (digital) khi bat mo phong
+        self.sim_kind = {}           # {net: 'D'/'A'/'?'}
+        self.sim_inputs = set()      # net la dau vao (click de set)
+        self.sim_analog = {}         # {net: float} gia tri analog nguoi nhap
+        self.on_sim_toggle = None    # callback(net) khi click dau vao DIGITAL
+        self.on_sim_set_analog = None  # callback(net) khi click dau vao ANALOG
+        self.on_sim_dyn_config = None  # callback(bid) khi click khoi DONG de cai dat
+        self.on_func_view = None     # callback(bid, name) khi click khoi F(x)
+        self.func_codes = set()      # cac macrocode la F(x)
+        self.sim_dyn = {}            # {bid: {"ti","out","code","label"}} khoi DONG (tich phan...)
         self.build()
+
+    # --- mo phong: bat/tat + mau ---
+    def set_sim(self, values, kinds, inputs, analog=None, dyn=None):
+        self.sim_values = dict(values or {})
+        self.sim_kind = dict(kinds or {})
+        self.sim_inputs = set(inputs or [])
+        self.sim_analog = dict(analog or {})
+        self.sim_dyn = dict(dyn or {})
+        self.build()
+
+    def clear_sim(self):
+        self.sim_values = None
+        self.sim_kind = {}
+        self.sim_inputs = set()
+        self.sim_analog = {}
+        self.sim_dyn = {}
+        self.build()
+
+    def _sim_on(self):
+        return self.sim_values is not None
+
+    def _sim_cell_col(self, net):
+        """(bg, fg) cho o terminal: analog=xanh duong, digital=xanh/do/xam theo 0/1."""
+        if self.sim_kind.get(net) == "A":
+            return QColor("#DBEAFE"), QColor("#1D4ED8")
+        v = self.sim_values.get(net) if self.sim_values else None
+        if v == 1:
+            return QColor("#DCFCE7"), QColor("#15803D")
+        if v == 0:
+            return QColor("#FEE2E2"), QColor("#B91C1C")
+        return QColor("#F1F5F9"), QColor("#94A3B8")
+
+    def _sim_wire_pen(self, net):
+        """(QColor, width) cho day: analog=xanh duong manh, digital=xanh/do theo 0/1."""
+        if self.sim_kind.get(net) == "A":
+            return QColor("#93C5FD"), 1.6
+        v = self.sim_values.get(net) if self.sim_values else None
+        if v == 1:
+            return QColor("#16A34A"), 2.4
+        if v == 0:
+            return QColor("#DC2626"), 2.4
+        return QColor("#CBD5E1"), 1.1
 
     # --- bien doi toa do ---
     def sx(self, x):
@@ -69,24 +124,45 @@ class SheetScene(QGraphicsScene):
         self.clear()
         self._hits = []
         self._block_hits = []
+        self._term_hits = []
+        self._term_lids = set(t.lid for t in self.sh.terms if getattr(t, "lid", None))
+        self._sim_wire_hits = []      # [(QRectF, net)] diem settable NOI BO tren day
+        # vi tri NGO RA cua tung net (de dat nhan gia tri ngay tai khoi sinh ra no)
+        self._out_pin_pos = {}
+        self._block_centers = []
+        for b in self.sh.blocks:
+            if getattr(b, "box", None):
+                xl, yb, xr, yt = b.box
+                self._block_centers.append(((self.sx(xl) + self.sx(xr)) / 2,
+                                            (self.sy(yb) + self.sy(yt)) / 2))
+            for pin in getattr(b, "pins", []):
+                if len(pin) > 5 and pin[2] and pin[5]:      # is_out va co net
+                    self._out_pin_pos[pin[5]] = (self.sx(pin[0]), self.sy(pin[1]))
         self._wires()
         self._blocks()
         self._terminals()
         self._texts()
         self._frame()
+        if self._sim_on() and getattr(self, "sim_dyn", None):
+            self._sim_dyn_badges()
         r = self.itemsBoundingRect()
         self.setSceneRect(r.adjusted(-40, -40, 40, 40))
 
     # --- day noi theo hinh hoc goc ---
     def _wires(self):
         for w in self.sh.wires:
+            if self._sim_on() and getattr(w, "signalid", None):
+                wc, ww = self._sim_wire_pen(w.signalid)
+                wpen = QPen(wc, ww)
+            else:
+                wpen = QPen(COL_WIRE, 1.1)
             for poly in w.polylines:
                 if len(poly) < 2:
                     continue
                 path = QPainterPath(QPointF(self.sx(poly[0][0]), self.sy(poly[0][1])))
                 for (x, y) in poly[1:]:
                     path.lineTo(self.sx(x), self.sy(y))
-                it = self.addPath(path, QPen(COL_WIRE, 1.1))
+                it = self.addPath(path, wpen)
                 it.setZValue(-2)
             if w.signalid and w.signalid[:1] == "a" and w.polylines:
                 pl = max(w.polylines, key=len)
@@ -94,6 +170,50 @@ class SheetScene(QGraphicsScene):
                 t = self.addText(w.signalid, QFont("Segoe UI", 10))
                 t.setDefaultTextColor(COL_NET)
                 t.setPos(self.sx(mx) - 6, self.sy(my) - 16)
+            # mo phong: hien gia tri / diem nhap TREN DAY cho net NOI BO (khong o mep)
+            if self._sim_on() and w.signalid and w.polylines \
+                    and w.signalid not in self._term_lids:
+                self._wire_value(w.signalid, w.polylines)
+
+    def _wire_value(self, net, polylines):
+        isin = net in self.sim_inputs                 # net noi bo NHUNG la dau vao -> cho nhap
+        v = self.sim_values.get(net) if self.sim_values else None
+        analog = self.sim_kind.get(net) == "A"
+        if not isin and not (isinstance(v, (int, float)) and not isinstance(v, bool)):
+            return                                    # khong phai dau vao & chua co gia tri -> bo qua
+        if analog:
+            has = isinstance(v, (int, float)) and not isinstance(v, bool)
+            txt = ("✎ %g" % v) if (isin and has) else ("✎ ?" if isin else "%g" % v)
+            col = QColor("#7C3AED")
+        else:
+            vs = "1" if v == 1 else ("0" if v == 0 else "?")
+            if not isin and vs == "?":
+                return
+            txt = ("▸ " + vs) if isin else vs
+            col = QColor("#16A34A") if v == 1 else (QColor("#DC2626") if v == 0 else QColor("#94A3B8"))
+        # dat nhan ngay tai NGO RA cua khoi sinh ra net nay (neu biet)
+        if net in self._out_pin_pos:
+            px, py = self._out_pin_pos[net]
+            bx, by = px + 6, py - 8
+        else:
+            # du phong: dinh day gan tam khoi nhat
+            pts = [(self.sx(x), self.sy(y)) for poly in polylines for (x, y) in poly]
+            if self._block_centers and pts:
+                def d2near(px, py):
+                    return min((px - cx) ** 2 + (py - cy) ** 2 for cx, cy in self._block_centers)
+                px, py = min(pts, key=lambda p: d2near(p[0], p[1]))
+            else:
+                pl = max(polylines, key=len)
+                mx, my = pl[len(pl) // 2]
+                px, py = self.sx(mx), self.sy(my)
+            bx, by = px + 4, py - 18
+        w = 13 + 8 * len(txt)
+        r = self.addRect(bx - 2, by, w, 17, QPen(col, 1.4 if isin else 1.0), QBrush(QColor("white")))
+        r.setZValue(5)
+        tt = self.addText(txt, QFont("Segoe UI", 11, QFont.Weight.Bold))
+        tt.setDefaultTextColor(col); tt.setPos(bx, by - 3); tt.setZValue(6)
+        if isin:
+            self._sim_wire_hits.append((QRectF(bx - 2, by, w, 17), net))
 
     # --- khoi (dung box + vi tri chan CHUAN theo macro) ---
     def _blocks(self):
@@ -125,10 +245,10 @@ class SheetScene(QGraphicsScene):
             def Y(v):
                 return top + v * SC
 
-            # nen trang che day (KHONG vien) - de ky hieu tu ve khung cua no
+            # nen trang che day (KHONG vien, KHONG tint)
             self.addRect(left, top, wpx, hpx, QPen(Qt.PenStyle.NoPen), QBrush(QColor("white")))
-            pen = QPen(QColor("#111827"), 1.0)
-            blk = QBrush(QColor("#111827"))
+            pen = QPen(COL_SYM, 1.4)
+            blk = QBrush(COL_SYM)
             nob = QBrush(Qt.BrushStyle.NoBrush)
             for x1, y1, x2, y2 in sh.get("lines", []):
                 self.addLine(X(x1), Y(y1), X(x2), Y(y2), pen)
@@ -143,12 +263,40 @@ class SheetScene(QGraphicsScene):
                 fnt = QFont("Segoe UI")
                 fnt.setPixelSize(ps)
                 it = self.addText(str(txt), fnt)
-                it.setDefaultTextColor(QColor(col or "#000000"))
+                cc = COL_SYM if (not col or col.lower() in ("#000000", "#000", "black")) else QColor(col)
+                it.setDefaultTextColor(cc)
                 it.setPos(X(x) - 2, Y(y) - ps)
-            self._block_hits.append((QRectF(left, top, wpx, hpx), b.code, b.name))
+            self._block_hits.append((QRectF(left, top, wpx, hpx), b.code, b.name, b.bid))
+            # phu chu (giu nhu che do o): tag KKS + mo ta + nhan vi tri + tham so + exec
             if b.tag:
                 tg = self.addText(str(b.tag), QFont("Segoe UI", 11, QFont.Weight.Bold))
-                tg.setDefaultTextColor(COL_RED); tg.setPos(left, top - 40)
+                tg.setDefaultTextColor(COL_RED); tg.setPos(left, top - 60)
+                if b.tdes:
+                    td = self.addText(str(b.tdes)[:26], QFont("Segoe UI", 10))
+                    td.setDefaultTextColor(QColor("#444")); td.setPos(left, top - 39)
+            plc = sh.get("params")
+            if plc:
+                # dat gia tri that vao DUNG o placeholder cua ky hieu
+                pm = getattr(b, "parammap", {}) or {}
+                for x, y, size, n in plc:
+                    val = pm.get(n)
+                    if not val:
+                        continue
+                    # tranh lap: mã KKS + mo ta da hien mau DO/xam o tren
+                    if b.tag and str(val).strip() in (str(b.tag).strip(), str(b.tdes).strip()):
+                        continue
+                    ps = max(7, int(size * SC))
+                    fnt = QFont("Segoe UI"); fnt.setPixelSize(ps)
+                    it = self.addText(str(val)[:12], fnt)
+                    it.setDefaultTextColor(COL_SYM); it.setPos(X(x) - 2, Y(y) - ps)
+            else:
+                if b.label:
+                    lb = self.addText(str(b.label), QFont("Segoe UI", 10))
+                    lb.setDefaultTextColor(COL_TXT); lb.setPos(left, top - 18)
+                yy = top + hpx + 2
+                for pv in b.params[:4]:
+                    pt = self.addText(str(pv)[:14], QFont("Segoe UI", 10))
+                    pt.setDefaultTextColor(QColor("#333")); pt.setPos(left, yy); yy += 13
             if b.exorder >= 0:
                 eo = self.addText("%02d" % b.exorder, QFont("Segoe UI", 11, QFont.Weight.Bold))
                 eo.setDefaultTextColor(COL_RED); eo.setPos(left + wpx - 18, top + hpx - 1)
@@ -162,7 +310,7 @@ class SheetScene(QGraphicsScene):
         right, bot = self.sx(xr), self.sy(yb)
         w, h = right - left, bot - top
         self.addRect(left, top, w, h, QPen(COL_BLK, 1.1), QBrush(COL_BODY))
-        self._block_hits.append((QRectF(left, top, w, h), b.code, b.name))
+        self._block_hits.append((QRectF(left, top, w, h), b.code, b.name, b.bid))
         self.addRect(left, top, w, 18, QPen(Qt.PenStyle.NoPen), QBrush(COL_BLK))
         tl = self.addText(str(b.name)[:16], QFont("Segoe UI", 11, QFont.Weight.Bold))
         tl.setDefaultTextColor(QColor("white")); tl.setPos(left + 2, top - 1)
@@ -204,7 +352,7 @@ class SheetScene(QGraphicsScene):
         x0, y0 = self.sx(b.x), self.sy(b.y)
         w, h = 9 * SC, 6 * SC
         self.addRect(x0, y0, w, h, QPen(COL_BLK, 1.1), QBrush(COL_BODY))
-        self._block_hits.append((QRectF(x0, y0, w, h), b.code, b.name))
+        self._block_hits.append((QRectF(x0, y0, w, h), b.code, b.name, b.bid))
         self.addRect(x0, y0, w, 18, QPen(Qt.PenStyle.NoPen), QBrush(COL_BLK))
         tl = self.addText(str(b.name)[:12], QFont("Segoe UI", 11, QFont.Weight.Bold))
         tl.setDefaultTextColor(QColor("white")); tl.setPos(x0 + 2, y0 - 1)
@@ -213,10 +361,11 @@ class SheetScene(QGraphicsScene):
             eo.setDefaultTextColor(COL_RED); eo.setPos(x0 + w - 18, y0 + h - 1)
 
     # --- terminal 2 mep dang cot (cat chu vua o de khong tran) ---
-    def _cell(self, x0, w, y, text, clickable=False, wrap=False):
-        font = QFont("Segoe UI", 11, QFont.Weight.Bold if clickable else QFont.Weight.Normal)
+    def _cell(self, x0, w, y, text, clickable=False, wrap=False, bg=None, fg=None):
+        bold = clickable or (fg is not None)
+        font = QFont("Segoe UI", 11, QFont.Weight.Bold if bold else QFont.Weight.Normal)
         t = self.addText("", font)
-        t.setDefaultTextColor(COL_NET if clickable else COL_TXT)
+        t.setDefaultTextColor(fg if fg is not None else (COL_NET if clickable else COL_TXT))
         if wrap:                              # ten dai -> tu xuong dong
             t.setTextWidth(w - 8)
             t.setPlainText(str(text))
@@ -224,9 +373,40 @@ class SheetScene(QGraphicsScene):
             fm = QFontMetrics(font)
             t.setPlainText(fm.elidedText(str(text), Qt.TextElideMode.ElideRight, int(w - 8)))
         th = max(20, t.boundingRect().height() + 2)
-        rect = self.addRect(x0, y - 10, w, th, QPen(COL_GRID, 1), QBrush(QColor("white")))
+        rect = self.addRect(x0, y - 10, w, th, QPen(COL_GRID, 1),
+                            QBrush(bg if bg is not None else QColor("white")))
         rect.setZValue(-1)                    # dua khung ra SAU chu
         t.setPos(x0 + 3, y - 11)
+        return th
+
+    def _sim_lid_cell(self, x0, w, y, t, isin, bg):
+        """O LID khi mo phong: GIA TRI (to, mau tim) o tren, dia chi LID o duoi."""
+        net = t.lid
+        kind = self.sim_kind.get(net)
+        if kind == "A":
+            # gia tri analog: uu tien gia tri TINH RA (sim_values), roi toi gia tri nguoi nhap
+            av = self.sim_values.get(net) if self.sim_values else None
+            if not isinstance(av, (int, float)):
+                av = self.sim_analog.get(net)
+            vs = ("%g" % av) if isinstance(av, (int, float)) else "~"
+            mk = "✎ " if isin else ""
+        else:
+            v = self.sim_values.get(net) if self.sim_values else None
+            vs = "1" if v == 1 else ("0" if v == 0 else "?")
+            mk = "▸ " if isin else ""
+        th = 42
+        rect = self.addRect(x0, y - 10, w, th, QPen(COL_GRID, 1),
+                            QBrush(bg if bg is not None else QColor("white")))
+        rect.setZValue(-1)
+        vf = QFont("Segoe UI", 14, QFont.Weight.Bold)
+        tv = self.addText(mk + vs, vf)
+        tv.setDefaultTextColor(QColor("#7C3AED"))     # tim
+        tv.setPos(x0 + 3, y - 12)
+        lf = QFont("Segoe UI", 9)
+        fm = QFontMetrics(lf)
+        tl = self.addText(fm.elidedText(str(net), Qt.TextElideMode.ElideRight, int(w - 8)), lf)
+        tl.setDefaultTextColor(COL_TXT)
+        tl.setPos(x0 + 3, y + 12)
         return th
 
     def _refcell(self, x0, w, y, refs, clickable=False):
@@ -244,22 +424,39 @@ class SheetScene(QGraphicsScene):
         return h
 
     def _terminals(self):
+        simon = self._sim_on()
         for t in self.sh.terms:
             y = self.sy(t.y)
             has = bool(t.targets) or bool(getattr(t, "xcpu", None))
+            # mau mo phong cho o ten tin hieu
+            bg = fg = None
+            isin = simon and t.lid in self.sim_inputs
+            if simon and t.lid:
+                bg, fg = self._sim_cell_col(t.lid)
             if t.side == "L":
                 ch = self._refcell(250, 80, y, t.refs, clickable=has)
-                lh = self._cell(0, 250, y, t.linename, wrap=True)
-                self._cell(330, 110, y, t.lid, clickable=has)
+                lh = self._cell(0, 250, y, t.linename, wrap=True, bg=bg, fg=fg)
+                if simon and t.lid:
+                    self._sim_lid_cell(330, 110, y, t, isin, bg)
+                else:
+                    self._cell(330, 110, y, t.lid, clickable=has, bg=bg, fg=fg)
+                rct = QRectF(0, y - 10, MARGIN_L, max(ch, lh, 20))
                 if has:
-                    self._hits.append((QRectF(0, y - 10, MARGIN_L, max(ch, lh, 20)), t))
+                    self._hits.append((rct, t))
             else:
                 x0 = self._right_x0
                 ch = self._refcell(x0 + 90, 80, y, t.refs, clickable=has)
-                self._cell(x0, 90, y, t.lid, clickable=has)
-                lh = self._cell(x0 + 180, 260, y, t.linename, wrap=True)
+                if simon and t.lid:
+                    self._sim_lid_cell(x0, 90, y, t, isin, bg)
+                else:
+                    self._cell(x0, 90, y, t.lid, clickable=has, bg=bg, fg=fg)
+                lh = self._cell(x0 + 180, 260, y, t.linename, wrap=True, bg=bg, fg=fg)
+                rct = QRectF(x0, y - 10, MARGIN_R, max(ch, lh, 20))
                 if has:
-                    self._hits.append((QRectF(x0, y - 10, MARGIN_R, max(ch, lh, 20)), t))
+                    self._hits.append((rct, t))
+            if t.lid:
+                self._term_hits.append((rct, t.lid, t.linename))
+
 
     def _texts(self):
         for tx in self.sh.texts:
@@ -284,24 +481,88 @@ class SheetScene(QGraphicsScene):
         ti = self.addText(info, QFont("Segoe UI", 13, QFont.Weight.Bold))
         ti.setDefaultTextColor(COL_TXT); ti.setPos(rx, bot + 6)
 
+    def _sim_dyn_badges(self):
+        """Danh dau khoi DONG (tich phan...) + in TI va gia tri hien tai ngay tren khoi."""
+        orange = QColor("#EA580C")
+        for rect, code, name, bid in self._block_hits:
+            info = self.sim_dyn.get(bid)
+            if not info:
+                continue
+            # vien cam quanh khoi dong
+            fr = self.addRect(rect.adjusted(-2, -2, 2, 2), QPen(orange, 2.0), QBrush(Qt.BrushStyle.NoBrush))
+            fr.setZValue(7)
+            ti = info.get("ti")
+            outv = self.sim_values.get(info.get("out")) if self.sim_values else None
+            vs = ("%g" % outv) if isinstance(outv, (int, float)) and not isinstance(outv, bool) else "?"
+            pstr = ("%g" % ti) if ti is not None else "?"
+            k = info.get("kind")
+            if k == "D":
+                txt = "d/dt  G=%s  y=%s" % (pstr, vs)
+            elif k == "L":
+                txt = "F(t)  T=%s  y=%s" % (pstr, vs)
+            else:
+                txt = "∫ I  TI=%s  y=%s" % (pstr, vs)
+            bx, by = rect.left(), rect.top() - 17
+            r = self.addRect(bx, by, 16 + 7 * len(txt), 16, QPen(orange, 1.0), QBrush(QColor("#FFF7ED")))
+            r.setZValue(7)
+            t = self.addText(txt, QFont("Segoe UI", 10, QFont.Weight.Bold))
+            t.setDefaultTextColor(orange); t.setPos(bx + 2, by - 3); t.setZValue(8)
+
     def block_at(self, sp):
         """Tra ve (code, name) cua khoi tai vi tri sp, hoac None."""
-        for rect, code, name in self._block_hits:
+        for rect, code, name, bid in self._block_hits:
             if rect.contains(sp):
-                return (code, name)
+                return (code, name, bid)
+        return None
+
+    def term_at(self, sp):
+        """Tra ve (net, linename) cua terminal/tin hieu tai vi tri sp, hoac None."""
+        for rect, net, linename in self._term_hits:
+            if rect.contains(sp):
+                return (net, linename)
         return None
 
     def click_at(self, sp):
         """Xu ly 1 cu click tai vi tri scene sp (ZoomView goi khi bam trai khong keo)."""
+        # che do mo phong: click dau vao -> digital doi 0/1, analog nhap so
+        if self._sim_on():
+            hit = self.term_at(sp)
+            net = hit[0] if (hit and hit[0] in self.sim_inputs) else None
+            if net is None:                        # thu diem settable NOI BO tren day
+                for rect, n in getattr(self, "_sim_wire_hits", []):
+                    if rect.contains(sp):
+                        net = n; break
+            if net is not None and net in self.sim_inputs:
+                if self.sim_kind.get(net) == "A":
+                    if self.on_sim_set_analog:
+                        self.on_sim_set_analog(net)
+                        return
+                elif self.on_sim_toggle:
+                    self.on_sim_toggle(net)
+                    return
+            # click khoi DONG (cam) -> cai dat TI / gia tri dau
+            if self.sim_dyn and self.on_sim_dyn_config:
+                for rect, code, name, bid in self._block_hits:
+                    if bid in self.sim_dyn and rect.contains(sp):
+                        self.on_sim_dyn_config(bid)
+                        return
         for rect, t in self._hits:
             if rect.contains(sp) and self.on_navigate:
                 self.on_navigate(t)
                 return
-        for rect, code, name in self._block_hits:
+        # click khoi F(x) -> xem bang x-y
+        for rect, code, name, bid in self._block_hits:
+            if rect.contains(sp) and code in getattr(self, "func_codes", set()) \
+                    and self.on_func_view:
+                self.on_func_view(bid, name)
+                return
+        for rect, code, name, bid in self._block_hits:
             if rect.contains(sp) and self.on_block_click:
                 self.on_block_click(code, name)
                 return
 
     def mousePressEvent(self, ev):
-        self.click_at(ev.scenePos())
+        is_left = ev.button() == Qt.MouseButton.LeftButton
+        if is_left:
+            self.click_at(ev.scenePos())
         super().mousePressEvent(ev)
