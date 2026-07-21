@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout, QCheckBox, QGroupBox, QComboBox, QScrollArea,
     QDoubleSpinBox, QSpinBox, QPushButton, QFormLayout, QMenu, QTabWidget,
 )
-from PySide6.QtGui import QPainter, QAction, QPixmap
+from PySide6.QtGui import QPainter, QAction, QPixmap, QShortcut, QKeySequence
 from PySide6.QtCore import Qt
 
 from core.model import (Circuit, BLOCK_SPECS,
@@ -395,7 +395,7 @@ class AnalogSimDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("T-Designer Lite - FBD Logic Editor (prototype)")
+        self.setWindowTitle("Logic Demo - T-Designer Lite")
         self.resize(1280, 800)
         self.circuit = Circuit("SHEET1")
         self.db_path = None
@@ -415,7 +415,6 @@ class MainWindow(QMainWindow):
         self.graph_tab = SignalGraphPanel(cpu_paths=getattr(self, "cpu_paths", {}))
         self.center_tabs.addTab(self.graph_tab, "Signal node diagram")
         self.setCentralWidget(self.center_tabs)
-
         self._build_palette()
         self._build_dbtree()
         self._build_output_dock()
@@ -589,6 +588,25 @@ class MainWindow(QMainWindow):
     def _build_toolbar(self):
         tb = QToolBar("Chinh")
         tb.setMovable(False)
+        tb.setStyleSheet("""
+            QToolBar {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #eef5ff, stop:1 #dfeaf7);
+                border: 1px solid #b8cce3;
+                spacing: 4px;
+                padding: 3px;
+            }
+            QToolBar QToolButton {
+                background-color: transparent;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                padding: 4px 6px;
+                color: #12305a;
+            }
+            QToolBar QToolButton:hover {
+                background-color: #d7e7f7;
+            }
+        """)
         self.addToolBar(tb)
 
         def act(text, fn, tip=""):
@@ -616,6 +634,8 @@ class MainWindow(QMainWindow):
         act("Fit", self.view.zoom_fit, "Fit to screen")
         act("100%", self.view.zoom_reset, "Reset to 1:1")
         tb.addSeparator()
+        # Tim tin hieu: phim tat Ctrl+F
+        QShortcut(QKeySequence("Ctrl+F"), self, activated=self.find_signal)
         self.sim_sheet_act = QAction("Simulate on sheet", self)
         self.sim_sheet_act.setCheckable(True)
         self.sim_sheet_act.setToolTip("Toggle: color 0/1 on the logic sheet; click inputs to change 0/1")
@@ -932,6 +952,7 @@ class MainWindow(QMainWindow):
         m = QMenu(self)
         a_graph = m.addAction("View signal node diagram")
         a_cond = m.addAction("View conditions (for signal = 1)")
+        a_ai = m.addAction("Explain (AI)")
         act = m.exec(global_pos)
         if act == a_graph:
             self._open_node_tab(net, linename or net)
@@ -939,6 +960,16 @@ class MainWindow(QMainWindow):
             CondTreeWindow(self.db_path, self.cur_sheet, net,
                            linename or net, self,
                            cpu_paths=getattr(self, "cpu_paths", None)).show()
+        elif act == a_ai:
+            try:
+                from core import project_index as PI
+                PI.ensure(list(getattr(self, "meta_by_path", {}).keys()))
+            except Exception:
+                pass
+            from ui.ai_dialog import AIExplainDialog
+            self._ai_dlg = AIExplainDialog(self.db_path, self.cur_sheet, net,
+                                           cpu_paths=getattr(self, "cpu_paths", None), parent=self)
+            self._ai_dlg.show()
 
     def _open_node_tab(self, net, title):
         """Nap tin hieu vao TAB 'So do node' va chuyen sang tab do."""
@@ -1114,6 +1145,61 @@ class MainWindow(QMainWindow):
             ana.pop(net, None)
         self.sim_analog = ana
         self._apply_sheet_sim()
+
+    def find_signal(self):
+        """Tim ten tin hieu nam o sheet nao (tra khap cac DB da import)."""
+        import sqlite3
+        from core import signal_graph as SG
+        paths = list(getattr(self, "meta_by_path", {}).keys())
+        if not paths:
+            self.status("Import at least one DB first.")
+            return
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Find signal")
+        dlg.resize(640, 460)
+        lay = QVBoxLayout(dlg)
+        row = QHBoxLayout()
+        ed = QLineEdit(); ed.setPlaceholderText("Type signal name (e.g. O2 MSTR AUTO CTRL CMD) then Enter...")
+        btn = QPushButton("Search")
+        row.addWidget(ed, 1); row.addWidget(btn)
+        lay.addLayout(row)
+        info = QLabel(""); info.setStyleSheet("color:#64748B;font-size:11px;")
+        lay.addWidget(info)
+        res = QTreeWidget(); res.setHeaderLabels(["CPU", "Sheet", "Signal name"])
+        res.setColumnWidth(0, 150); res.setColumnWidth(1, 90)
+        lay.addWidget(res, 1)
+
+        from core import project_index as PI
+
+        def run():
+            q = ed.text().strip()
+            res.clear()
+            if len(q) < 2:
+                info.setText("Enter at least 2 characters.")
+                return
+            try:
+                PI.ensure(paths)     # dung/ cap nhat index neu can (nhanh, cache)
+                rows = PI.find(q)    # tra tuc thi tu index
+            except Exception:
+                rows = []
+            for (name, cpuname, cpuno, slbl, db, sheet, sigid) in rows:
+                it = QTreeWidgetItem([cpuname or ("CPU%s" % cpuno), slbl, name])
+                it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
+                res.addTopLevelItem(it)
+            info.setText("Found %d result(s). Double-click to open the sheet." % len(rows))
+
+        def open_hit(item, _c=0):
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            if data:
+                self._open_cross(data[0], data[1])
+                dlg.raise_()
+
+        btn.clicked.connect(run)
+        ed.returnPressed.connect(run)
+        res.itemDoubleClicked.connect(open_hit)
+        ed.setFocus()
+        dlg.show()
+        self._find_dlg = dlg
 
     def status(self, msg):
         self.statusBar().showMessage(msg)
