@@ -28,6 +28,9 @@ env/
 .agents/
 .claude/
 
+# --- GitHub Actions / CI helpers ---
+build-mac.yml.txt
+
 # --- He dieu hanh ---
 .DS_Store
 Thumbs.db
