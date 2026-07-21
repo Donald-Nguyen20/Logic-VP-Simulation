@@ -93,9 +93,9 @@ class SheetScene(QGraphicsScene):
             return QColor("#DBEAFE"), QColor("#1D4ED8")
         v = self.sim_values.get(net) if self.sim_values else None
         if v == 1:
-            return QColor("#DCFCE7"), QColor("#15803D")
-        if v == 0:
             return QColor("#FEE2E2"), QColor("#B91C1C")
+        if v == 0:
+            return QColor("#DCFCE7"), QColor("#15803D")
         return QColor("#F1F5F9"), QColor("#94A3B8")
 
     def _sim_wire_pen(self, net):
@@ -104,9 +104,9 @@ class SheetScene(QGraphicsScene):
             return QColor("#93C5FD"), 1.6
         v = self.sim_values.get(net) if self.sim_values else None
         if v == 1:
-            return QColor("#16A34A"), 2.4
-        if v == 0:
             return QColor("#DC2626"), 2.4
+        if v == 0:
+            return QColor("#16A34A"), 2.4
         return QColor("#CBD5E1"), 1.1
 
     # --- bien doi toa do ---
@@ -190,7 +190,7 @@ class SheetScene(QGraphicsScene):
             if not isin and vs == "?":
                 return
             txt = ("▸ " + vs) if isin else vs
-            col = QColor("#16A34A") if v == 1 else (QColor("#DC2626") if v == 0 else QColor("#94A3B8"))
+            col = QColor("#DC2626") if v == 1 else (QColor("#16A34A") if v == 0 else QColor("#94A3B8"))
         # dat nhan ngay tai NGO RA cua khoi sinh ra net nay (neu biet)
         if net in self._out_pin_pos:
             px, py = self._out_pin_pos[net]
