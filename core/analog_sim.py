@@ -37,6 +37,7 @@ class AnalogSim:
         self.params = {k: float(v.get("val", 0.0)) for k, v in self.spec.get("params", {}).items()}
         self.state = {}
         self._pid_prev = {}
+        self.last_memo = {}          # gia tri tung node o buoc step() gan nhat (cho xem so do)
 
     def set_input(self, name, val):
         if name in self.inputs:
@@ -116,7 +117,9 @@ class AnalogSim:
                 target = val(nd["in"][0])
                 rate = self._P(nd.get("rate", 1.0)) * dt
                 cur = self.state.get(name, target if nd.get("init_track") else self._P(nd.get("init", 0.0)))
-                if target > cur:
+                if nd.get("hold") and val(nd["hold"]) > 0.5:
+                    pass                                    # Hold=1: giu nguyen, khong doi toc do
+                elif target > cur:
                     cur = min(target, cur + rate)
                 else:
                     cur = max(target, cur - rate)
@@ -187,6 +190,37 @@ class AnalogSim:
                 self.state[name + ".I"] = integ
                 self._pid_prev[name] = e
                 r = out
+            elif op == "ABS":
+                r = abs(val(nd["in"][0]))
+            elif op == "AND":
+                r = 1.0 if all(val(x) > 0.5 for x in nd["in"]) else 0.0
+            elif op == "SRLATCH":
+                # chot nho: S=1 -> bat (1); R=1 -> tat (0); R uu tien hon S neu ca hai cung 1
+                s = val(nd["s"]); r_ = val(nd["r"])
+                cur = self.state.get(name, self._P(nd.get("init", 0.0)))
+                if r_ > 0.5:
+                    cur = 0.0
+                elif s > 0.5:
+                    cur = 1.0
+                self.state[name] = cur
+                r = cur
+            elif op == "DELAY":
+                # Z^-1: tre 1 chu ky quet (gia tri buoc truoc)
+                x = val(nd["in"][0])
+                r = self.state.get(name, self._P(nd.get("init", x)))
+                self.state[name] = x
+            elif op == "TON":
+                # bo tre bat (dropout filter): dau ra=1 chi khi dau vao=1 lien tuc >= T giay;
+                # dau vao ve 0 la reset bo dem ngay (khong tre khi tat)
+                x = val(nd["in"][0])
+                T = self._P(nd.get("t", 0.0))
+                if x > 0.5:
+                    acc = self.state.get(name + ".acc", 0.0) + dt
+                    self.state[name + ".acc"] = acc
+                    r = 1.0 if acc >= T else 0.0
+                else:
+                    self.state[name + ".acc"] = 0.0
+                    r = 0.0
             else:
                 r = 0.0
             memo[name] = r
@@ -195,6 +229,10 @@ class AnalogSim:
         out = {}
         for o, node in self.spec.get("out_map", {}).items():
             out[o] = val(node)
+        for nm in nodes:                    # dam bao MOI node deu co gia tri (cho xem so do noi bo)
+            if nm not in memo:
+                val(nm)
+        self.last_memo = memo               # snapshot gia tri tung node trong buoc nay
         return out
 
 

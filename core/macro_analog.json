@@ -1,4 +1,199 @@
 {
+ "410D": {
+  "name": "HIL2-D",
+  "desc": "High Limiter (HL input with comparison output). Y=min(X,HL); D=1 khi X>=HL (dang bi kep).",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Gia tri can gioi han"
+   },
+   "HL": {
+    "init": 0,
+    "desc": "Nguong gioi han tren (input thuc)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "CLAMP",
+    "in": [
+     "X"
+    ],
+    "hi": "HL"
+   },
+   "d": {
+    "op": "GT",
+    "in": [
+     "X",
+     "HL"
+    ]
+   }
+  },
+  "outputs": [
+   "Y",
+   "D"
+  ],
+  "out_map": {
+   "Y": "y",
+   "D": "d"
+  }
+ },
+ "410F": {
+  "name": "LOL2-D",
+  "desc": "Low Limiter (LL input with comparison output). Y=max(X,LL); D=1 khi X<=LL (dang bi kep).",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Gia tri can gioi han"
+   },
+   "LL": {
+    "init": 0,
+    "desc": "Nguong gioi han duoi (input thuc)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "CLAMP",
+    "in": [
+     "X"
+    ],
+    "lo": "LL"
+   },
+   "d": {
+    "op": "GT",
+    "in": [
+     "LL",
+     "X"
+    ]
+   }
+  },
+  "outputs": [
+   "Y",
+   "D"
+  ],
+  "out_map": {
+   "Y": "y",
+   "D": "d"
+  }
+ },
+ "0058": {
+  "name": "ASW",
+  "desc": "ASW - Analog Switch (obs). SW=1 -> Y=X1; SW=0 -> Y=X2 (giong ho T-Transfer 4048H-404DH).",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input value 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input value 2"
+   },
+   "SW": {
+    "init": 1,
+    "bool": true,
+    "desc": "Selector: 1=chon X1, 0=chon X2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SELECT",
+    "sel": "SW",
+    "a": "X1",
+    "b": "X2"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "210F": {
+  "name": "FUL2",
+  "desc": "Upper Limiter2 - External parameter (for HCNT). Y=min(X,L); D=1 khi X>=L (dang bi kep).",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Gia tri can gioi han"
+   },
+   "L": {
+    "init": 0,
+    "desc": "Nguong gioi han tren (tu ben ngoai)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "CLAMP",
+    "in": [
+     "X"
+    ],
+    "hi": "L"
+   },
+   "d": {
+    "op": "GT",
+    "in": [
+     "X",
+     "L"
+    ]
+   }
+  },
+  "outputs": [
+   "Y",
+   "D"
+  ],
+  "out_map": {
+   "Y": "y",
+   "D": "d"
+  }
+ },
+ "2110": {
+  "name": "FLL2",
+  "desc": "Lower Limiter2 - External parameter (for HCNT). Y=max(X,L); D=1 khi X<=L (dang bi kep).",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Gia tri can gioi han"
+   },
+   "L": {
+    "init": 0,
+    "desc": "Nguong gioi han duoi (tu ben ngoai)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "CLAMP",
+    "in": [
+     "X"
+    ],
+    "lo": "L"
+   },
+   "d": {
+    "op": "GT",
+    "in": [
+     "L",
+     "X"
+    ]
+   }
+  },
+  "outputs": [
+   "Y",
+   "D"
+  ],
+  "out_map": {
+   "Y": "y",
+   "D": "d"
+  }
+ },
  "100D": {
   "name": "PID",
   "desc": "PID Control",
@@ -62,48 +257,46 @@
  },
  "820E": {
   "name": "MV",
-  "desc": "MV Station (tram dau ra MV, gioi han toc do + HL/LL)",
+  "desc": "MV Station (AA205), P.118-120. Khong co POS -> khong co chuoi MV ERR (khong xuat MV ERR). Cau truc con lai giong 820D. [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Auto": {
     "init": 1,
-    "bool": true,
-    "desc": "1=Auto (theo lenh MV vao)"
+    "bool": true
    },
    "Manual": {
     "init": 0,
     "bool": true
    },
-   "MV": {
+   "DLT MV": {
     "init": 0,
-    "desc": "Lenh MV tu ngoai (che do Auto)"
-   },
-   "INC": {
-    "init": 0,
-    "bool": true,
-    "desc": "Tang (che do Manual)"
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true,
-    "desc": "Giam (che do Manual)"
+    "desc": "Delta MV tay"
    },
    "OR-R-MV": {
     "init": 0,
-    "bool": true,
-    "desc": "Yeu cau cuong buc"
+    "bool": true
    },
    "OR-MV": {
-    "init": 0,
-    "desc": "Gia tri cuong buc"
+    "init": 0
    },
    "HL-MV": {
-    "init": 100,
-    "desc": "Gioi han tren"
+    "init": 0
    },
    "LL-MV": {
+    "init": 0
+   },
+   "MV": {
     "init": 0,
-    "desc": "Gioi han duoi"
+    "desc": "Lenh MV (Auto)"
+   },
+   "REF1": {
+    "init": 0
+   },
+   "REF2": {
+    "init": 0
+   },
+   "REF3": {
+    "init": 0
    },
    "CTL-ABN": {
     "init": 0,
@@ -116,54 +309,73 @@
   },
   "params": {
    "MSR": {
-    "val": 8.0,
-    "desc": "Toc do doi MV (don vi/s)"
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung duoc qua day - chi nut vat ly)"
    },
-   "MMR": {
-    "val": 10.0,
-    "desc": "Toc do INC/DEC tay (don vi/s)"
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung duoc qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change - thoi gian chuyen slow->fast tren panel (khong dung qua day)"
+   },
+   "ULD": {
+    "val": 100.0,
+    "desc": "Upper Limit of Delta MV - kep tren cho DLT MV"
+   },
+   "LLD": {
+    "val": -100.0,
+    "desc": "Lower Limit of Delta MV - kep duoi cho DLT MV"
    }
   },
+  "param_pos": {
+   "7": "MSR",
+   "8": "MFR",
+   "9": "TRC",
+   "10": "ULD",
+   "11": "LLD"
+  },
   "nodes": {
-   "incdec": {
-    "op": "SUB",
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "dltClamped": {
+    "op": "CLAMP",
     "in": [
-     "INC",
-     "DEC"
-    ]
+     "DLT MV"
+    ],
+    "hi": "ULD",
+    "lo": "LLD"
    },
    "manVal": {
     "op": "INTEG",
     "in": [
-     "incdec"
+     "dltClamped"
     ],
-    "ki": "MMR",
+    "ki": 1.0,
     "hi": "HL-MV",
     "lo": "LL-MV"
    },
    "autoSel": {
     "op": "SELECT",
-    "sel": "Auto",
+    "sel": "autoLatch",
     "a": "MV",
     "b": "manVal"
    },
    "ovrSel": {
     "op": "SELECT",
-    "sel": "OR-R-MV",
+    "sel": "mvOvrLatch",
     "a": "OR-MV",
     "b": "autoSel"
    },
-   "limited": {
-    "op": "RATELIM",
-    "in": [
-     "ovrSel"
-    ],
-    "rate": "MSR"
-   },
-   "clamped": {
+   "mv": {
     "op": "CLAMP",
     "in": [
-     "limited"
+     "ovrSel"
     ],
     "hi": "HL-MV",
     "lo": "LL-MV"
@@ -171,25 +383,43 @@
    "abn": {
     "op": "OR",
     "in": [
-     "CTL-ABN",
-     "DRV-ABN"
+     "ctlAbnLatch",
+     "drvAbnLatch"
     ]
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV",
+    "r": "0",
+    "init": 0
    }
   },
   "outputs": [
-   "MV",
    "Auto",
+   "MV",
    "ABN"
   ],
   "out_map": {
-   "MV": "clamped",
-   "Auto": "Auto",
+   "Auto": "autoLatch",
+   "MV": "mv",
    "ABN": "abn"
   }
  },
  "820C": {
   "name": "SV",
-  "desc": "SV Station (tram setpoint, gioi han toc do + HL/LL)",
+  "desc": "SV Station (AA203). Doc tu manual 6F6S0281 P.84-86. SV tay (khong co chan day) la thanh ghi luu (svHeld), chinh qua hop cai dat. Gioi han toc do dung RLSV (khong phai SSR/SFR - do la toc do nut vat ly). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Auto": {
@@ -201,16 +431,8 @@
     "bool": true
    },
    "Auto SV": {
-    "init": 50,
-    "desc": "Setpoint tu ngoai (che do Auto)"
-   },
-   "INC": {
     "init": 0,
-    "bool": true
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true
+    "desc": "Setpoint tu ngoai (Auto)"
    },
    "OR-R-SV": {
     "init": 0,
@@ -221,78 +443,98 @@
     "desc": "SV cuong buc"
    },
    "HL-SV": {
-    "init": 100,
-    "desc": "Gioi han tren"
+    "init": 0
    },
    "LL-SV": {
+    "init": 0
+   },
+   "PV": {
     "init": 0,
-    "desc": "Gioi han duoi"
+    "desc": "Do luong (chi hien thi)"
    }
   },
   "params": {
-   "SSR": {
-    "val": 6.0,
-    "desc": "Toc do doi SV (don vi/s)"
+   "ISV": {
+    "val": 0.0,
+    "desc": "Initial SV - gia tri SV tay ban dau (khi chua tung dat)"
    },
-   "SMR": {
-    "val": 8.0,
-    "desc": "Toc do INC/DEC tay (don vi/s)"
+   "RLSV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of SV - gioi han toc do doi SV thuc te"
+   },
+   "SSR": {
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung qua day)"
+   },
+   "SFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung qua day)"
    }
   },
+  "param_pos": {
+   "9": "RLSV",
+   "10": "SSR",
+   "11": "SFR",
+   "7": "ISV"
+  },
   "nodes": {
-   "incdec": {
-    "op": "SUB",
-    "in": [
-     "INC",
-     "DEC"
-    ]
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
    },
-   "manVal": {
+   "svHeld": {
     "op": "INTEG",
     "in": [
-     "incdec"
+     "0"
     ],
-    "ki": "SMR",
     "hi": "HL-SV",
     "lo": "LL-SV",
-    "init": 50
+    "init": "ISV"
    },
-   "autoSel": {
+   "svAutoSel": {
     "op": "SELECT",
-    "sel": "Auto",
+    "sel": "autoLatch",
     "a": "Auto SV",
-    "b": "manVal"
+    "b": "svHeld"
    },
-   "ovrSel": {
+   "svOvr": {
     "op": "SELECT",
-    "sel": "OR-R-SV",
+    "sel": "svOvrLatch",
     "a": "OR-SV",
-    "b": "autoSel"
+    "b": "svAutoSel"
    },
-   "limited": {
+   "svLim": {
     "op": "RATELIM",
     "in": [
-     "ovrSel"
+     "svOvr"
     ],
-    "rate": "SSR",
+    "rate": "RLSV",
     "init": 50
    },
-   "clamped": {
+   "sv": {
     "op": "CLAMP",
     "in": [
-     "limited"
+     "svLim"
     ],
     "hi": "HL-SV",
     "lo": "LL-SV"
+   },
+   "svOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-SV",
+    "r": "0",
+    "init": 0
    }
   },
   "outputs": [
-   "SV",
-   "Auto"
+   "Auto",
+   "SV"
   ],
   "out_map": {
-   "SV": "clamped",
-   "Auto": "Auto"
+   "Auto": "autoLatch",
+   "SV": "sv"
   }
  },
  "406C": {
@@ -420,7 +662,7 @@
     "desc": "Gia tri track (khi SW=1)"
    },
    "HL": {
-    "init": 100,
+    "init": 0,
     "desc": "Gioi han tren"
    },
    "LL": {
@@ -473,7 +715,7 @@
     "desc": "Gia tri track (khi SW=1)"
    },
    "HL": {
-    "init": 100,
+    "init": 0,
     "desc": "Gioi han tren"
    },
    "LL": {
@@ -554,11 +796,11 @@
     "desc": "Dau vao"
    },
    "Tle": {
-    "init": 2.0,
+    "init": 0,
     "desc": "Hang so LEAD (s)"
    },
    "Tla": {
-    "init": 5.0,
+    "init": 0,
     "desc": "Hang so LAG (s)"
    }
   },
@@ -676,11 +918,11 @@
     "desc": "Dau vao"
    },
    "Tle": {
-    "init": 2.0,
+    "init": 0,
     "desc": "Hang so LEAD (s)"
    },
    "Tla": {
-    "init": 5.0,
+    "init": 0,
     "desc": "Hang so LAG (s)"
    },
    "SW": {
@@ -718,11 +960,11 @@
     "desc": "Dau vao"
    },
    "Tle": {
-    "init": 2.0,
+    "init": 0,
     "desc": "Hang so LEAD (s)"
    },
    "Tla": {
-    "init": 5.0,
+    "init": 0,
     "desc": "Hang so LAG (s)"
    },
    "SW": {
@@ -752,7 +994,7 @@
  },
  "820D": {
   "name": "MV-POS",
-  "desc": "MV Station voi phan hoi vi tri POS",
+  "desc": "MV Station with POS (AA204). Doc chinh xac tu manual 6F6S0281 P.115-117: Auto/Manual la CHOT NHO (SR latch, khong phai chon theo muc); tay dung DLT MV kep ULD/LLD roi tich phan kep HL/LL-MV (KHONG co gioi han toc do lien tuc tren duong ra chinh - MSR/MFR chi la toc do nut Inc/Dec vat ly); MV ERR = so lech POS voi tham chieu (noi bo hoac ngoai theo SW) qua Z-1, gioi han RLMV, qua nguong DHL, phai dai du TDH giay moi bao. MV ERR da duoc CHAN theo POS-QTY (gia dinh POS-QTY=1 nghia la tin hieu phan hoi XAU/loi -> khong bao MV ERR khi do; neu du an dung chieu nguoc lai (1=tot), doi node 'posOK' tu NOT(POS-QTY) sang chinh POS-QTY). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Auto": {
@@ -763,17 +1005,9 @@
     "init": 0,
     "bool": true
    },
-   "MV": {
+   "DLT MV": {
     "init": 0,
-    "desc": "Lenh MV (Auto)"
-   },
-   "INC": {
-    "init": 0,
-    "bool": true
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true
+    "desc": "Delta MV: luong thay doi tay moi chu ky"
    },
    "OR-R-MV": {
     "init": 0,
@@ -784,12 +1018,30 @@
     "desc": "MV cuong buc"
    },
    "HL-MV": {
-    "init": 100,
-    "desc": "Gioi han tren"
+    "init": 0
    },
    "LL-MV": {
+    "init": 0
+   },
+   "MV": {
     "init": 0,
-    "desc": "Gioi han duoi"
+    "desc": "Lenh MV tu ngoai (Auto)"
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi thuc"
+   },
+   "POS-QTY": {
+    "init": 0,
+    "desc": "Chat luong phan hoi (chi hien thi)"
+   },
+   "REF1": {
+    "init": 0,
+    "desc": "Tham chieu (chi hien thi)"
+   },
+   "REF2": {
+    "init": 0,
+    "desc": "Tham chieu (chi hien thi)"
    },
    "CTL-ABN": {
     "init": 0,
@@ -798,79 +1050,189 @@
    "DRV-ABN": {
     "init": 0,
     "bool": true
-   },
-   "POS": {
-    "init": 0,
-    "desc": "Vi tri phan hoi thuc"
    }
   },
   "params": {
    "MSR": {
-    "val": 8.0,
-    "desc": "Toc do doi MV"
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung duoc qua day - chi nut vat ly)"
    },
-   "MMR": {
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung duoc qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change - thoi gian chuyen slow->fast tren panel (khong dung qua day)"
+   },
+   "ULD": {
+    "val": 100.0,
+    "desc": "Upper Limit of Delta MV - kep tren cho DLT MV"
+   },
+   "LLD": {
+    "val": -100.0,
+    "desc": "Lower Limit of Delta MV - kep duoi cho DLT MV"
+   },
+   "Z": {
+    "val": 1.0,
+    "desc": "Sampling Delay of MV (so chu ky tre, Z^-1). Engine dung dung 1 buoc tre co dinh."
+   },
+   "RLMV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of MV - gioi han toc do cho tham chieu do lech MV ERR"
+   },
+   "DHL": {
+    "val": 5.0,
+    "desc": "Deviation High Limit of MV (%) - nguong lech de bao MV ERR"
+   },
+   "TDH": {
     "val": 10.0,
-    "desc": "Toc do INC/DEC"
+    "desc": "Time to Deviation High of MV (s) - phai lech qua DHL lien tuc bang nay giay moi bao MV ERR"
+   },
+   "SW": {
+    "val": 0,
+    "desc": "Internal/External MV Select: 0=dung MV noi bo lam tham chieu, 1=dung MV ngoai (chan vao MV)"
    }
   },
+  "param_pos": {
+   "7": "MSR",
+   "8": "MFR",
+   "9": "TRC",
+   "10": "ULD",
+   "11": "LLD",
+   "12": "Z",
+   "13": "RLMV",
+   "14": "DHL",
+   "15": "TDH",
+   "16": "SW"
+  },
   "nodes": {
-   "incdec": {
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "dltClamped": {
+    "op": "CLAMP",
     "in": [
-     "INC",
-     "DEC"
+     "DLT MV"
     ],
-    "op": "SUB"
+    "hi": "ULD",
+    "lo": "LLD"
    },
    "manVal": {
+    "op": "INTEG",
     "in": [
-     "incdec"
+     "dltClamped"
     ],
-    "ki": "MMR",
+    "ki": 1.0,
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "INTEG"
+    "lo": "LL-MV"
    },
    "autoSel": {
-    "sel": "Auto",
+    "op": "SELECT",
+    "sel": "autoLatch",
     "a": "MV",
-    "b": "manVal",
-    "op": "SELECT"
+    "b": "manVal"
    },
    "ovrSel": {
-    "sel": "OR-R-MV",
+    "op": "SELECT",
+    "sel": "mvOvrLatch",
     "a": "OR-MV",
-    "b": "autoSel",
-    "op": "SELECT"
+    "b": "autoSel"
    },
-   "limited": {
+   "mv": {
+    "op": "CLAMP",
     "in": [
      "ovrSel"
     ],
-    "rate": "MSR",
-    "op": "RATELIM"
-   },
-   "clamped": {
-    "in": [
-     "limited"
-    ],
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "CLAMP"
-   },
-   "MVERR": {
-    "in": [
-     "clamped",
-     "POS"
-    ],
-    "op": "SUB"
+    "lo": "LL-MV"
    },
    "abn": {
+    "op": "OR",
     "in": [
-     "CTL-ABN",
-     "DRV-ABN"
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "refSel": {
+    "op": "SELECT",
+    "sel": "SW",
+    "a": "MV",
+    "b": "mv"
+   },
+   "refDelay": {
+    "op": "DELAY",
+    "in": [
+     "refSel"
+    ]
+   },
+   "refRL": {
+    "op": "RATELIM",
+    "in": [
+     "refDelay"
     ],
-    "op": "OR"
+    "rate": "RLMV"
+   },
+   "dev": {
+    "op": "SUB",
+    "in": [
+     "POS",
+     "refRL"
+    ]
+   },
+   "devAbs": {
+    "op": "ABS",
+    "in": [
+     "dev"
+    ]
+   },
+   "overDHL": {
+    "op": "GT",
+    "in": [
+     "devAbs",
+     "DHL"
+    ]
+   },
+   "MVERR": {
+    "op": "TON",
+    "in": [
+     "errGated"
+    ],
+    "t": "TDH"
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV",
+    "r": "0",
+    "init": 0
+   },
+   "posOK": {
+    "op": "NOT",
+    "in": [
+     "POS-QTY"
+    ]
+   },
+   "errGated": {
+    "op": "AND",
+    "in": [
+     "overDHL",
+     "posOK"
+    ]
    }
   },
   "outputs": [
@@ -880,15 +1242,15 @@
    "ABN"
   ],
   "out_map": {
-   "Auto": "Auto",
-   "MV": "clamped",
+   "Auto": "autoLatch",
+   "MV": "mv",
    "MV ERR": "MVERR",
    "ABN": "abn"
   }
  },
  "8210": {
   "name": "MV-FF",
-  "desc": "MV Station voi Feed Forward",
+  "desc": "MV Station with FF (AA207), P.124-126. Nhu 820F nhung khong co POS -> khong MV ERR. [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Auto": {
@@ -899,45 +1261,9 @@
     "init": 0,
     "bool": true
    },
-   "MV": {
+   "DLT MV": {
     "init": 0,
-    "desc": "Lenh MV (Auto)"
-   },
-   "INC": {
-    "init": 0,
-    "bool": true
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true
-   },
-   "OR-R-MV": {
-    "init": 0,
-    "bool": true
-   },
-   "OR-MV": {
-    "init": 0,
-    "desc": "MV cuong buc"
-   },
-   "HL-MV": {
-    "init": 100,
-    "desc": "Gioi han tren"
-   },
-   "LL-MV": {
-    "init": 0,
-    "desc": "Gioi han duoi"
-   },
-   "CTL-ABN": {
-    "init": 0,
-    "bool": true
-   },
-   "DRV-ABN": {
-    "init": 0,
-    "bool": true
-   },
-   "FF": {
-    "init": 0,
-    "desc": "Tin hieu feed-forward"
+    "desc": "Delta MV tay"
    },
    "OR-R-MV1": {
     "init": 0,
@@ -945,144 +1271,202 @@
    },
    "OR-MV1": {
     "init": 0
-   }
-  },
-  "params": {
-   "MSR": {
-    "val": 8.0,
-    "desc": "Toc do doi MV"
    },
-   "MMR": {
-    "val": 10.0,
-    "desc": "Toc do INC/DEC"
-   }
-  },
-  "nodes": {
-   "incdec": {
-    "in": [
-     "INC",
-     "DEC"
-    ],
-    "op": "SUB"
-   },
-   "manVal": {
-    "in": [
-     "incdec"
-    ],
-    "ki": "MMR",
-    "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "INTEG"
-   },
-   "autoSel": {
-    "sel": "Auto",
-    "a": "ffsum",
-    "b": "manVal",
-    "op": "SELECT"
-   },
-   "ovrSel": {
-    "sel": "OR-R-MV1",
-    "a": "OR-MV1",
-    "b": "autoSel",
-    "op": "SELECT"
-   },
-   "limited": {
-    "in": [
-     "ovrSel"
-    ],
-    "rate": "MSR",
-    "op": "RATELIM"
-   },
-   "clamped": {
-    "in": [
-     "limited"
-    ],
-    "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "CLAMP"
-   },
-   "ffsum": {
-    "in": [
-     "MV",
-     "FF"
-    ],
-    "op": "SUM"
-   },
-   "abn": {
-    "in": [
-     "CTL-ABN",
-     "DRV-ABN"
-    ],
-    "op": "OR"
-   }
-  },
-  "outputs": [
-   "Auto",
-   "MV",
-   "ABN"
-  ],
-  "out_map": {
-   "Auto": "Auto",
-   "MV": "clamped",
-   "ABN": "abn"
-  }
- },
- "820F": {
-  "name": "MV-FF-POS",
-  "desc": "MV Station voi FF va POS",
-  "dt": 0.5,
-  "inputs": {
-   "Auto": {
-    "init": 1,
-    "bool": true
-   },
-   "Manual": {
+   "OR-R-MV2": {
     "init": 0,
     "bool": true
+   },
+   "OR-MV2": {
+    "init": 0
+   },
+   "Hold": {
+    "init": 0,
+    "bool": true,
+    "desc": "1 = giu nguyen bo tich phan tay (dung theo lenh Hold)"
+   },
+   "HL-MV": {
+    "init": 0
+   },
+   "LL-MV": {
+    "init": 0
    },
    "MV": {
     "init": 0,
     "desc": "Lenh MV (Auto)"
-   },
-   "INC": {
-    "init": 0,
-    "bool": true
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true
-   },
-   "OR-R-MV": {
-    "init": 0,
-    "bool": true
-   },
-   "OR-MV": {
-    "init": 0,
-    "desc": "MV cuong buc"
-   },
-   "HL-MV": {
-    "init": 100,
-    "desc": "Gioi han tren"
-   },
-   "LL-MV": {
-    "init": 0,
-    "desc": "Gioi han duoi"
-   },
-   "CTL-ABN": {
-    "init": 0,
-    "bool": true
-   },
-   "DRV-ABN": {
-    "init": 0,
-    "bool": true
    },
    "FF": {
     "init": 0,
     "desc": "Feed-forward"
    },
-   "POS": {
+   "CTL-ABN": {
     "init": 0,
-    "desc": "Vi tri phan hoi"
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "REF1": {
+    "init": 0
+   },
+   "REF2": {
+    "init": 0
+   },
+   "REF3": {
+    "init": 0
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung duoc qua day - chi nut vat ly)"
+   },
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung duoc qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change - thoi gian chuyen slow->fast tren panel (khong dung qua day)"
+   },
+   "ULD": {
+    "val": 100.0,
+    "desc": "Upper Limit of Delta MV - kep tren cho DLT MV"
+   },
+   "LLD": {
+    "val": -100.0,
+    "desc": "Lower Limit of Delta MV - kep duoi cho DLT MV"
+   }
+  },
+  "param_pos": {
+   "7": "MSR",
+   "8": "MFR",
+   "9": "TRC",
+   "10": "ULD",
+   "11": "LLD",
+   "12": "SW"
+  },
+  "nodes": {
+   "ffsum": {
+    "op": "SUM",
+    "in": [
+     "MV",
+     "FF"
+    ]
+   },
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "dltClamped": {
+    "op": "CLAMP",
+    "in": [
+     "DLT MV"
+    ],
+    "hi": "ULD",
+    "lo": "LLD"
+   },
+   "manVal": {
+    "op": "INTEG",
+    "in": [
+     "dltClamped"
+    ],
+    "ki": 1.0,
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "hold": "Hold"
+   },
+   "autoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
+    "a": "ffsum",
+    "b": "manVal"
+   },
+   "ovr2": {
+    "op": "SELECT",
+    "sel": "mvOvr2Latch",
+    "a": "OR-MV2",
+    "b": "autoSel"
+   },
+   "ovr1": {
+    "op": "SELECT",
+    "sel": "mvOvr1Latch",
+    "a": "OR-MV1",
+    "b": "ovr2"
+   },
+   "mv": {
+    "op": "CLAMP",
+    "in": [
+     "ovr1"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV"
+   },
+   "abn": {
+    "op": "OR",
+    "in": [
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr1Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV1",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr2Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV2",
+    "r": "0",
+    "init": 0
+   }
+  },
+  "outputs": [
+   "In F-OP1",
+   "In F-OP2",
+   "Auto",
+   "MV",
+   "ABN"
+  ],
+  "out_map": {
+   "In F-OP1": "mvOvr1Latch",
+   "In F-OP2": "mvOvr2Latch",
+   "Auto": "autoLatch",
+   "MV": "mv",
+   "ABN": "abn"
+  }
+ },
+ "820F": {
+  "name": "MV-FF-POS",
+  "desc": "MV Station with FF & POS (AA206), P.121-123. FF cong truc tiep vao MV truoc khi chon Auto (ffsum=MV+FF). Hold giu nguyen bo tich phan tay. Co chuoi MV ERR day du. MV ERR da duoc CHAN theo POS-QTY (gia dinh POS-QTY=1 nghia la tin hieu phan hoi XAU/loi -> khong bao MV ERR khi do; neu du an dung chieu nguoc lai (1=tot), doi node 'posOK' tu NOT(POS-QTY) sang chinh POS-QTY). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "DLT MV": {
+    "init": 0,
+    "desc": "Delta MV tay"
    },
    "OR-R-MV1": {
     "init": 0,
@@ -1090,181 +1474,359 @@
    },
    "OR-MV1": {
     "init": 0
+   },
+   "OR-R-MV2": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV2": {
+    "init": 0
+   },
+   "Hold": {
+    "init": 0,
+    "bool": true,
+    "desc": "1 = giu nguyen bo tich phan tay (dung theo lenh Hold)"
+   },
+   "HL-MV": {
+    "init": 0
+   },
+   "LL-MV": {
+    "init": 0
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV (Auto)"
+   },
+   "FF": {
+    "init": 0,
+    "desc": "Feed-forward"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi"
+   },
+   "POS-QTY": {
+    "init": 0,
+    "desc": "Chi hien thi"
+   },
+   "REF1": {
+    "init": 0
+   },
+   "REF2": {
+    "init": 0
    }
   },
   "params": {
    "MSR": {
-    "val": 8.0,
-    "desc": "Toc do doi MV"
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung duoc qua day - chi nut vat ly)"
    },
-   "MMR": {
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung duoc qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change - thoi gian chuyen slow->fast tren panel (khong dung qua day)"
+   },
+   "ULD": {
+    "val": 100.0,
+    "desc": "Upper Limit of Delta MV - kep tren cho DLT MV"
+   },
+   "LLD": {
+    "val": -100.0,
+    "desc": "Lower Limit of Delta MV - kep duoi cho DLT MV"
+   },
+   "Z": {
+    "val": 1.0,
+    "desc": "Sampling Delay of MV (so chu ky tre, Z^-1). Engine dung dung 1 buoc tre co dinh."
+   },
+   "RLMV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of MV - gioi han toc do cho tham chieu do lech MV ERR"
+   },
+   "DHL": {
+    "val": 5.0,
+    "desc": "Deviation High Limit of MV (%) - nguong lech de bao MV ERR"
+   },
+   "TDH": {
     "val": 10.0,
-    "desc": "Toc do INC/DEC"
+    "desc": "Time to Deviation High of MV (s) - phai lech qua DHL lien tuc bang nay giay moi bao MV ERR"
+   },
+   "SW": {
+    "val": 0,
+    "desc": "Internal/External MV Select: 0=dung MV noi bo lam tham chieu, 1=dung MV ngoai (chan vao MV)"
    }
   },
+  "param_pos": {
+   "7": "MSR",
+   "8": "MFR",
+   "9": "TRC",
+   "10": "ULD",
+   "11": "LLD",
+   "12": "Z",
+   "13": "RLMV",
+   "14": "DHL",
+   "15": "TDH",
+   "16": "SW"
+  },
   "nodes": {
-   "incdec": {
-    "in": [
-     "INC",
-     "DEC"
-    ],
-    "op": "SUB"
-   },
-   "manVal": {
-    "in": [
-     "incdec"
-    ],
-    "ki": "MMR",
-    "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "INTEG"
-   },
-   "autoSel": {
-    "sel": "Auto",
-    "a": "ffsum",
-    "b": "manVal",
-    "op": "SELECT"
-   },
-   "ovrSel": {
-    "sel": "OR-R-MV1",
-    "a": "OR-MV1",
-    "b": "autoSel",
-    "op": "SELECT"
-   },
-   "limited": {
-    "in": [
-     "ovrSel"
-    ],
-    "rate": "MSR",
-    "op": "RATELIM"
-   },
-   "clamped": {
-    "in": [
-     "limited"
-    ],
-    "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "CLAMP"
-   },
    "ffsum": {
+    "op": "SUM",
     "in": [
      "MV",
      "FF"
-    ],
-    "op": "SUM"
+    ]
    },
-   "MVERR": {
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "dltClamped": {
+    "op": "CLAMP",
     "in": [
-     "clamped",
-     "POS"
+     "DLT MV"
     ],
-    "op": "SUB"
+    "hi": "ULD",
+    "lo": "LLD"
+   },
+   "manVal": {
+    "op": "INTEG",
+    "in": [
+     "dltClamped"
+    ],
+    "ki": 1.0,
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "hold": "Hold"
+   },
+   "autoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
+    "a": "ffsum",
+    "b": "manVal"
+   },
+   "ovr2": {
+    "op": "SELECT",
+    "sel": "mvOvr2Latch",
+    "a": "OR-MV2",
+    "b": "autoSel"
+   },
+   "ovr1": {
+    "op": "SELECT",
+    "sel": "mvOvr1Latch",
+    "a": "OR-MV1",
+    "b": "ovr2"
+   },
+   "mv": {
+    "op": "CLAMP",
+    "in": [
+     "ovr1"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV"
    },
    "abn": {
+    "op": "OR",
     "in": [
-     "CTL-ABN",
-     "DRV-ABN"
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "refSel": {
+    "op": "SELECT",
+    "sel": "SW",
+    "a": "MV",
+    "b": "mv"
+   },
+   "refDelay": {
+    "op": "DELAY",
+    "in": [
+     "refSel"
+    ]
+   },
+   "refRL": {
+    "op": "RATELIM",
+    "in": [
+     "refDelay"
     ],
-    "op": "OR"
+    "rate": "RLMV"
+   },
+   "dev": {
+    "op": "SUB",
+    "in": [
+     "POS",
+     "refRL"
+    ]
+   },
+   "devAbs": {
+    "op": "ABS",
+    "in": [
+     "dev"
+    ]
+   },
+   "overDHL": {
+    "op": "GT",
+    "in": [
+     "devAbs",
+     "DHL"
+    ]
+   },
+   "MVERR": {
+    "op": "TON",
+    "in": [
+     "errGated"
+    ],
+    "t": "TDH"
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr1Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV1",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr2Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV2",
+    "r": "0",
+    "init": 0
+   },
+   "posOK": {
+    "op": "NOT",
+    "in": [
+     "POS-QTY"
+    ]
+   },
+   "errGated": {
+    "op": "AND",
+    "in": [
+     "overDHL",
+     "posOK"
+    ]
    }
   },
   "outputs": [
+   "In F-OP1",
+   "In F-OP2",
    "Auto",
    "MV",
    "MV ERR",
    "ABN"
   ],
   "out_map": {
-   "Auto": "Auto",
-   "MV": "clamped",
+   "In F-OP1": "mvOvr1Latch",
+   "In F-OP2": "mvOvr2Latch",
+   "Auto": "autoLatch",
+   "MV": "mv",
    "MV ERR": "MVERR",
    "ABN": "abn"
   }
  },
  "8211": {
   "name": "SV-BIAS",
-  "desc": "SV Station (dat Bias): SV = Auto SV + Bias",
+  "desc": "SV Station - Bias Set (AA208). Bias la thanh ghi luu (khong co chan day tang/giam - chi nut vat ly), Reset ve 0. Gioi han toc do dung RLSV (moi theo P.85-87). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
-   "Auto SV": {
-    "init": 50,
-    "desc": "Setpoint co so"
-   },
-   "INC": {
-    "init": 0,
-    "bool": true,
-    "desc": "Tang bias"
-   },
-   "DEC": {
-    "init": 0,
-    "bool": true,
-    "desc": "Giam bias"
-   },
    "Reset": {
     "init": 0,
     "bool": true,
     "desc": "Xoa bias ve 0"
    },
+   "Auto SV": {
+    "init": 0,
+    "desc": "Setpoint co so"
+   },
    "HL-Bias": {
-    "init": 20,
-    "desc": "Bias max"
+    "init": 0
    },
    "LL-Bias": {
-    "init": -20,
-    "desc": "Bias min"
+    "init": 0
    },
    "HL-SV": {
-    "init": 100,
-    "desc": "SV max"
+    "init": 0
    },
    "LL-SV": {
-    "init": 0,
-    "desc": "SV min"
+    "init": 0
    },
    "PV": {
     "init": 0,
-    "desc": "Do luong"
+    "desc": "Chi hien thi"
    }
   },
   "params": {
-   "BMR": {
-    "val": 5.0,
-    "desc": "Toc do INC/DEC bias"
+   "RLSV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of SV"
+   },
+   "BSR": {
+    "val": 0.1,
+    "desc": "OPS panel bias slow rate (khong dung qua day)"
+   },
+   "BFR": {
+    "val": 1.0,
+    "desc": "OPS panel bias fast rate (khong dung qua day)"
    }
   },
+  "param_pos": {
+   "5": "RLSV",
+   "6": "BSR",
+   "7": "BFR"
+  },
   "nodes": {
-   "incdec": {
-    "in": [
-     "INC",
-     "DEC"
-    ],
-    "op": "SUB"
-   },
    "bias": {
+    "op": "INTEG",
     "in": [
-     "incdec"
+     "0"
     ],
-    "ki": "BMR",
     "hi": "HL-Bias",
     "lo": "LL-Bias",
     "preset": "Reset",
     "preset_val": 0,
-    "op": "INTEG"
+    "init": 0
    },
    "svsum": {
+    "op": "SUM",
     "in": [
      "Auto SV",
      "bias"
-    ],
-    "op": "SUM"
+    ]
    },
-   "sv": {
+   "svLim": {
+    "op": "RATELIM",
     "in": [
      "svsum"
     ],
+    "rate": "RLSV"
+   },
+   "sv": {
+    "op": "CLAMP",
+    "in": [
+     "svLim"
+    ],
     "hi": "HL-SV",
-    "lo": "LL-SV",
-    "op": "CLAMP"
+    "lo": "LL-SV"
    }
   },
   "outputs": [
@@ -1278,7 +1840,7 @@
  },
  "820B": {
   "name": "SV/MV",
-  "desc": "SV/MV",
+  "desc": "SV & MV Station (AA202), P.105-107. Cascade la muc truc tiep (khong thay day Reset rieng nen khong chot). SV dung RLSV; MV dung DLT MV nhu 820E (khong POS -> khong MV ERR). REF chi hien thi. (Da sua: 820B KHONG co tham so ULD/LLD trong manual - DLT MV vao thang bo tich phan, khong kep truoc.) [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Cascade": {
@@ -1294,7 +1856,7 @@
     "bool": true
    },
    "Auto SV": {
-    "init": 50,
+    "init": 0,
     "desc": "SV ngoai"
    },
    "OR-R-SV": {
@@ -1305,18 +1867,18 @@
     "init": 0
    },
    "HL-SV": {
-    "init": 100
+    "init": 0
    },
    "LL-SV": {
     "init": 0
    },
    "PV": {
     "init": 0,
-    "desc": "Do luong"
+    "desc": "Chi hien thi"
    },
-   "MV": {
+   "DLT MV": {
     "init": 0,
-    "desc": "Lenh MV"
+    "desc": "Delta MV tay"
    },
    "OR-R-MV": {
     "init": 0,
@@ -1326,18 +1888,18 @@
     "init": 0
    },
    "HL-MV": {
-    "init": 100
+    "init": 0
    },
    "LL-MV": {
     "init": 0
    },
-   "INC": {
+   "MV": {
     "init": 0,
-    "bool": true
+    "desc": "Lenh MV"
    },
-   "DEC": {
+   "REF": {
     "init": 0,
-    "bool": true
+    "desc": "Chi hien thi"
    },
    "CTL-ABN": {
     "init": 0,
@@ -1349,119 +1911,161 @@
    }
   },
   "params": {
+   "ISV": {
+    "val": 0.0,
+    "desc": "Initial SV - gia tri SV tay ban dau (khi chua tung dat)"
+   },
+   "RLSV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of SV"
+   },
    "SSR": {
-    "val": 6.0,
-    "desc": "Toc do SV"
+    "val": 0.1,
+    "desc": "OPS panel SV slow rate (khong dung qua day)"
+   },
+   "SFR": {
+    "val": 1.0,
+    "desc": "OPS panel SV fast rate (khong dung qua day)"
    },
    "MSR": {
-    "val": 8.0,
-    "desc": "Toc do MV"
+    "val": 0.1,
+    "desc": "OPS panel MV slow rate (khong dung qua day)"
    },
-   "MMR": {
-    "val": 10.0,
-    "desc": "Toc do tay"
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel MV fast rate (khong dung qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change (khong dung qua day)"
    }
   },
+  "param_pos": {
+   "12": "RLSV",
+   "13": "SSR",
+   "14": "SFR",
+   "15": "MSR",
+   "16": "MFR",
+   "17": "TRC",
+   "10": "ISV"
+  },
   "nodes": {
-   "sv_manVal": {
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "svHeld": {
+    "op": "INTEG",
     "in": [
-     "sv_incdec"
+     "0"
     ],
-    "ki": "MMR",
     "hi": "HL-SV",
     "lo": "LL-SV",
-    "init": 50,
-    "op": "INTEG"
+    "init": "ISV"
    },
-   "sv_incdec": {
-    "in": [
-     "INC",
-     "DEC"
-    ],
-    "op": "SUB"
-   },
-   "sv_autoSel": {
-    "sel": "Auto",
+   "svAutoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
     "a": "Auto SV",
-    "b": "sv_manVal",
-    "op": "SELECT"
+    "b": "svHeld"
    },
-   "sv_ovr": {
-    "sel": "OR-R-SV",
+   "svOvr": {
+    "op": "SELECT",
+    "sel": "svOvrLatch",
     "a": "OR-SV",
-    "b": "sv_autoSel",
-    "op": "SELECT"
+    "b": "svAutoSel"
    },
-   "sv_lim": {
+   "svLim": {
+    "op": "RATELIM",
     "in": [
-     "sv_ovr"
+     "svOvr"
     ],
-    "rate": "SSR",
-    "init": 50,
-    "op": "RATELIM"
+    "rate": "RLSV",
+    "init": 50
    },
    "sv": {
+    "op": "CLAMP",
     "in": [
-     "sv_lim"
+     "svLim"
     ],
     "hi": "HL-SV",
-    "lo": "LL-SV",
-    "op": "CLAMP"
+    "lo": "LL-SV"
    },
-   "mv_manVal": {
+   "manVal": {
+    "op": "INTEG",
     "in": [
-     "sv_incdec"
+     "DLT MV"
     ],
-    "ki": "MMR",
+    "ki": 1.0,
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "INTEG"
+    "lo": "LL-MV"
    },
    "mv_autoSel": {
-    "sel": "Auto",
+    "op": "SELECT",
+    "sel": "autoLatch",
     "a": "MV",
-    "b": "mv_manVal",
-    "op": "SELECT"
+    "b": "manVal"
    },
    "mv_ovr": {
-    "sel": "OR-R-MV",
+    "op": "SELECT",
+    "sel": "mvOvrLatch",
     "a": "OR-MV",
-    "b": "mv_autoSel",
-    "op": "SELECT"
+    "b": "mv_autoSel"
    },
-   "mv_lim": {
+   "mv": {
+    "op": "CLAMP",
     "in": [
      "mv_ovr"
     ],
-    "rate": "MSR",
-    "op": "RATELIM"
-   },
-   "mv": {
-    "in": [
-     "mv_lim"
-    ],
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "CLAMP"
+    "lo": "LL-MV"
    },
    "abn": {
+    "op": "OR",
     "in": [
-     "CTL-ABN",
-     "DRV-ABN"
-    ],
-    "op": "OR"
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV",
+    "r": "0",
+    "init": 0
+   },
+   "svOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-SV",
+    "r": "0",
+    "init": 0
    }
   },
   "outputs": [
    "Cascade",
    "Auto",
+   "Manual",
    "SV",
    "MV",
    "ABN"
   ],
   "out_map": {
    "Cascade": "Cascade",
-   "Auto": "Auto",
+   "Auto": "autoLatch",
+   "Manual": "Manual",
    "SV": "sv",
    "MV": "mv",
    "ABN": "abn"
@@ -1469,7 +2073,7 @@
  },
  "820A": {
   "name": "SV/MV-POS",
-  "desc": "SV/MV-POS",
+  "desc": "SV & MV Station with POS (AA201), P.102-104. Nhu 820B nhung co POS -> co chuoi MV ERR day du (SW/Z/RLMV/DHL/TDH). (Da sua: 820A KHONG co tham so ULD/LLD trong manual - DLT MV vao thang bo tich phan, khong kep truoc.) MV ERR da duoc CHAN theo POS-QTY (gia dinh POS-QTY=1 nghia la tin hieu phan hoi XAU/loi -> khong bao MV ERR khi do; neu du an dung chieu nguoc lai (1=tot), doi node 'posOK' tu NOT(POS-QTY) sang chinh POS-QTY). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
   "dt": 0.5,
   "inputs": {
    "Cascade": {
@@ -1485,7 +2089,7 @@
     "bool": true
    },
    "Auto SV": {
-    "init": 50,
+    "init": 0,
     "desc": "SV ngoai"
    },
    "OR-R-SV": {
@@ -1496,18 +2100,18 @@
     "init": 0
    },
    "HL-SV": {
-    "init": 100
+    "init": 0
    },
    "LL-SV": {
     "init": 0
    },
    "PV": {
     "init": 0,
-    "desc": "Do luong"
+    "desc": "Chi hien thi"
    },
-   "MV": {
+   "DLT MV": {
     "init": 0,
-    "desc": "Lenh MV"
+    "desc": "Delta MV tay"
    },
    "OR-R-MV": {
     "init": 0,
@@ -1517,18 +2121,22 @@
     "init": 0
    },
    "HL-MV": {
-    "init": 100
+    "init": 0
    },
    "LL-MV": {
     "init": 0
    },
-   "INC": {
+   "MV": {
     "init": 0,
-    "bool": true
+    "desc": "Lenh MV"
    },
-   "DEC": {
+   "POS": {
     "init": 0,
-    "bool": true
+    "desc": "Vi tri phan hoi"
+   },
+   "POS-QTY": {
+    "init": 0,
+    "desc": "Chi hien thi"
    },
    "CTL-ABN": {
     "init": 0,
@@ -1537,126 +2145,240 @@
    "DRV-ABN": {
     "init": 0,
     "bool": true
-   },
-   "POS": {
-    "init": 0,
-    "desc": "Vi tri phan hoi"
    }
   },
   "params": {
+   "ISV": {
+    "val": 0.0,
+    "desc": "Initial SV - gia tri SV tay ban dau (khi chua tung dat)"
+   },
+   "RLSV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of SV"
+   },
    "SSR": {
-    "val": 6.0,
-    "desc": "Toc do SV"
+    "val": 0.1,
+    "desc": "(khong dung qua day)"
+   },
+   "SFR": {
+    "val": 1.0,
+    "desc": "(khong dung qua day)"
    },
    "MSR": {
-    "val": 8.0,
-    "desc": "Toc do MV"
+    "val": 0.1,
+    "desc": "(khong dung qua day)"
    },
-   "MMR": {
+   "MFR": {
+    "val": 1.0,
+    "desc": "(khong dung qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "(khong dung qua day)"
+   },
+   "Z": {
+    "val": 1,
+    "desc": "Sampling Delay of MV (1 chu ky)"
+   },
+   "RLMV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of MV (cho tham chieu MV ERR)"
+   },
+   "DHL": {
+    "val": 5.0,
+    "desc": "Deviation High Limit of MV (%)"
+   },
+   "TDH": {
     "val": 10.0,
-    "desc": "Toc do tay"
+    "desc": "Time to Deviation High of MV (s)"
+   },
+   "SW": {
+    "val": 0,
+    "desc": "0=noi bo,1=ngoai (tham chieu MV ERR)"
    }
   },
+  "param_pos": {
+   "12": "RLSV",
+   "13": "SSR",
+   "14": "SFR",
+   "15": "MSR",
+   "16": "MFR",
+   "17": "TRC",
+   "18": "Z",
+   "19": "RLMV",
+   "20": "DHL",
+   "21": "TDH",
+   "22": "SW",
+   "10": "ISV"
+  },
   "nodes": {
-   "sv_manVal": {
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "svHeld": {
+    "op": "INTEG",
     "in": [
-     "sv_incdec"
+     "0"
     ],
-    "ki": "MMR",
     "hi": "HL-SV",
     "lo": "LL-SV",
-    "init": 50,
-    "op": "INTEG"
+    "init": "ISV"
    },
-   "sv_incdec": {
-    "in": [
-     "INC",
-     "DEC"
-    ],
-    "op": "SUB"
-   },
-   "sv_autoSel": {
-    "sel": "Auto",
+   "svAutoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
     "a": "Auto SV",
-    "b": "sv_manVal",
-    "op": "SELECT"
+    "b": "svHeld"
    },
-   "sv_ovr": {
-    "sel": "OR-R-SV",
+   "svOvr": {
+    "op": "SELECT",
+    "sel": "svOvrLatch",
     "a": "OR-SV",
-    "b": "sv_autoSel",
-    "op": "SELECT"
+    "b": "svAutoSel"
    },
-   "sv_lim": {
+   "svLim": {
+    "op": "RATELIM",
     "in": [
-     "sv_ovr"
+     "svOvr"
     ],
-    "rate": "SSR",
-    "init": 50,
-    "op": "RATELIM"
+    "rate": "RLSV",
+    "init": 50
    },
    "sv": {
+    "op": "CLAMP",
     "in": [
-     "sv_lim"
+     "svLim"
     ],
     "hi": "HL-SV",
-    "lo": "LL-SV",
-    "op": "CLAMP"
+    "lo": "LL-SV"
    },
-   "mv_manVal": {
+   "manVal": {
+    "op": "INTEG",
     "in": [
-     "sv_incdec"
+     "DLT MV"
     ],
-    "ki": "MMR",
+    "ki": 1.0,
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "INTEG"
+    "lo": "LL-MV"
    },
    "mv_autoSel": {
-    "sel": "Auto",
+    "op": "SELECT",
+    "sel": "autoLatch",
     "a": "MV",
-    "b": "mv_manVal",
-    "op": "SELECT"
+    "b": "manVal"
    },
    "mv_ovr": {
-    "sel": "OR-R-MV",
+    "op": "SELECT",
+    "sel": "mvOvrLatch",
     "a": "OR-MV",
-    "b": "mv_autoSel",
-    "op": "SELECT"
+    "b": "mv_autoSel"
    },
-   "mv_lim": {
+   "mv": {
+    "op": "CLAMP",
     "in": [
      "mv_ovr"
     ],
-    "rate": "MSR",
-    "op": "RATELIM"
-   },
-   "mv": {
-    "in": [
-     "mv_lim"
-    ],
     "hi": "HL-MV",
-    "lo": "LL-MV",
-    "op": "CLAMP"
+    "lo": "LL-MV"
    },
    "abn": {
+    "op": "OR",
     "in": [
-     "CTL-ABN",
-     "DRV-ABN"
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "refSel": {
+    "op": "SELECT",
+    "sel": "SW",
+    "a": "MV",
+    "b": "mv"
+   },
+   "refDelay": {
+    "op": "DELAY",
+    "in": [
+     "refSel"
+    ]
+   },
+   "refRL": {
+    "op": "RATELIM",
+    "in": [
+     "refDelay"
     ],
-    "op": "OR"
+    "rate": "RLMV"
+   },
+   "dev": {
+    "op": "SUB",
+    "in": [
+     "POS",
+     "refRL"
+    ]
+   },
+   "devAbs": {
+    "op": "ABS",
+    "in": [
+     "dev"
+    ]
+   },
+   "overDHL": {
+    "op": "GT",
+    "in": [
+     "devAbs",
+     "DHL"
+    ]
    },
    "MVERR": {
+    "op": "TON",
     "in": [
-     "mv",
-     "POS"
+     "errGated"
     ],
-    "op": "SUB"
+    "t": "TDH"
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV",
+    "r": "0",
+    "init": 0
+   },
+   "svOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-SV",
+    "r": "0",
+    "init": 0
+   },
+   "posOK": {
+    "op": "NOT",
+    "in": [
+     "POS-QTY"
+    ]
+   },
+   "errGated": {
+    "op": "AND",
+    "in": [
+     "overDHL",
+     "posOK"
+    ]
    }
   },
   "outputs": [
    "Cascade",
    "Auto",
+   "Manual",
    "SV",
    "MV",
    "MV ERR",
@@ -1664,11 +2386,12 @@
   ],
   "out_map": {
    "Cascade": "Cascade",
-   "Auto": "Auto",
+   "Auto": "autoLatch",
+   "Manual": "Manual",
    "SV": "sv",
    "MV": "mv",
-   "ABN": "abn",
-   "MV ERR": "MVERR"
+   "MV ERR": "MVERR",
+   "ABN": "abn"
   }
  },
  "4070": {
@@ -1834,11 +2557,11 @@
     "desc": "Dau vao"
    },
    "HL": {
-    "init": 100,
+    "init": 0,
     "desc": "Gioi han tren"
    },
    "LL": {
-    "init": -100,
+    "init": 0,
     "desc": "Gioi han duoi"
    },
    "SW": {
@@ -1887,11 +2610,11 @@
     "desc": "Dau vao"
    },
    "HL": {
-    "init": 100,
+    "init": 0,
     "desc": "Gioi han tren"
    },
    "LL": {
-    "init": -100,
+    "init": 0,
     "desc": "Gioi han duoi"
    },
    "SW": {
@@ -1940,11 +2663,11 @@
     "desc": "Dau vao"
    },
    "HL": {
-    "init": 100,
+    "init": 0,
     "desc": "Gioi han tren"
    },
    "LL": {
-    "init": -100,
+    "init": 0,
     "desc": "Gioi han duoi"
    }
   },
@@ -1975,6 +2698,2769 @@
   ],
   "out_map": {
    "Y": "Y"
+  }
+ },
+ "8304": {
+  "name": "SV Station(Change Inhibit)",
+  "desc": "SV-CI (AA209?) = SV (820C) + INC-INH/DEC-INH. Cac chan INH chi khoa nut vat ly, KHONG anh huong gia tri SV tinh o day (theo manual P.150-152). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "Auto SV": {
+    "init": 0
+   },
+   "OR-R-SV": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-SV": {
+    "init": 0
+   },
+   "HL-SV": {
+    "init": 0
+   },
+   "LL-SV": {
+    "init": 0
+   },
+   "INC-INH": {
+    "init": 0,
+    "bool": true,
+    "desc": "Khoa tang tren tram vat ly (khong anh huong o day)"
+   },
+   "DEC-INH": {
+    "init": 0,
+    "bool": true,
+    "desc": "Khoa giam tren tram vat ly (khong anh huong o day)"
+   },
+   "PV": {
+    "init": 0,
+    "desc": "Chi hien thi"
+   }
+  },
+  "params": {
+   "ISV": {
+    "val": 0.0,
+    "desc": "Initial SV - gia tri SV tay ban dau (khi chua tung dat)"
+   },
+   "RLSV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of SV"
+   },
+   "SSR": {
+    "val": 0.1,
+    "desc": "OPS panel slow rate (khong dung qua day)"
+   },
+   "SFR": {
+    "val": 1.0,
+    "desc": "OPS panel fast rate (khong dung qua day)"
+   }
+  },
+  "param_pos": {
+   "9": "RLSV",
+   "10": "SSR",
+   "11": "SFR",
+   "7": "ISV"
+  },
+  "nodes": {
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "svHeld": {
+    "op": "INTEG",
+    "in": [
+     "0"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV",
+    "init": "ISV"
+   },
+   "svAutoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
+    "a": "Auto SV",
+    "b": "svHeld"
+   },
+   "svOvr": {
+    "op": "SELECT",
+    "sel": "svOvrLatch",
+    "a": "OR-SV",
+    "b": "svAutoSel"
+   },
+   "svLim": {
+    "op": "RATELIM",
+    "in": [
+     "svOvr"
+    ],
+    "rate": "RLSV",
+    "init": 50
+   },
+   "sv": {
+    "op": "CLAMP",
+    "in": [
+     "svLim"
+    ],
+    "hi": "HL-SV",
+    "lo": "LL-SV"
+   },
+   "svOvrLatch": {
+    "op": "SRLATCH",
+    "s": "OR-R-SV",
+    "r": "0",
+    "init": 0
+   }
+  },
+  "outputs": [
+   "Auto",
+   "SV"
+  ],
+  "out_map": {
+   "Auto": "autoLatch",
+   "SV": "sv"
+  }
+ },
+ "8305": {
+  "name": "MV-FF-POS(Change Inhibit)",
+  "desc": "MV-FF-POS-CI (TagType92), P.153+. = 820F + INC-INH/DEC-INH (chi khoa nut vat ly, khong anh huong tinh toan o day). Param position gia dinh giong 820F (chua thay bang so thu tu rieng trong manual, cau truc/chan giong het 820F). MV ERR da duoc CHAN theo POS-QTY (gia dinh POS-QTY=1 nghia la tin hieu phan hoi XAU/loi -> khong bao MV ERR khi do; neu du an dung chieu nguoc lai (1=tot), doi node 'posOK' tu NOT(POS-QTY) sang chinh POS-QTY). [Da them: ABN chot tung chan, cuong buc chot theo yeu cau nguoi dung xac nhan.]",
+  "dt": 0.5,
+  "inputs": {
+   "Auto": {
+    "init": 1,
+    "bool": true
+   },
+   "Manual": {
+    "init": 0,
+    "bool": true
+   },
+   "DLT MV": {
+    "init": 0,
+    "desc": "Delta MV tay"
+   },
+   "OR-R-MV1": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV1": {
+    "init": 0
+   },
+   "OR-R-MV2": {
+    "init": 0,
+    "bool": true
+   },
+   "OR-MV2": {
+    "init": 0
+   },
+   "Hold": {
+    "init": 0,
+    "bool": true,
+    "desc": "1 = giu nguyen bo tich phan tay (dung theo lenh Hold)"
+   },
+   "HL-MV": {
+    "init": 0
+   },
+   "LL-MV": {
+    "init": 0
+   },
+   "MV": {
+    "init": 0,
+    "desc": "Lenh MV (Auto)"
+   },
+   "FF": {
+    "init": 0,
+    "desc": "Feed-forward"
+   },
+   "CTL-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "DRV-ABN": {
+    "init": 0,
+    "bool": true
+   },
+   "POS": {
+    "init": 0,
+    "desc": "Vi tri phan hoi"
+   },
+   "POS-QTY": {
+    "init": 0,
+    "desc": "Chi hien thi"
+   },
+   "REF1": {
+    "init": 0
+   },
+   "REF2": {
+    "init": 0
+   },
+   "INC-INH": {
+    "init": 0,
+    "bool": true,
+    "desc": "Khoa tang tren tram vat ly (khong anh huong o day)"
+   },
+   "DEC-INH": {
+    "init": 0,
+    "bool": true,
+    "desc": "Khoa giam tren tram vat ly (khong anh huong o day)"
+   }
+  },
+  "params": {
+   "MSR": {
+    "val": 0.1,
+    "desc": "OPS panel Inc/Dec slow rate (khong dung duoc qua day - chi nut vat ly)"
+   },
+   "MFR": {
+    "val": 1.0,
+    "desc": "OPS panel Inc/Dec fast rate (khong dung duoc qua day)"
+   },
+   "TRC": {
+    "val": 3.0,
+    "desc": "Time to Rating Change - thoi gian chuyen slow->fast tren panel (khong dung qua day)"
+   },
+   "ULD": {
+    "val": 100.0,
+    "desc": "Upper Limit of Delta MV - kep tren cho DLT MV"
+   },
+   "LLD": {
+    "val": -100.0,
+    "desc": "Lower Limit of Delta MV - kep duoi cho DLT MV"
+   },
+   "Z": {
+    "val": 1.0,
+    "desc": "Sampling Delay of MV (so chu ky tre, Z^-1). Engine dung dung 1 buoc tre co dinh."
+   },
+   "RLMV": {
+    "val": 99999999.0,
+    "desc": "Rate Limiter of MV - gioi han toc do cho tham chieu do lech MV ERR"
+   },
+   "DHL": {
+    "val": 5.0,
+    "desc": "Deviation High Limit of MV (%) - nguong lech de bao MV ERR"
+   },
+   "TDH": {
+    "val": 10.0,
+    "desc": "Time to Deviation High of MV (s) - phai lech qua DHL lien tuc bang nay giay moi bao MV ERR"
+   },
+   "SW": {
+    "val": 0,
+    "desc": "Internal/External MV Select: 0=dung MV noi bo lam tham chieu, 1=dung MV ngoai (chan vao MV)"
+   }
+  },
+  "param_pos": {
+   "7": "MSR",
+   "8": "MFR",
+   "9": "TRC",
+   "10": "ULD",
+   "11": "LLD",
+   "12": "Z",
+   "13": "RLMV",
+   "14": "DHL",
+   "15": "TDH",
+   "16": "SW"
+  },
+  "nodes": {
+   "ffsum": {
+    "op": "SUM",
+    "in": [
+     "MV",
+     "FF"
+    ]
+   },
+   "autoLatch": {
+    "op": "SRLATCH",
+    "s": "Auto",
+    "r": "Manual",
+    "init": 1
+   },
+   "dltClamped": {
+    "op": "CLAMP",
+    "in": [
+     "DLT MV"
+    ],
+    "hi": "ULD",
+    "lo": "LLD"
+   },
+   "manVal": {
+    "op": "INTEG",
+    "in": [
+     "dltClamped"
+    ],
+    "ki": 1.0,
+    "hi": "HL-MV",
+    "lo": "LL-MV",
+    "hold": "Hold"
+   },
+   "autoSel": {
+    "op": "SELECT",
+    "sel": "autoLatch",
+    "a": "ffsum",
+    "b": "manVal"
+   },
+   "ovr2": {
+    "op": "SELECT",
+    "sel": "mvOvr2Latch",
+    "a": "OR-MV2",
+    "b": "autoSel"
+   },
+   "ovr1": {
+    "op": "SELECT",
+    "sel": "mvOvr1Latch",
+    "a": "OR-MV1",
+    "b": "ovr2"
+   },
+   "mv": {
+    "op": "CLAMP",
+    "in": [
+     "ovr1"
+    ],
+    "hi": "HL-MV",
+    "lo": "LL-MV"
+   },
+   "abn": {
+    "op": "OR",
+    "in": [
+     "ctlAbnLatch",
+     "drvAbnLatch"
+    ]
+   },
+   "refSel": {
+    "op": "SELECT",
+    "sel": "SW",
+    "a": "MV",
+    "b": "mv"
+   },
+   "refDelay": {
+    "op": "DELAY",
+    "in": [
+     "refSel"
+    ]
+   },
+   "refRL": {
+    "op": "RATELIM",
+    "in": [
+     "refDelay"
+    ],
+    "rate": "RLMV"
+   },
+   "dev": {
+    "op": "SUB",
+    "in": [
+     "POS",
+     "refRL"
+    ]
+   },
+   "devAbs": {
+    "op": "ABS",
+    "in": [
+     "dev"
+    ]
+   },
+   "overDHL": {
+    "op": "GT",
+    "in": [
+     "devAbs",
+     "DHL"
+    ]
+   },
+   "MVERR": {
+    "op": "TON",
+    "in": [
+     "errGated"
+    ],
+    "t": "TDH"
+   },
+   "ctlAbnLatch": {
+    "op": "SRLATCH",
+    "s": "CTL-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "drvAbnLatch": {
+    "op": "SRLATCH",
+    "s": "DRV-ABN",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr1Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV1",
+    "r": "0",
+    "init": 0
+   },
+   "mvOvr2Latch": {
+    "op": "SRLATCH",
+    "s": "OR-R-MV2",
+    "r": "0",
+    "init": 0
+   },
+   "posOK": {
+    "op": "NOT",
+    "in": [
+     "POS-QTY"
+    ]
+   },
+   "errGated": {
+    "op": "AND",
+    "in": [
+     "overDHL",
+     "posOK"
+    ]
+   }
+  },
+  "outputs": [
+   "In F-OP1",
+   "In F-OP2",
+   "Auto",
+   "MV",
+   "MV ERR",
+   "ABN"
+  ],
+  "out_map": {
+   "In F-OP1": "mvOvr1Latch",
+   "In F-OP2": "mvOvr2Latch",
+   "Auto": "autoLatch",
+   "MV": "mv",
+   "MV ERR": "MVERR",
+   "ABN": "abn"
+  }
+ },
+ "0042": {
+  "name": "ADD",
+  "desc": "+ - Addition (obs). Y=X1+X2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "0044": {
+  "name": "SUM+-",
+  "desc": "*+ - Addition and Subtraction (obs). Y=K1*X1+K2*X2 (dat K=-1 de tru). Y nghia 2 tham so suy luan tu ten macro, chua co tai lieu xac nhan.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "K1": {
+    "val": 1.0,
+    "desc": "He so cho X1 (+1 cong, -1 tru)"
+   },
+   "K2": {
+    "val": 1.0,
+    "desc": "He so cho X2 (+1 cong, -1 tru)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "K1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "K2"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401A": {
+  "name": "SUM1",
+  "desc": "SUM1 - Summing (2 input). Y=X1+X2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401B": {
+  "name": "SUM2",
+  "desc": "SUM2 - Summing (2 input). Y=X1+X2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401C": {
+  "name": "SUM3",
+  "desc": "SUM3 - Summing (2 input). Y=X1+X2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401D": {
+  "name": "AVE1",
+  "desc": "AVE1 - Averaging (2 input). Y=(X1+X2)/2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "s": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   },
+   "y": {
+    "op": "GAIN",
+    "in": [
+     "s"
+    ],
+    "k": 0.5
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401E": {
+  "name": "AVE2",
+  "desc": "AVE2 - Averaging (2 input). Y=(X1+X2)/2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "s": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   },
+   "y": {
+    "op": "GAIN",
+    "in": [
+     "s"
+    ],
+    "k": 0.5
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "401F": {
+  "name": "AVE3",
+  "desc": "AVE3 - Averaging (2 input). Y=(X1+X2)/2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "s": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   },
+   "y": {
+    "op": "GAIN",
+    "in": [
+     "s"
+    ],
+    "k": 0.5
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4020": {
+  "name": "AVE4",
+  "desc": "AVE4 - Averaging (3 input). Y=(X1+X2+X3)/3.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "s": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "X3"
+    ]
+   },
+   "y": {
+    "op": "GAIN",
+    "in": [
+     "s"
+    ],
+    "k": 0.3333333333333333
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4021": {
+  "name": "DIF1",
+  "desc": "DIF1 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4022": {
+  "name": "DIF2",
+  "desc": "DIF2 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4023": {
+  "name": "DIF3",
+  "desc": "DIF3 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4024": {
+  "name": "DIF4",
+  "desc": "DIF4 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4025": {
+  "name": "DIF5",
+  "desc": "DIF5 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4026": {
+  "name": "DIF6",
+  "desc": "DIF6 - Difference. Y=Plus-Minus.",
+  "dt": 0.5,
+  "inputs": {
+   "Plus": {
+    "init": 0,
+    "desc": "So bi tru (+)"
+   },
+   "Minus": {
+    "init": 0,
+    "desc": "So tru (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUB",
+    "in": [
+     "Plus",
+     "Minus"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4030": {
+  "name": "SUMGAIN1",
+  "desc": "SUMGAIN1 - Summing with gain (2 input). Y=G1*X1+G2*X2+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so thu 3 (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4031": {
+  "name": "SUMGAIN2",
+  "desc": "SUMGAIN2 - Summing with gain (2 input). Y=G1*X1+G2*X2+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so thu 3 (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4032": {
+  "name": "SUMGAIN3",
+  "desc": "SUMGAIN3 - Summing with gain (2 input). Y=G1*X1+G2*X2+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so thu 3 (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "405F": {
+  "name": "D-SUM1",
+  "desc": "D-SUM1 - Digital summing with gain (2 input). Y=sum(Gi*Xi)+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4060": {
+  "name": "D-SUM2",
+  "desc": "D-SUM2 - Digital summing with gain (3 input). Y=sum(Gi*Xi)+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "G3": {
+    "val": 1.0,
+    "desc": "He so nhan cho X3"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": "G3"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "g3",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4061": {
+  "name": "D-SUM3",
+  "desc": "D-SUM3 - Digital summing with gain (4 input). Y=sum(Gi*Xi)+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "G3": {
+    "val": 1.0,
+    "desc": "He so nhan cho X3"
+   },
+   "G4": {
+    "val": 1.0,
+    "desc": "He so nhan cho X4"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": "G3"
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": "G4"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "g3",
+     "g4",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4062": {
+  "name": "D-SUM4",
+  "desc": "D-SUM4 - Digital summing with gain (5 input). Y=sum(Gi*Xi)+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "G3": {
+    "val": 1.0,
+    "desc": "He so nhan cho X3"
+   },
+   "G4": {
+    "val": 1.0,
+    "desc": "He so nhan cho X4"
+   },
+   "G5": {
+    "val": 1.0,
+    "desc": "He so nhan cho X5"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": "G3"
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": "G4"
+   },
+   "g5": {
+    "op": "GAIN",
+    "in": [
+     "X5"
+    ],
+    "k": "G5"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "g3",
+     "g4",
+     "g5",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4063": {
+  "name": "D-SUM5",
+  "desc": "D-SUM5 - Digital summing with gain (6 input). Y=sum(Gi*Xi)+Bias.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   }
+  },
+  "params": {
+   "G1": {
+    "val": 1.0,
+    "desc": "He so nhan cho X1"
+   },
+   "G2": {
+    "val": 1.0,
+    "desc": "He so nhan cho X2"
+   },
+   "G3": {
+    "val": 1.0,
+    "desc": "He so nhan cho X3"
+   },
+   "G4": {
+    "val": 1.0,
+    "desc": "He so nhan cho X4"
+   },
+   "G5": {
+    "val": 1.0,
+    "desc": "He so nhan cho X5"
+   },
+   "G6": {
+    "val": 1.0,
+    "desc": "He so nhan cho X6"
+   },
+   "Bias": {
+    "val": 0.0,
+    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
+   }
+  },
+  "nodes": {
+   "g1": {
+    "op": "GAIN",
+    "in": [
+     "X1"
+    ],
+    "k": "G1"
+   },
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": "G2"
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": "G3"
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": "G4"
+   },
+   "g5": {
+    "op": "GAIN",
+    "in": [
+     "X5"
+    ],
+    "k": "G5"
+   },
+   "g6": {
+    "op": "GAIN",
+    "in": [
+     "X6"
+    ],
+    "k": "G6"
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "g1",
+     "g2",
+     "g3",
+     "g4",
+     "g5",
+     "g6",
+     "Bias"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4107": {
+  "name": "SUM4-1",
+  "desc": "Summing(4in:++++) for HCNT. Y=X1+X2+X3+X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (+)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (+)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "X3",
+     "X4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4108": {
+  "name": "SUM4-2",
+  "desc": "Summing(4in:+++-) for HCNT. Y=X1+X2+X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (+)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "X3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "4109": {
+  "name": "SUM4-3",
+  "desc": "Summing(4in:++--) for HCNT. Y=X1+X2-X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (-)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": -1.0
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "g3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "410A": {
+  "name": "SUM4-4",
+  "desc": "Summing(4in:+---) for HCNT. Y=X1-X2-X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (-)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (-)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": -1.0
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": -1.0
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "g2",
+     "g3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "20FF": {
+  "name": "4ADD1",
+  "desc": "4 Adder(1) for HCNT. Y=X+X2+X3+X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (+)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (+)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "X3",
+     "X4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "2100": {
+  "name": "4ADD2",
+  "desc": "4 Adder(2) for HCNT. Y=X+X2+X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (+)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "X3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "2101": {
+  "name": "4ADD3",
+  "desc": "4 Adder(3) for HCNT. Y=X+X2-X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (+)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (-)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": -1.0
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2",
+     "g3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "2102": {
+  "name": "4ADD4",
+  "desc": "4 Adder(4) for HCNT. Y=X-X2-X3-X4.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1 (+)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2 (-)"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3 (-)"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4 (-)"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "g2": {
+    "op": "GAIN",
+    "in": [
+     "X2"
+    ],
+    "k": -1.0
+   },
+   "g3": {
+    "op": "GAIN",
+    "in": [
+     "X3"
+    ],
+    "k": -1.0
+   },
+   "g4": {
+    "op": "GAIN",
+    "in": [
+     "X4"
+    ],
+    "k": -1.0
+   },
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "g2",
+     "g3",
+     "g4"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "503B": {
+  "name": "FADD-2a",
+  "desc": "Addition-2-input. Y=X+FADD (cong don gian, chua xac dinh vai tro daisy-chain tu tai lieu).",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "503C": {
+  "name": "FADD-2b",
+  "desc": "Addition-2-input (bien the co them chan X noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "503D": {
+  "name": "FADD-3a",
+  "desc": "Addition-3-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "503E": {
+  "name": "FADD-3b",
+  "desc": "Addition-3-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "503F": {
+  "name": "FADD-4a",
+  "desc": "Addition-4-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5040": {
+  "name": "FADD-4b",
+  "desc": "Addition-4-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5041": {
+  "name": "FADD-5a",
+  "desc": "Addition-5-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5042": {
+  "name": "FADD-5b",
+  "desc": "Addition-5-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5043": {
+  "name": "FADD-6a",
+  "desc": "Addition-6-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5044": {
+  "name": "FADD-6b",
+  "desc": "Addition-6-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "X6",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5045": {
+  "name": "FADD-7a",
+  "desc": "Addition-7-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "X6",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5046": {
+  "name": "FADD-7b",
+  "desc": "Addition-7-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   },
+   "X7": {
+    "init": 0,
+    "desc": "Input 7"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "X6",
+     "X7",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5047": {
+  "name": "FADD-8a",
+  "desc": "Addition-8-input. Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   },
+   "X7": {
+    "init": 0,
+    "desc": "Input 7"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "X6",
+     "X7",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5048": {
+  "name": "FADD-8b",
+  "desc": "Addition-8-input (bien the noi chuoi). Y=tong tat ca ngo vao+FADD.",
+  "dt": 0.5,
+  "inputs": {
+   "X": {
+    "init": 0,
+    "desc": "Tin hieu vao (hoac tong chuyen tiep tu khoi truoc)"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   },
+   "X3": {
+    "init": 0,
+    "desc": "Input 3"
+   },
+   "X4": {
+    "init": 0,
+    "desc": "Input 4"
+   },
+   "X5": {
+    "init": 0,
+    "desc": "Input 5"
+   },
+   "X6": {
+    "init": 0,
+    "desc": "Input 6"
+   },
+   "X7": {
+    "init": 0,
+    "desc": "Input 7"
+   },
+   "X8": {
+    "init": 0,
+    "desc": "Input 8"
+   }
+  },
+  "params": {
+   "FADD": {
+    "val": 0.0,
+    "desc": "Hang so cong them (FADD)"
+   }
+  },
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X",
+     "X2",
+     "X3",
+     "X4",
+     "X5",
+     "X6",
+     "X7",
+     "X8",
+     "FADD"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "5049": {
+  "name": "ADD2",
+  "desc": "Addition-2-input (khong X/FADD). Y=X1+X2.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {},
+  "nodes": {
+   "y": {
+    "op": "SUM",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
+  }
+ },
+ "0045": {
+  "name": "MUL-G",
+  "desc": "* - Multiplication (obs), hien thi tham so 'G:' duoi khoi. Y=X1*X2*G.",
+  "dt": 0.5,
+  "inputs": {
+   "X1": {
+    "init": 0,
+    "desc": "Input 1"
+   },
+   "X2": {
+    "init": 0,
+    "desc": "Input 2"
+   }
+  },
+  "params": {
+   "G": {
+    "val": 1.0,
+    "desc": "He so nhan (hien thi duoi khoi, vd G:27)"
+   }
+  },
+  "nodes": {
+   "m": {
+    "op": "MUL",
+    "in": [
+     "X1",
+     "X2"
+    ]
+   },
+   "y": {
+    "op": "GAIN",
+    "in": [
+     "m"
+    ],
+    "k": "G"
+   }
+  },
+  "outputs": [
+   "Y"
+  ],
+  "out_map": {
+   "Y": "y"
   }
  }
 }

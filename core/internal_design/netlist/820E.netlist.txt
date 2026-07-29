@@ -1,0 +1,32 @@
+# 820E (MV_TG) - logic noi goc
+# Sinh TU DONG tu than logic goc trong TAG_MCR.DEF (nguon chuan cua phan mem).
+
+latch3     : SRLATCH : 
+not4       : NOT     : in=latch3
+and5       : AND     : in=latch3, in=not4
+or6        : OR      : in=OPS_IN5, in=Auto
+or7        : OR      : in=OPS_IN4, in=Manual, in=DRV-ABN
+latch11    : SRLATCH : s=or6, r=or7
+div13      : DIV     : a=Ftime, b=1000
+set16      : PASS    : in=0
+sel17      : SELECT  : sel=OPS_IN2, a=PRM_6, b=set16
+ton18      : TON     : in=OPS_IN2
+sel19      : SELECT  : sel=ton18, a=PRM_7, b=sel17
+set20      : PASS    : in=0
+sel21      : SELECT  : sel=OPS_IN3, a=PRM_6, b=set20
+ton22      : TON     : in=OPS_IN3
+sel23      : SELECT  : sel=ton22, a=PRM_7, b=sel21
+sub24      : SUB     : a=sel19, b=sel23
+mul25      : MUL     : in=sub24, in=div13
+clamp26    : CLAMP   : in=DLT MV, hi=PRM_9, lo=PRM_10
+sel27      : SELECT  : sel=latch11, a=clamp26, b=mul25
+integ28    : INTEG   : in=sel27 : ti=1.0
+set29      : PASS    : in=0
+sel30      : SELECT  : sel=OR-R-MV, a=OR-MV, b=set29
+or31       : OR      : in=OR-R-MV, in=and5
+sel32      : SELECT  : sel=or31, a=sel30, b=integ28
+clamp33    : CLAMP   : in=sel32, hi=HL-MV, lo=LL-MV
+set34      : PASS    : in=clamp33
+or61       : OR      : in=DRV-ABN, in=CTL-ABN
+
+OUT: Auto=latch11, MV=set34, ABN=or61

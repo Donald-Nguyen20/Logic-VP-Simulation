@@ -333,6 +333,21 @@ def sheet_io(tree):
     return out
 
 
+# ---- tin hieu nay co Y NGHIA boolean (nhan qua) hay khong ----
+def is_boolean_signal(db, sheet, net):
+    """True neu tin hieu NAY co the dung Cay dieu kien (nguyen nhan/he qua) mot
+    cach co y nghia: hoac la 1 tin hieu NGUON (chua tim thay khoi tao ra no trong
+    sheet - van la 1 "la" boolean hop le), hoac khoi tao ra no la 1 phep logic/so
+    sanh (AND/OR/NOT/XOR/SR/CONST/PASS/CMP - co trong logic_sem.json).
+    False CHI khi khoi tao ra no la 1 khoi TINH TOAN ANALOG thuan tuy (SUM/DIF/
+    TRAN-BMP/FNG/selector...) khong co trong logic_sem - luc do cay se chi co 1
+    la "opaque" duy nhat, khong co gi de xem nen KHONG co y nghia mo cay."""
+    prod = _producers(db, sheet).get(net)
+    if not prod:
+        return True   # tin hieu nguon (tu ben ngoai / chua ro) - van cho phep xem
+    return _sem().get(prod["code"]) is not None
+
+
 # ---- cong thuc 1 dong cho 1 tin hieu (de nhung vao so do node) ----
 def formula(db, sheet, net):
     """Tra ve (text, opword): tin hieu = phep(cac dau vao). '' neu la nguon."""

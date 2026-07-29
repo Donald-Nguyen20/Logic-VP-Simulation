@@ -34,10 +34,31 @@ def _num(s):
 
 
 _PARAMS = {}
+_PARAM_OVER = {}          # {bid: {paramno(str): value(str)}} - nguoi dung sua trong app
+
+
+def set_param_override(bid, params):
+    """Ghi de tham so CAI DAT cua 1 khoi (nguoi dung sua trong cua so 'Block parameters').
+    Cac gia tri nay se duoc dung khi mo phong sheet (nguong CMP, bang F(x), khoi tram...)."""
+    if params:
+        _PARAM_OVER[bid] = {str(k): str(v) for k, v in params.items()}
+    else:
+        _PARAM_OVER.pop(bid, None)
+    _PARAMS.clear()       # bo cache de lan tinh sau dung gia tri moi
+
+
+def param_overrides():
+    return _PARAM_OVER
+
+
+def clear_param_overrides():
+    _PARAM_OVER.clear()
+    _PARAMS.clear()
 
 
 def _params(db, sheet):
-    """{bid: {paramno(str): value(str)}} cho cac block tren sheet."""
+    """{bid: {paramno(str): value(str)}} cho cac block tren sheet (da ap gia tri
+    nguoi dung ghi de, neu co)."""
     key = (db, sheet)
     if key in _PARAMS:
         return _PARAMS[key]
@@ -47,6 +68,9 @@ def _params(db, sheet):
             "SELECT bp.BLOCK_ID, bp.PARAMNO, bp.PARAMVALUE FROM CAD_BLOCK_PARAM bp "
             "JOIN CAD_BLOCK b ON bp.BLOCK_ID=b.BLOCK_ID WHERE b.ID=?", (sheet,)):
         pm.setdefault(bid, {})[str(pno)] = pv
+    for bid, ov in _PARAM_OVER.items():
+        if bid in pm or ov:
+            pm.setdefault(bid, {}).update(ov)
     _PARAMS[key] = pm
     return pm
 
@@ -101,23 +125,28 @@ def _compute(net, prod, sem, val, thr=None):
         if rel in ("<", "LT"):
             return 1 if a < b else 0
         return None
+    # Tu day tro xuong la cac phep DIGITAL: tin hieu chua xac dinh coi nhu 0 (dong bo
+    # voi cach hien thi tren so do - digital chi co 0 hoac 1, khong con trang thai '?')
+    ins = [0 if x is None else x for x in ins]
     if op == "NOT":
-        return None if (not ins or ins[0] is None) else 1 - ins[0]
+        return 1 - ins[0] if ins else 1
     if op == "XOR":
-        return None if any(x is None for x in ins) else (sum(ins) % 2)
+        return sum(ins) % 2
     if op == "SR":
         S = ins[0] if len(ins) > 0 else None
         Rr = ins[1] if len(ins) > 1 else None
         cur = val.get(net)
+        if cur is None:
+            cur = 0                      # chot chua xac dinh -> coi nhu 0
         if s.get("priority") == "set":
             return 1 if S == 1 else (0 if Rr == 1 else cur)
         return 0 if Rr == 1 else (1 if S == 1 else cur)
     if op in ("AND", "NAND"):
-        r = 0 if any(x == 0 for x in ins) else (None if any(x is None for x in ins) else 1)
-        return (1 - r) if (op == "NAND" and r is not None) else r
+        r = 0 if any(x == 0 for x in ins) else 1
+        return (1 - r) if op == "NAND" else r
     if op in ("OR", "NOR"):
-        r = 1 if any(x == 1 for x in ins) else (None if any(x is None for x in ins) else 0)
-        return (1 - r) if (op == "NOR" and r is not None) else r
+        r = 1 if any(x == 1 for x in ins) else 0
+        return (1 - r) if op == "NOR" else r
     return val.get(net)
 
 
@@ -280,9 +309,11 @@ def _analog_producers(db, sheet):
                 oins = [ins[oidx]]
             else:
                 oins = ins
-            rec = {"code": code, "op": op, "bid": bid, "ins": oins}
+            rec = {"code": code, "op": op, "bid": bid, "ins": oins, "oidx": oidx}
             if sel:
                 rec["sel"] = sel        # (x1_net, x2_net, sw_net)
+            if op == "SIGNSUM":
+                rec["signs"] = asem[code].get("signs", [])
             aprod[onet] = rec
     _APROD[key] = aprod
     return aprod
@@ -399,7 +430,7 @@ def _eval_analog(net, aprod, val, db, sheet):
             x1n, x2n, swn = sel
             s = val.get(swn) if swn else None
             if s is None:
-                return None
+                s = 0                       # cong tac chua xac dinh -> coi nhu 0 (khop hien thi)
             pick = val.get(x1n) if s == 1 else val.get(x2n)   # SW=1->X1, SW=0->X2 (manual 4073)
             return pick if _isnum(pick) else None
         nums = [v for v in av if _isnum(v)]
@@ -442,6 +473,40 @@ def _eval_analog(net, aprod, val, db, sheet):
         return float(sum(xs)) if allnum(xs) else None
     if op == "AVG":
         return float(sum(xs)) / len(xs) if allnum(xs) else None
+    if op == "SIGNSUM":
+        # tong co dau co dinh theo tung chan vao (vd Summing 4in:++--)
+        if not allnum(xs):
+            return None
+        signs = p.get("signs") or []
+        total = 0.0
+        for i, v in enumerate(xs):
+            s = signs[i] if i < len(signs) else "+"
+            total += -v if s == "-" else v
+        return total
+    if op in ("CLAMPHI", "CLAMPLO"):
+        # Limiter co canh bao/so sanh (vd 210F/2110/410D/410F): ins=[X, L]
+        # oidx=0 -> ngo ra gia tri da gioi han (Y); oidx=1 -> co so sanh (D, dang bi kep hay khong)
+        if len(xs) < 2 or not allnum(xs[:2]):
+            return None
+        x, lim = xs[0], xs[1]
+        oidx = p.get("oidx", 0)
+        if op == "CLAMPHI":
+            if oidx == 0:
+                return min(x, lim)
+            return 1.0 if x >= lim else 0.0
+        else:
+            if oidx == 0:
+                return max(x, lim)
+            return 1.0 if x <= lim else 0.0
+    if op == "MULG":
+        # nhan 2 dau vao roi nhan them he so co dinh (param vi tri "2", giong quy uoc GAIN)
+        if len(xs) < 2 or not allnum(xs[:2]):
+            return None
+        pm = _params(db, sheet).get(p["bid"], {})
+        g = _num(pm.get("2"))
+        if g is None:
+            g = 1.0
+        return xs[0] * xs[1] * g
     if op == "SUB":
         a, b = named.get("+"), named.get("-")
         if not (_isnum(a) and _isnum(b)):

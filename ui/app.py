@@ -745,7 +745,7 @@ class MainWindow(QMainWindow):
         # neu dang bat mo phong tren trang -> ap dung cho sheet moi
         if getattr(self, "sim_sheet_act", None) is not None and self.sim_sheet_act.isChecked():
             self.sim_env = {}
-            self.sim_analog = {}
+            self.sim_analog = self._default_sim_analog(self.db_path, sheet_id)
             self.sim_dyn_over = {}
             self.sheet_scene.on_sim_toggle = self._sim_toggle
             self.sheet_scene.on_sim_set_analog = self._sim_set_analog
@@ -922,13 +922,30 @@ class MainWindow(QMainWindow):
         a_graph = m.addAction("View signal node diagram")
         a_cond = m.addAction("View conditions (for signal = 1)")
         a_view = m.addAction("View function (internal logic)")
-        a_sim = m.addAction("Simulate block")
+        a_live = m.addAction("Draw internal logic (design)")
+        a_sim = m.addAction("Block parameters (edit for simulation)")
         a_view.setEnabled(code in self.internal_map)
-        a_sim.setEnabled(bool(has_behavior(code) or has_analog(code)))
+        a_live.setEnabled(bool(code))
         has_db = (getattr(self, "db_path", None) is not None
                   and getattr(self, "cur_sheet", None) is not None)
+        a_sim.setEnabled(has_db and bid is not None)
         a_graph.setEnabled(has_db)
-        a_cond.setEnabled(has_db)
+        # "Xem dieu kien" chi co y nghia voi tin hieu DIGITAL (dau ra la 1 phep
+        # logic hoac so sanh nguong) - khoi tinh toan analog thuan (SUM/DIF/
+        # TRAN-BMP...) se cho ra 1 cay rong, khong co gi de xem nen khoa lai.
+        cond_ok = has_db and bid is not None
+        if cond_ok:
+            try:
+                from core.signal_graph import block_output_net
+                from core import cond_tree as CT
+                _net = block_output_net(self.db_path, self.cur_sheet, bid)
+                cond_ok = bool(_net) and CT.is_boolean_signal(self.db_path, self.cur_sheet, _net)
+            except Exception:
+                cond_ok = has_db and bid is not None
+        a_cond.setEnabled(cond_ok)
+        if has_db and bid is not None and not cond_ok:
+            a_cond.setToolTip("Tin hieu ANALOG (qua khoi tinh toan) - khong co cay"
+                              " nguyen nhan boolean de xem")
         act = m.exec(global_pos)
         if act == a_graph:
             from core.signal_graph import block_output_net
@@ -941,9 +958,28 @@ class MainWindow(QMainWindow):
                            cpu_paths=getattr(self, "cpu_paths", None)).show()
         elif act == a_view:
             self.show_internal_logic(code, name)
+        elif act == a_live:
+            from ui.internal_design_dialog import InternalDesignDialog
+            InternalDesignDialog(code, name, self,
+                                 db_path=getattr(self, "db_path", None),
+                                 sheet_id=getattr(self, "cur_sheet", None),
+                                 bid=bid,
+                                 sim_values=getattr(self, "sim_values", None),
+                                 dig_env=getattr(self, "sim_env", None),
+                                 ana_env=getattr(self, "sim_analog", None)).exec()
         elif act == a_sim:
             self._last_block_code = code
-            self.open_block_sim()
+            from ui.block_param_dialog import BlockParamDialog
+            # sau khi ap dung tham so -> tinh lai sheet ngay (neu dang bat mo phong)
+            def _after():
+                sc = getattr(self, "sheet_scene", None)
+                if sc is not None and getattr(sc, "sim_values", None) is not None:
+                    self._apply_sheet_sim()      # dang bat mo phong -> tinh lai ngay
+            BlockParamDialog(self.db_path, bid, code, name, self, on_applied=_after,
+                             sim_values=getattr(self, "sim_values", None),
+                             sheet_id=getattr(self, "cur_sheet", None),
+                             dig_env=getattr(self, "sim_env", None),
+                             ana_env=getattr(self, "sim_analog", None)).exec()
 
     def signal_context_menu(self, net, linename, global_pos):
         """Chuot phai len 1 TIN HIEU (terminal) -> xem so do node."""
@@ -953,6 +989,16 @@ class MainWindow(QMainWindow):
         a_graph = m.addAction("View signal node diagram")
         a_cond = m.addAction("View conditions (for signal = 1)")
         a_ai = m.addAction("Explain (AI)")
+        # chi cho xem cay dieu kien voi tin hieu DIGITAL - xem ghi chu o block_context_menu
+        try:
+            from core import cond_tree as CT
+            cond_ok = CT.is_boolean_signal(self.db_path, self.cur_sheet, net)
+        except Exception:
+            cond_ok = True
+        a_cond.setEnabled(cond_ok)
+        if not cond_ok:
+            a_cond.setToolTip("Tin hieu ANALOG (qua khoi tinh toan) - khong co cay"
+                              " nguyen nhan boolean de xem")
         act = m.exec(global_pos)
         if act == a_graph:
             self._open_node_tab(net, linename or net)
@@ -977,6 +1023,16 @@ class MainWindow(QMainWindow):
                                   cpu_paths=getattr(self, "cpu_paths", None))
         self.center_tabs.setCurrentWidget(self.graph_tab)
 
+    def _default_sim_analog(self, db, sheet):
+        """Cac net analog la dau vao that (chua co khoi nao mo hinh sinh ra) -> mac dinh = 0
+        thay vi de trong (~), nguoi dung van bam vao de sua lai gia tri khac neu can."""
+        from core import sheet_sim as SS
+        try:
+            kinds = SS._kind_map(db, sheet)
+            return {n: 0.0 for n, _ in SS.input_nets(db, sheet) if kinds.get(n) == "A"}
+        except Exception:
+            return {}
+
     def toggle_sheet_sim(self, on):
         """Bat/tat lop phu mo phong ngay tren trang logic."""
         sc = getattr(self, "sheet_scene", None)
@@ -988,7 +1044,7 @@ class MainWindow(QMainWindow):
                 self.sim_sheet_act.setChecked(False)
                 return
             self.sim_env = {}
-            self.sim_analog = {}
+            self.sim_analog = self._default_sim_analog(self.db_path, self.cur_sheet)
             self.sim_dyn_over = {}
             sc.on_sim_toggle = self._sim_toggle
             sc.on_sim_set_analog = self._sim_set_analog
@@ -1002,11 +1058,22 @@ class MainWindow(QMainWindow):
     def _dyn_info(self, db, sh):
         """{bid: {ti, out, code, label}} cac khoi dong (tich phan) de danh dau tren sheet."""
         from core import sheet_dyn as DYN
+        from core import ai_explain as AE
         info = {}
         try:
             for b in DYN._dyn_blocks(db, sh, getattr(self, "sim_dyn_over", {})):
-                info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
-                                  "kind": b.get("kind", "I")}
+                if b["kind"] == "S":
+                    info[b["bid"]] = {"kind": "S", "code": b["code"],
+                                      "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
+                                      "outs": dict(b.get("last_out") or {}),
+                                      "in_nets": b["in_nets"], "out_nets": b["out_nets"],
+                                      "real_params": dict(b["sim"].params)}
+                else:
+                    info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
+                                      "kind": b.get("kind", "I")}
+                    if b.get("kind") == "R":
+                        info[b["bid"]]["up"] = b.get("up")
+                        info[b["bid"]]["dn"] = b.get("dn")
         except Exception:
             pass
         return info
@@ -1015,20 +1082,35 @@ class MainWindow(QMainWindow):
         """Click khoi dong (cam): hop cai dat TI, gia tri dau, dt, so buoc + nut Chay."""
         over = getattr(self, "sim_dyn_over", {})
         cur = dict(self.sheet_scene.sim_dyn.get(bid, {}))
+        if cur.get("kind") == "S":
+            self._sim_station_config(bid, cur, over)
+            return
         cur_ti = over.get(bid, {}).get("ti", cur.get("ti") or 1.0)
         cur_init = over.get(bid, {}).get("init", 0.0)
 
         kind = cur.get("kind")
-        titles = {"D": "Derivative settings", "L": "F(t) lag filter settings"}
+        titles = {"D": "Derivative settings", "L": "F(t) lag filter settings", "R": "Rate limiter settings"}
         plabels = {"D": "G - gain:", "L": "T - time constant (seconds):"}
         dlg = QDialog(self)
         dlg.setWindowTitle(titles.get(kind, "Integrator settings"))
         form = QFormLayout(dlg)
-        sp_ti = QDoubleSpinBox(); sp_ti.setRange(-1e6, 1e6); sp_ti.setDecimals(3); sp_ti.setValue(float(cur_ti))
+        sp_up = sp_dn = None
+        if kind == "R":
+            cur_up = over.get(bid, {}).get("up", cur.get("up"))
+            cur_dn = over.get(bid, {}).get("dn", cur.get("dn"))
+            sp_up = QDoubleSpinBox(); sp_up.setRange(0.0, 1e9); sp_up.setDecimals(4)
+            sp_up.setValue(float(cur_up) if cur_up is not None else 0.0)
+            sp_dn = QDoubleSpinBox(); sp_dn.setRange(0.0, 1e9); sp_dn.setDecimals(4)
+            sp_dn.setValue(float(cur_dn) if cur_dn is not None else 0.0)
+            form.addRow("IR tang (up rate, don vi/giay):", sp_up)
+            form.addRow("IR giam (down rate, don vi/giay):", sp_dn)
+            sp_ti = None
+        else:
+            sp_ti = QDoubleSpinBox(); sp_ti.setRange(-1e6, 1e6); sp_ti.setDecimals(3); sp_ti.setValue(float(cur_ti))
+            form.addRow(plabels.get(kind, "TI - time constant (seconds):"), sp_ti)
         sp_init = QDoubleSpinBox(); sp_init.setRange(-1e9, 1e9); sp_init.setDecimals(3); sp_init.setValue(float(cur_init))
         sp_dt = QDoubleSpinBox(); sp_dt.setRange(0.01, 60.0); sp_dt.setDecimals(2); sp_dt.setSingleStep(0.1); sp_dt.setValue(float(getattr(self, "_dyn_dt", 0.5)))
         sp_steps = QSpinBox(); sp_steps.setRange(1, 100000); sp_steps.setValue(int(getattr(self, "_dyn_steps", 300)))
-        form.addRow(plabels.get(kind, "TI - time constant (seconds):"), sp_ti)
         form.addRow("Initial output value:", sp_init)
         form.addRow("dt - time step (seconds):", sp_dt)
         form.addRow("Steps:", sp_steps)
@@ -1042,7 +1124,107 @@ class MainWindow(QMainWindow):
         form.addRow(row)
 
         def _apply_run():
-            over[bid] = {"ti": sp_ti.value(), "init": sp_init.value()}
+            if kind == "R":
+                over[bid] = {"up": sp_up.value(), "dn": sp_dn.value(), "init": sp_init.value()}
+            else:
+                over[bid] = {"ti": sp_ti.value(), "init": sp_init.value()}
+            self.sim_dyn_over = over
+            self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
+            dlg.accept()
+            self.run_dynamic_sim()
+        b_run.clicked.connect(_apply_run)
+        b_close.clicked.connect(dlg.reject)
+        dlg.exec()
+
+    def _sim_station_config(self, bid, cur, over):
+        """Hop cai dat khoi TRAM (MV/SV/MV-POS/SV-MV...): chan nao co day thi chi bao
+        (bam vao day tren sheet de dat), chan nao KHONG co day (Auto/Manual/DLT MV,
+        cuong buc, ABN gia lap...) thi cho nhap thang trong hop nay."""
+        from core import analog_sim as AS
+        from core import signal_graph as SG
+        code = cur.get("code")
+        spec = AS.load_analog().get(code, {})
+        in_nets = cur.get("in_nets", {})
+        ov = dict(over.get(bid, {}))
+        ov_in = dict(ov.get("inputs") or {})
+        ov_pm = dict(ov.get("params") or {})
+        real_pm = cur.get("real_params") or {}   # gia tri THAT da cau hinh trong DB (CAD_BLOCK_PARAM)
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("%s (%s) settings" % (cur.get("name") or code, code))
+        outer = QVBoxLayout(dlg)
+        scroll_body = QWidget()
+        form = QFormLayout(scroll_body)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setWidget(scroll_body)
+        outer.addWidget(scroll)
+        form.addRow(QLabel("Wired pins: click their terminal on the sheet to set. "
+                           "Unwired pins below are set here (not on the sheet)."))
+        widgets = {}   # name -> (kind, widget)
+        for name, meta in (spec.get("inputs") or {}).items():
+            if name in in_nets:
+                net = in_nets[name]
+                sig = SG._name_of(self.db_path, self.cur_sheet, net) or net
+                form.addRow(name + "  (wired):", QLabel(sig or net))
+                continue
+            if meta.get("bool"):
+                w = QCheckBox()
+                w.setChecked(bool(ov_in.get(name, meta.get("init", 0))))
+                widgets[name] = ("b", w)
+                form.addRow(name + ":", w)
+            else:
+                w = QDoubleSpinBox(); w.setRange(-1e9, 1e9); w.setDecimals(3)
+                w.setValue(float(ov_in.get(name, meta.get("init", 0.0))))
+                widgets[name] = ("n", w)
+                form.addRow("%s%s:" % (name, ("  (%s)" % meta["desc"]) if meta.get("desc") else ""), w)
+        pwidgets = {}
+        for pname, pmeta in (spec.get("params") or {}).items():
+            w = QDoubleSpinBox(); w.setRange(-1e9, 1e9); w.setDecimals(3)
+            # uu tien: nguoi dung da chinh (ov_pm) > gia tri THAT trong DB (real_pm) > mac dinh JSON
+            default_val = real_pm.get(pname, pmeta.get("val", 0.0))
+            w.setValue(float(ov_pm.get(pname, default_val)))
+            pwidgets[pname] = w
+            form.addRow("%s%s:" % (pname, ("  (%s)" % pmeta["desc"]) if pmeta.get("desc") else ""), w)
+        # Diem xuat phat cua bo tich phan (VD MV dang la 200). KHOI THAT KHONG co chan
+        # nao de dat gia tri nay - MV nam trong bo nho noi va duoc giu qua cac vong quet;
+        # o day chi la dieu kien ban dau cho MO PHONG (de trong = khoi dong nguoi tu 0).
+        sp_init = QDoubleSpinBox(); sp_init.setRange(-1e9, 1e9); sp_init.setDecimals(3)
+        sp_init.setSpecialValueText("(khoi dong nguoi - tu 0)")
+        sp_init.setValue(float(ov.get("init_out", sp_init.minimum())))
+        form.addRow("Gia tri dau ra ban dau (MV hien tai - chi cho mo phong):", sp_init)
+
+        # TI cho bo tich phan NOI cua tram. Logic goc dat TI = chu ky quet nen moi vong
+        # cong THANG DLT MV (chay rat nhanh). Dat TI = so giay de moi vong chi cong
+        # DLT MV * dt / TI  -> quan sat duoc qua trinh thay doi.
+        sp_ti = QDoubleSpinBox(); sp_ti.setRange(0.0, 1e6); sp_ti.setDecimals(2)
+        sp_ti.setSpecialValueText("(theo logic goc - TI = chu ky quet)")
+        sp_ti.setValue(float(ov.get("ti", 0.0)))
+        form.addRow("TI - hang so thoi gian tich phan noi (giay):", sp_ti)
+
+        sp_dt = QDoubleSpinBox(); sp_dt.setRange(0.01, 60.0); sp_dt.setDecimals(2); sp_dt.setSingleStep(0.1)
+        sp_dt.setValue(float(getattr(self, "_dyn_dt", 0.5)))
+        sp_steps = QSpinBox(); sp_steps.setRange(1, 100000); sp_steps.setValue(int(getattr(self, "_dyn_steps", 300)))
+        form.addRow("dt - time step (seconds):", sp_dt)
+        form.addRow("Steps:", sp_steps)
+        lbl_t = QLabel(""); form.addRow("Total time:", lbl_t)
+        def _upd():
+            lbl_t.setText("%.1f s" % (sp_dt.value() * sp_steps.value()))
+        sp_dt.valueChanged.connect(_upd); sp_steps.valueChanged.connect(_upd); _upd()
+        row = QHBoxLayout()
+        b_run = QPushButton("▶ Run dynamic"); b_close = QPushButton("Close")
+        row.addStretch(1); row.addWidget(b_close); row.addWidget(b_run)
+        outer.addLayout(row)
+        dlg.resize(650, 700)
+
+        def _apply_run():
+            new_in = {}
+            for name, (k, w) in widgets.items():
+                new_in[name] = (1 if w.isChecked() else 0) if k == "b" else w.value()
+            new_pm = {pname: w.value() for pname, w in pwidgets.items()}
+            over[bid] = {"inputs": new_in, "params": new_pm}
+            if sp_init.value() > sp_init.minimum():     # de trong = khoi dong nguoi tu 0
+                over[bid]["init_out"] = sp_init.value()
+            if sp_ti.value() > 0:                       # de trong = theo logic goc
+                over[bid]["ti"] = sp_ti.value()
             self.sim_dyn_over = over
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
             dlg.accept()
@@ -1058,6 +1240,7 @@ class MainWindow(QMainWindow):
         kinds = SS._kind_map(db, sh)
         values, _ = SS.simulate(db, sh, getattr(self, "sim_env", {}),
                                 getattr(self, "sim_analog", {}))
+        self.sim_values = values          # luu lai de tai su dung (VD trong trinh ve logic noi)
         self.sheet_scene.set_sim(values, kinds, inputs, getattr(self, "sim_analog", {}),
                                  dyn=self._dyn_info(db, sh))
 
@@ -1077,7 +1260,10 @@ class MainWindow(QMainWindow):
             dblocks = DYN._dyn_blocks(db, sh, getattr(self, "sim_dyn_over", {}))
         except Exception:
             dblocks = []
-        record = [b["out"] for b in dblocks]
+        record = [b["out"] for b in dblocks if b["kind"] != "S"]
+        for b in dblocks:
+            if b["kind"] == "S":
+                record.extend(b["out_nets"].values())
         try:
             val, hist, blocks = DYN.run(db, sh, getattr(self, "sim_env", {}),
                                         getattr(self, "sim_analog", {}), dt=dt, nsteps=nsteps,
@@ -1087,10 +1273,27 @@ class MainWindow(QMainWindow):
             return
         kinds = SS._kind_map(db, sh)
         # dau ra khoi dong da tu tinh -> khong con la dau vao ✎
-        dynouts = set(b["out"] for b in blocks)
+        dynouts = set(b["out"] for b in blocks if b["kind"] != "S")
+        for b in blocks:
+            if b["kind"] == "S":
+                dynouts.update(b["out_nets"].values())
         inputs = [n for n, _ in SS.input_nets(db, sh) if n not in dynouts]
-        dyninfo = {b["bid"]: {"ti": b["ti"], "out": b["out"], "code": b["code"],
-                              "kind": b.get("kind", "I")} for b in blocks}
+        from core import ai_explain as AE
+        dyninfo = {}
+        for b in blocks:
+            if b["kind"] == "S":
+                dyninfo[b["bid"]] = {"kind": "S", "code": b["code"],
+                                     "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
+                                     "outs": dict(b.get("last_out") or {}),
+                                     "in_nets": b["in_nets"], "out_nets": b["out_nets"],
+                                     "real_params": dict(b["sim"].params)}
+            else:
+                dyninfo[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
+                                     "kind": b.get("kind", "I")}
+                if b.get("kind") == "R":
+                    dyninfo[b["bid"]]["up"] = b.get("up")
+                    dyninfo[b["bid"]]["dn"] = b.get("dn")
+        self.sim_values = val             # luu lai (dung cho trinh ve logic noi)
         self.sheet_scene.set_sim(val, kinds, inputs, getattr(self, "sim_analog", {}), dyn=dyninfo)
         self.status("Ran %d steps (dt=%.2fs, ~%.1fs). %d integral/dynamic blocks."
                     % (nsteps, dt, nsteps * dt, len(blocks)))
@@ -1161,7 +1364,9 @@ class MainWindow(QMainWindow):
         row = QHBoxLayout()
         ed = QLineEdit(); ed.setPlaceholderText("Type signal name (e.g. O2 MSTR AUTO CTRL CMD) then Enter...")
         btn = QPushButton("Search")
-        row.addWidget(ed, 1); row.addWidget(btn)
+        btn_rb = QPushButton("Rebuild index")
+        btn_rb.setToolTip("Dung lai chi muc tu dau (dung khi tim khong ra du ten dung)")
+        row.addWidget(ed, 1); row.addWidget(btn); row.addWidget(btn_rb)
         lay.addLayout(row)
         info = QLabel(""); info.setStyleSheet("color:#64748B;font-size:11px;")
         lay.addWidget(info)
@@ -1171,22 +1376,39 @@ class MainWindow(QMainWindow):
 
         from core import project_index as PI
 
-        def run():
+        def run(force_rebuild=False):
             q = ed.text().strip()
             res.clear()
             if len(q) < 2:
                 info.setText("Enter at least 2 characters.")
                 return
+            note = ""
+            rows = []
             try:
-                PI.ensure(paths)     # dung/ cap nhat index neu can (nhanh, cache)
-                rows = PI.find(q)    # tra tuc thi tu index
-            except Exception:
-                rows = []
+                if force_rebuild:
+                    PI.build(paths)                 # dung lai index tu dau
+                else:
+                    PI.ensure(paths)                # dung/cap nhat index neu can (cache)
+                rows = PI.find(q, db_paths=paths)   # co du phong quet thang DB
+            except Exception as e:
+                # KHONG im lang: bao loi that va van quet thang cac file DB
+                note = "  [index loi: %s - da quet thang DB]" % e
+                try:
+                    rows = PI.find_direct(q, paths)
+                except Exception as e2:
+                    info.setText("Khong tim duoc: %s" % e2)
+                    return
             for (name, cpuname, cpuno, slbl, db, sheet, sigid) in rows:
                 it = QTreeWidgetItem([cpuname or ("CPU%s" % cpuno), slbl, name])
                 it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
                 res.addTopLevelItem(it)
-            info.setText("Found %d result(s). Double-click to open the sheet." % len(rows))
+            if not rows:
+                info.setText("Khong tim thay '%s' trong %d file DB (tim theo TEN tin hieu - "
+                             "LINENAME). Thu tu khoa ngan hon, hoac bam 'Rebuild index'.%s"
+                             % (q, len(paths), note))
+            else:
+                info.setText("Found %d result(s). Double-click to open the sheet.%s"
+                             % (len(rows), note))
 
         def open_hit(item, _c=0):
             data = item.data(0, Qt.ItemDataRole.UserRole)
@@ -1194,8 +1416,9 @@ class MainWindow(QMainWindow):
                 self._open_cross(data[0], data[1])
                 dlg.raise_()
 
-        btn.clicked.connect(run)
-        ed.returnPressed.connect(run)
+        btn.clicked.connect(lambda: run(False))
+        btn_rb.clicked.connect(lambda: run(True))
+        ed.returnPressed.connect(lambda: run(False))
         res.itemDoubleClicked.connect(open_hit)
         ed.setFocus()
         dlg.show()

@@ -87,27 +87,27 @@ class SheetScene(QGraphicsScene):
     def _sim_on(self):
         return self.sim_values is not None
 
+    def _sim_dig(self, net):
+        """Gia tri DIGITAL de hien thi: chi 0 hoac 1. Tin hieu chua xac dinh coi nhu 0
+        (khong con trang thai '?' mau xam)."""
+        v = self.sim_values.get(net) if self.sim_values else None
+        return 1 if (isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0.5) else 0
+
     def _sim_cell_col(self, net):
-        """(bg, fg) cho o terminal: analog=xanh duong, digital=xanh/do/xam theo 0/1."""
+        """(bg, fg) cho o terminal: analog=xanh duong, digital=xanh(0)/do(1)."""
         if self.sim_kind.get(net) == "A":
             return QColor("#DBEAFE"), QColor("#1D4ED8")
-        v = self.sim_values.get(net) if self.sim_values else None
-        if v == 1:
+        if self._sim_dig(net):
             return QColor("#FEE2E2"), QColor("#B91C1C")
-        if v == 0:
-            return QColor("#DCFCE7"), QColor("#15803D")
-        return QColor("#F1F5F9"), QColor("#94A3B8")
+        return QColor("#DCFCE7"), QColor("#15803D")
 
     def _sim_wire_pen(self, net):
-        """(QColor, width) cho day: analog=xanh duong manh, digital=xanh/do theo 0/1."""
+        """(QColor, width) cho day: analog=xanh duong manh, digital=xanh(0)/do(1)."""
         if self.sim_kind.get(net) == "A":
             return QColor("#93C5FD"), 1.6
-        v = self.sim_values.get(net) if self.sim_values else None
-        if v == 1:
+        if self._sim_dig(net):
             return QColor("#DC2626"), 2.4
-        if v == 0:
-            return QColor("#16A34A"), 2.4
-        return QColor("#CBD5E1"), 1.1
+        return QColor("#16A34A"), 2.4
 
     # --- bien doi toa do ---
     def sx(self, x):
@@ -179,18 +179,19 @@ class SheetScene(QGraphicsScene):
         isin = net in self.sim_inputs                 # net noi bo NHUNG la dau vao -> cho nhap
         v = self.sim_values.get(net) if self.sim_values else None
         analog = self.sim_kind.get(net) == "A"
-        if not isin and not (isinstance(v, (int, float)) and not isinstance(v, bool)):
-            return                                    # khong phai dau vao & chua co gia tri -> bo qua
+        # ANALOG chua co gia tri (va khong phai dau vao) -> bo qua; DIGITAL thi LUON hien
+        # 0 hoac 1 (khong con trang thai '?' mau xam)
+        if analog and not isin and not (isinstance(v, (int, float)) and not isinstance(v, bool)):
+            return
         if analog:
             has = isinstance(v, (int, float)) and not isinstance(v, bool)
             txt = ("✎ %g" % v) if (isin and has) else ("✎ ?" if isin else "%g" % v)
             col = QColor("#7C3AED")
         else:
-            vs = "1" if v == 1 else ("0" if v == 0 else "?")
-            if not isin and vs == "?":
-                return
+            d = self._sim_dig(net)            # digital: chi 0 hoac 1
+            vs = "1" if d else "0"
             txt = ("▸ " + vs) if isin else vs
-            col = QColor("#DC2626") if v == 1 else (QColor("#16A34A") if v == 0 else QColor("#94A3B8"))
+            col = QColor("#DC2626") if d else QColor("#16A34A")
         # dat nhan ngay tai NGO RA cua khoi sinh ra net nay (neu biet)
         if net in self._out_pin_pos:
             px, py = self._out_pin_pos[net]
@@ -391,8 +392,7 @@ class SheetScene(QGraphicsScene):
             vs = ("%g" % av) if isinstance(av, (int, float)) else "~"
             mk = "✎ " if isin else ""
         else:
-            v = self.sim_values.get(net) if self.sim_values else None
-            vs = "1" if v == 1 else ("0" if v == 0 else "?")
+            vs = "1" if self._sim_dig(net) else "0"      # digital: chi 0 hoac 1
             mk = "▸ " if isin else ""
         th = 42
         rect = self.addRect(x0, y - 10, w, th, QPen(COL_GRID, 1),
@@ -491,17 +491,28 @@ class SheetScene(QGraphicsScene):
             # vien cam quanh khoi dong
             fr = self.addRect(rect.adjusted(-2, -2, 2, 2), QPen(orange, 2.0), QBrush(Qt.BrushStyle.NoBrush))
             fr.setZValue(7)
-            ti = info.get("ti")
-            outv = self.sim_values.get(info.get("out")) if self.sim_values else None
-            vs = ("%g" % outv) if isinstance(outv, (int, float)) and not isinstance(outv, bool) else "?"
-            pstr = ("%g" % ti) if ti is not None else "?"
             k = info.get("kind")
-            if k == "D":
-                txt = "d/dt  G=%s  y=%s" % (pstr, vs)
-            elif k == "L":
-                txt = "F(t)  T=%s  y=%s" % (pstr, vs)
+            if k == "S":
+                outs = info.get("outs") or {}
+                main_lbl = "MV" if "MV" in outs else ("SV" if "SV" in outs else (next(iter(outs), None)))
+                mv = outs.get(main_lbl)
+                mvs = ("%g" % mv) if isinstance(mv, (int, float)) and not isinstance(mv, bool) else "?"
+                auto = outs.get("Auto")
+                autos = "Auto" if (isinstance(auto, (int, float)) and auto > 0.5) else "Man"
+                abn = outs.get("ABN")
+                abnsuf = "  ABN!" if (isinstance(abn, (int, float)) and abn > 0.5) else ""
+                txt = "%s  %s  %s=%s%s" % (info.get("name") or "STATION", autos, main_lbl or "?", mvs, abnsuf)
             else:
-                txt = "∫ I  TI=%s  y=%s" % (pstr, vs)
+                ti = info.get("ti")
+                outv = self.sim_values.get(info.get("out")) if self.sim_values else None
+                vs = ("%g" % outv) if isinstance(outv, (int, float)) and not isinstance(outv, bool) else "?"
+                pstr = ("%g" % ti) if ti is not None else "?"
+                if k == "D":
+                    txt = "d/dt  G=%s  y=%s" % (pstr, vs)
+                elif k == "L":
+                    txt = "F(t)  T=%s  y=%s" % (pstr, vs)
+                else:
+                    txt = "∫ I  TI=%s  y=%s" % (pstr, vs)
             bx, by = rect.left(), rect.top() - 17
             r = self.addRect(bx, by, 16 + 7 * len(txt), 16, QPen(orange, 1.0), QBrush(QColor("#FFF7ED")))
             r.setZValue(7)
