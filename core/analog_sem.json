@@ -392,23 +392,23 @@
   "name": "ADL - Analog Data Link"
  },
  "405F": {
-  "op": "ADD",
+  "op": "WSUM",
   "name": "DSUM - Digital Summing (2-input)"
  },
  "4060": {
-  "op": "ADD",
+  "op": "WSUM",
   "name": "DSUM - Digital Summing (3-input)"
  },
  "4061": {
-  "op": "ADD",
+  "op": "WSUM",
   "name": "DSUM - Digital Summing (4-input)"
  },
  "4062": {
-  "op": "ADD",
+  "op": "WSUM",
   "name": "DSUM - Digital Summing (5-input)"
  },
  "4063": {
-  "op": "ADD",
+  "op": "WSUM",
   "name": "DSUM - Digital Summing (6-input)"
  },
  "4021": {

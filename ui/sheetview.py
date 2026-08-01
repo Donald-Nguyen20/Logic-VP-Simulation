@@ -53,12 +53,15 @@ class SheetScene(QGraphicsScene):
         self._hits = []              # [(QRectF, term)]
         self._block_hits = []        # [(QRectF, code, name)]
         self._term_hits = []         # [(QRectF, net, linename)] moi terminal (de chuot phai xem node)
+        self._sim_lid_hits = []      # [(QRectF, net)] rieng vung cot LID de SET GIA TRI khi mo phong
+                                      # (tach khoi _term_hits/_hits de cot Line Name van nhay sheet duoc)
         self.svg_mode = True         # luon ve bang bo ky hieu (native)
         # --- mo phong tren trang ---
         self.sim_values = None       # {net: 0/1/None} (digital) khi bat mo phong
         self.sim_kind = {}           # {net: 'D'/'A'/'?'}
         self.sim_inputs = set()      # net la dau vao (click de set)
         self.sim_analog = {}         # {net: float} gia tri analog nguoi nhap
+        self.sim_osc_nets = set()    # net dang DAO DONG (chuot phai "Set oscillation") -> danh dau rieng
         self.on_sim_toggle = None    # callback(net) khi click dau vao DIGITAL
         self.on_sim_set_analog = None  # callback(net) khi click dau vao ANALOG
         self.on_sim_dyn_config = None  # callback(bid) khi click khoi DONG de cai dat
@@ -68,12 +71,13 @@ class SheetScene(QGraphicsScene):
         self.build()
 
     # --- mo phong: bat/tat + mau ---
-    def set_sim(self, values, kinds, inputs, analog=None, dyn=None):
+    def set_sim(self, values, kinds, inputs, analog=None, dyn=None, osc_nets=None):
         self.sim_values = dict(values or {})
         self.sim_kind = dict(kinds or {})
         self.sim_inputs = set(inputs or [])
         self.sim_analog = dict(analog or {})
         self.sim_dyn = dict(dyn or {})
+        self.sim_osc_nets = set(osc_nets or ())
         self.build()
 
     def clear_sim(self):
@@ -82,6 +86,7 @@ class SheetScene(QGraphicsScene):
         self.sim_inputs = set()
         self.sim_analog = {}
         self.sim_dyn = {}
+        self.sim_osc_nets = set()
         self.build()
 
     def _sim_on(self):
@@ -125,6 +130,7 @@ class SheetScene(QGraphicsScene):
         self._hits = []
         self._block_hits = []
         self._term_hits = []
+        self._sim_lid_hits = []
         self._term_lids = set(t.lid for t in self.sh.terms if getattr(t, "lid", None))
         self._sim_wire_hits = []      # [(QRectF, net)] diem settable NOI BO tren day
         # vi tri NGO RA cua tung net (de dat nhan gia tri ngay tai khoi sinh ra no)
@@ -384,13 +390,14 @@ class SheetScene(QGraphicsScene):
         """O LID khi mo phong: GIA TRI (to, mau tim) o tren, dia chi LID o duoi."""
         net = t.lid
         kind = self.sim_kind.get(net)
+        osc = net in self.sim_osc_nets      # dang DAO DONG (bat qua chuot phai) -> danh dau rieng
         if kind == "A":
             # gia tri analog: uu tien gia tri TINH RA (sim_values), roi toi gia tri nguoi nhap
             av = self.sim_values.get(net) if self.sim_values else None
             if not isinstance(av, (int, float)):
                 av = self.sim_analog.get(net)
             vs = ("%g" % av) if isinstance(av, (int, float)) else "~"
-            mk = "✎ " if isin else ""
+            mk = "∿ " if osc else ("✎ " if isin else "")
         else:
             vs = "1" if self._sim_dig(net) else "0"      # digital: chi 0 hoac 1
             mk = "▸ " if isin else ""
@@ -400,7 +407,7 @@ class SheetScene(QGraphicsScene):
         rect.setZValue(-1)
         vf = QFont("Segoe UI", 14, QFont.Weight.Bold)
         tv = self.addText(mk + vs, vf)
-        tv.setDefaultTextColor(QColor("#7C3AED"))     # tim
+        tv.setDefaultTextColor(QColor("#EA580C") if osc else QColor("#7C3AED"))  # cam neu dang dao dong
         tv.setPos(x0 + 3, y - 12)
         lf = QFont("Segoe UI", 9)
         fm = QFontMetrics(lf)
@@ -440,7 +447,9 @@ class SheetScene(QGraphicsScene):
                     self._sim_lid_cell(330, 110, y, t, isin, bg)
                 else:
                     self._cell(330, 110, y, t.lid, clickable=has, bg=bg, fg=fg)
-                rct = QRectF(0, y - 10, MARGIN_L, max(ch, lh, 20))
+                rh = max(ch, lh, 20)
+                rct = QRectF(0, y - 10, MARGIN_L, rh)
+                rct_lid = QRectF(330, y - 10, MARGIN_L - 330, rh)     # rieng cot LID
                 if has:
                     self._hits.append((rct, t))
             else:
@@ -451,11 +460,14 @@ class SheetScene(QGraphicsScene):
                 else:
                     self._cell(x0, 90, y, t.lid, clickable=has, bg=bg, fg=fg)
                 lh = self._cell(x0 + 180, 260, y, t.linename, wrap=True, bg=bg, fg=fg)
-                rct = QRectF(x0, y - 10, MARGIN_R, max(ch, lh, 20))
+                rh = max(ch, lh, 20)
+                rct = QRectF(x0, y - 10, MARGIN_R, rh)
+                rct_lid = QRectF(x0, y - 10, 90, rh)                  # rieng cot LID
                 if has:
                     self._hits.append((rct, t))
             if t.lid:
                 self._term_hits.append((rct, t.lid, t.linename))
+                self._sim_lid_hits.append((rct_lid, t.lid))
 
 
     def _texts(self):
@@ -477,9 +489,12 @@ class SheetScene(QGraphicsScene):
         for xx in [0, MARGIN_L, rx, rx + MARGIN_R]:
             self.addLine(xx, top + 22, xx, bot, QPen(COL_GRID, 1))
         self.addLine(0, top + 20, rx + MARGIN_R, top + 20, QPen(COL_GRID, 1))
-        info = "%s-%s   %s   [%s]" % (self.sh.pa, self.sh.sheetno, self.sh.title, self.sh.drawno)
+        loopsheet = ("%s-%s   " % (self.sh.loopno, self.sh.loopsheetno)
+                     if (self.sh.loopno and self.sh.loopsheetno) else "")
+        info = "%s%s-%s   %s   [%s]" % (loopsheet, self.sh.pa, self.sh.sheetno,
+                                        self.sh.title, self.sh.drawno)
         ti = self.addText(info, QFont("Segoe UI", 13, QFont.Weight.Bold))
-        ti.setDefaultTextColor(COL_TXT); ti.setPos(rx, bot + 6)
+        ti.setDefaultTextColor(COL_TXT); ti.setPos(0, top - 30)
 
     def _sim_dyn_badges(self):
         """Danh dau khoi DONG (tich phan...) + in TI va gia tri hien tai ngay tren khoi."""
@@ -537,8 +552,10 @@ class SheetScene(QGraphicsScene):
         """Xu ly 1 cu click tai vi tri scene sp (ZoomView goi khi bam trai khong keo)."""
         # che do mo phong: click dau vao -> digital doi 0/1, analog nhap so
         if self._sim_on():
-            hit = self.term_at(sp)
-            net = hit[0] if (hit and hit[0] in self.sim_inputs) else None
+            net = None
+            for rect, n in self._sim_lid_hits:      # chi vung cot LID moi set gia tri
+                if rect.contains(sp) and n in self.sim_inputs:
+                    net = n; break
             if net is None:                        # thu diem settable NOI BO tren day
                 for rect, n in getattr(self, "_sim_wire_hits", []):
                     if rect.contains(sp):

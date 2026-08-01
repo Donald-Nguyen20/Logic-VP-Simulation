@@ -140,8 +140,8 @@ class SignalGraphPanel(QWidget):
         lay.addWidget(self.view, 1)
 
         hint = QLabel(
-            "Click 1 tin hieu = chon LAM NOI BAT to tien / hau due / ca hai, hoac Xem dieu kien "
-            "(nhan qua) (bam vao cho trong = bo noi bat).  Double-click = doi lam goc.  "
+            "Click 1 tin hieu = chon LAM NOI BAT to tien / hau due / ca hai "
+            "(bam vao cho trong = bo noi bat).  Double-click = doi lam goc.  "
             "Scroll = zoom, keo = pan.")
         hint.setStyleSheet("color:#94A3B8; font-size:11px;")
         lay.addWidget(hint)
@@ -536,19 +536,6 @@ class SignalGraphPanel(QWidget):
         m.addSeparator()
         a_clear = m.addAction("Bo lam noi bat")
         a_clear.setEnabled(self._focus_id is not None)
-        m.addSeparator()
-        a_cond = m.addAction("⊙  Xem dieu kien (nhan qua)")
-        n = self._nodes.get(node_id) or {}
-        is_bool = True
-        if n.get("db") and n.get("sheet") is not None and n.get("net"):
-            try:
-                is_bool = CT.is_boolean_signal(n["db"], n["sheet"], n["net"])
-            except Exception:
-                is_bool = True
-        a_cond.setEnabled(is_bool)
-        if not is_bool:
-            a_cond.setToolTip("Tin hieu ANALOG (qua khoi tinh toan) - khong co cay"
-                              " nguyen nhan boolean de xem")
         pos = global_pos if global_pos else QCursor.pos()
         act = m.exec(pos)
         if act is a_up:
@@ -562,22 +549,7 @@ class SignalGraphPanel(QWidget):
             self._apply_highlight(node_id, "both")
         elif act is a_clear:
             self._clear_highlight()
-        elif act is a_cond:
-            self._open_cond_tree(node_id)
         # act is None (bam ra ngoai de dong menu) -> giu nguyen trang thai cu
-
-    def _open_cond_tree(self, node_id):
-        """Mo Cay dieu kien (nhan qua) NGAY cho node vua bam - tan dung db/sheet/net
-        da co san trong node dict, khong bat nguoi dung phai roi tab di tim lai."""
-        n = self._nodes.get(node_id)
-        if not n or not n.get("db") or n.get("sheet") is None:
-            return
-        from ui.condtree_window import CondTreeWindow
-        title = n.get("label") or n.get("net") or ""
-        self._cond_win = CondTreeWindow(
-            n["db"], n["sheet"], n["net"], title, self,
-            cpu_paths=getattr(self, "cpu_paths", None))
-        self._cond_win.show()
 
     def _apply_highlight(self, node_id, mode="both"):
         related = self._related_set(node_id, mode)

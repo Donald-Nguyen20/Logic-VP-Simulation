@@ -507,6 +507,20 @@ def _eval_analog(net, aprod, val, db, sheet):
         if g is None:
             g = 1.0
         return xs[0] * xs[1] * g
+    if op == "WSUM":
+        # D-SUM (405F/4060/4061/4062/4063): Y = sum(Gi*Xi). param1=nhan ID,
+        # param2..param(n+1)=G1..Gn theo dung thu tu chan vao (PINNO tang dan).
+        # Mac dinh Gi=0 neu chua dat (dung nhu default trong macro_param.csv).
+        if not allnum(xs):
+            return None
+        pm = _params(db, sheet).get(p["bid"], {})
+        total = 0.0
+        for i, v in enumerate(xs):
+            g = _num(pm.get(str(i + 2)))
+            if g is None:
+                g = 0.0
+            total += g * v
+        return total
     if op == "SUB":
         a, b = named.get("+"), named.get("-")
         if not (_isnum(a) and _isnum(b)):

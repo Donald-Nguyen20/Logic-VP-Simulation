@@ -3831,7 +3831,7 @@
  },
  "405F": {
   "name": "D-SUM1",
-  "desc": "D-SUM1 - Digital summing with gain (2 input). Y=sum(Gi*Xi)+Bias.",
+  "desc": "D-SUM1 - Digital summing with gain (2 input). Y=sum(Gi*Xi).",
   "dt": 0.5,
   "inputs": {
    "X1": {
@@ -3851,10 +3851,6 @@
    "G2": {
     "val": 1.0,
     "desc": "He so nhan cho X2"
-   },
-   "Bias": {
-    "val": 0.0,
-    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
    }
   },
   "nodes": {
@@ -3876,8 +3872,7 @@
     "op": "SUM",
     "in": [
      "g1",
-     "g2",
-     "Bias"
+     "g2"
     ]
    }
   },
@@ -3890,7 +3885,7 @@
  },
  "4060": {
   "name": "D-SUM2",
-  "desc": "D-SUM2 - Digital summing with gain (3 input). Y=sum(Gi*Xi)+Bias.",
+  "desc": "D-SUM2 - Digital summing with gain (3 input). Y=sum(Gi*Xi).",
   "dt": 0.5,
   "inputs": {
    "X1": {
@@ -3918,10 +3913,6 @@
    "G3": {
     "val": 1.0,
     "desc": "He so nhan cho X3"
-   },
-   "Bias": {
-    "val": 0.0,
-    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
    }
   },
   "nodes": {
@@ -3951,8 +3942,7 @@
     "in": [
      "g1",
      "g2",
-     "g3",
-     "Bias"
+     "g3"
     ]
    }
   },
@@ -3965,7 +3955,7 @@
  },
  "4061": {
   "name": "D-SUM3",
-  "desc": "D-SUM3 - Digital summing with gain (4 input). Y=sum(Gi*Xi)+Bias.",
+  "desc": "D-SUM3 - Digital summing with gain (4 input). Y=sum(Gi*Xi).",
   "dt": 0.5,
   "inputs": {
    "X1": {
@@ -4001,10 +3991,6 @@
    "G4": {
     "val": 1.0,
     "desc": "He so nhan cho X4"
-   },
-   "Bias": {
-    "val": 0.0,
-    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
    }
   },
   "nodes": {
@@ -4042,8 +4028,7 @@
      "g1",
      "g2",
      "g3",
-     "g4",
-     "Bias"
+     "g4"
     ]
    }
   },
@@ -4056,7 +4041,7 @@
  },
  "4062": {
   "name": "D-SUM4",
-  "desc": "D-SUM4 - Digital summing with gain (5 input). Y=sum(Gi*Xi)+Bias.",
+  "desc": "D-SUM4 - Digital summing with gain (5 input). Y=sum(Gi*Xi).",
   "dt": 0.5,
   "inputs": {
    "X1": {
@@ -4100,10 +4085,6 @@
    "G5": {
     "val": 1.0,
     "desc": "He so nhan cho X5"
-   },
-   "Bias": {
-    "val": 0.0,
-    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
    }
   },
   "nodes": {
@@ -4149,8 +4130,7 @@
      "g2",
      "g3",
      "g4",
-     "g5",
-     "Bias"
+     "g5"
     ]
    }
   },
@@ -4163,7 +4143,7 @@
  },
  "4063": {
   "name": "D-SUM5",
-  "desc": "D-SUM5 - Digital summing with gain (6 input). Y=sum(Gi*Xi)+Bias.",
+  "desc": "D-SUM5 - Digital summing with gain (6 input). Y=sum(Gi*Xi).",
   "dt": 0.5,
   "inputs": {
    "X1": {
@@ -4215,10 +4195,6 @@
    "G6": {
     "val": 1.0,
     "desc": "He so nhan cho X6"
-   },
-   "Bias": {
-    "val": 0.0,
-    "desc": "Tham so phu (chua ro nghia tu tai lieu - mac dinh cong them, de 0 neu khong dung)"
    }
   },
   "nodes": {
@@ -4272,8 +4248,7 @@
      "g3",
      "g4",
      "g5",
-     "g6",
-     "Bias"
+     "g6"
     ]
    }
   },

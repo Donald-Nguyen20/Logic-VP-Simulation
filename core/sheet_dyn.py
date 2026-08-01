@@ -34,12 +34,24 @@ STATION_CODES = {"820A", "820B", "820C", "820D", "820E", "820F",
                   "8210", "8211", "8304", "8305"}
 
 
-def _dyn_blocks(db, sheet, overrides=None):
+def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
     """Danh sach khoi dong tren sheet: {bid, code, out, x(net), sw(net), ti, init, state}
     (I/D/L) hoac {bid, code, kind:'S', sim, in_nets, out_nets, last_out} (tram MV/SV).
     overrides: {bid: {'ti':.., 'init':..}} (I/D/L) hoac
-               {bid: {'inputs':{...}, 'params':{...}, 'state':{...}}} (tram)."""
+               {bid: {'inputs':{...}, 'params':{...}, 'state':{...}}} (tram).
+    live_values: {net: gia_tri} - KET QUA VUA TINH cua ca sheet (SS.simulate), de bom vao
+    chan vao (in_nets) cua khoi TRAM truoc khi step() 1 lan, giong het cach run() (mo phong
+    dong nhieu buoc) da lam - de badge "Simulate on sheet" (bao gom ca luc dao dong) phan
+    anh dung tin hieu dang chay toi no.
+    sim_cache: {bid: sim_object} - TUY CHON, do NGUOI GOI (ui/app.py) giu SONG xuyen cac
+    lan goi lien tiep (moi lan simulate/dao dong tick). MV cua khoi TRAM la 1 bo TICH LUY
+    (state noi bo), khong phai cong thuc tinh thang - neu moi lan deu dung sim MOI (state
+    rong) thi MV luon dung yen o gia tri khoi dong du input da dung. Truyen sim_cache vao
+    de TAI SU DUNG dung 1 object sim cho moi bid, giup MV thuc su tich luy qua thoi gian
+    (giong nhu dang chay dong ngam). None (mac dinh, dung cho run() ben duoi) = KHONG cache,
+    moi lan dung sim moi tu dau (dung cho 1 lan chay dong doc lap, khong lien quan lan khac)."""
     overrides = overrides or {}
+    live_values = live_values or {}
     c = D.connect(db).cursor()
     MP = SR._macro_pins()
     binfo = {}
@@ -75,7 +87,11 @@ def _dyn_blocks(db, sheet, overrides=None):
             # chi dung mo hinh macro_analog.json khi khoi do khong co than logic goc
             from core import def_sim as DS
             pm = params.get(bid, {})
-            if DS.has_def(code):
+            cached = sim_cache.get(bid) if sim_cache is not None else None
+            is_new = cached is None
+            if cached is not None:
+                sim = cached                    # TAI SU DUNG - giu nguyen state (MV) tich luy tu truoc
+            elif DS.has_def(code):
                 sim = DS.DefSim(code)
                 sim.set_params_by_no(pm)        # tham so THAT tu CAD_BLOCK_PARAM (PRM_n=PARAMNO n+1)
             else:
@@ -86,12 +102,30 @@ def _dyn_blocks(db, sheet, overrides=None):
                     v = SS._num(pm.get(pos))
                     if v is not None:
                         sim.set_param(pname, v)
+            if is_new and sim_cache is not None:
+                sim_cache[bid] = sim
             ov = overrides.get(bid, {})
             for pname, pval in (ov.get("params") or {}).items():
                 sim.set_param(pname, pval)          # nguoi dung ghi de tren gia tri DB
             for sname, sval in (ov.get("state") or {}).items():
                 sim.state[sname] = sval
-            last_out = sim.step()          # gieo gia tri dau ra ban dau (mac dinh)
+            # bom gia tri THAT dang chay toi tung chan vao (tu ket qua vua tinh ca sheet),
+            # roi moi toi gia tri nguoi dung ghi de tay (uu tien cao nhat) - dung thu tu
+            # nhu vong lap run() o duoi, chi khac la chi step() 1 lan (snapshot) chu khong
+            # tich luy qua thoi gian.
+            for nm, net in in_nets.items():
+                v = live_values.get(net)
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    try:
+                        sim.set_input(nm, v)
+                    except Exception:
+                        pass
+            for nm, v in (ov.get("inputs") or {}).items():
+                try:
+                    sim.set_input(nm, v)
+                except Exception:
+                    pass
+            last_out = sim.step()          # tien 1 buoc - neu la sim TAI SU DUNG thi tiep noi tu state cu
             # DIEM XUAT PHAT cho bo tich phan (chi la tro giup MO PHONG - khoi that
             # KHONG co chan nao de dat MV ban dau; MV nam trong bo nho noi cua khoi va
             # duoc giu qua cac vong quet, chi ve 0 khi khoi dong nguoi hoac bi override)
@@ -99,7 +133,10 @@ def _dyn_blocks(db, sheet, overrides=None):
             if ti_ov and hasattr(sim, "ti_override"):
                 sim.ti_override = float(ti_ov)
             init_out = ov.get("init_out")
-            if init_out is not None and hasattr(sim, "warm_start"):
+            # CHI ap dung diem xuat phat khi sim MOI duoc tao (is_new) - neu sim dang duoc
+            # TAI SU DUNG (dang tich luy tu cac lan truoc) ma van goi warm_start moi lan thi
+            # se KEO MV VE LAI init_out o MOI TICK, khong bao gio tich luy len duoc.
+            if is_new and init_out is not None and hasattr(sim, "warm_start"):
                 sim.warm_start(init_out)
                 last_out = dict(sim.out)   # gia tri xuat phat da nam o dung chan ra
             out.append({"bid": bid, "code": code, "kind": "S", "sim": sim,

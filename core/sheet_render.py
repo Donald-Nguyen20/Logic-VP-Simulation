@@ -86,6 +86,8 @@ class Sheet:
         self.pa = ""
         self.sheetno = ""
         self.drawno = ""
+        self.loopno = ""       # so loop (CAD_DATA.LOOPNO), vd "011"
+        self.loopsheetno = ""  # so sheet trong loop (CAD_DATA.SHEETNO), vd "80"
         self.blocks = []
         self.terms = []
         self.wires = []
@@ -100,9 +102,14 @@ def build_sheet(path, sheet_id):
     MP = _macro_pins()
     sh = Sheet()
     sh.id = sheet_id
-    meta = c.execute("SELECT PANO,PASHEETNO,SHEETNAME,DRAWNO FROM CAD_DATA WHERE ID=?", (sheet_id,)).fetchone()
+    meta = c.execute(
+        "SELECT PANO,PASHEETNO,SHEETNAME,DRAWNO,LOOPNO,SHEETNO FROM CAD_DATA WHERE ID=?",
+        (sheet_id,)).fetchone()
     if meta:
-        sh.pa, sh.sheetno, sh.title, sh.drawno = (D._clean(x) for x in meta)
+        sh.pa, sh.sheetno, sh.title, sh.drawno = (D._clean(x) for x in meta[:4])
+        loopno, loopsheetno = meta[4], meta[5]
+        sh.loopno = str(loopno).zfill(3) if loopno is not None else ""
+        sh.loopsheetno = str(loopsheetno) if loopsheetno is not None else ""
     _mtitle = re.search(r"CPU0*(\d+)", sh.title or "")
     sheet_partner = int(_mtitle.group(1)) if (_mtitle and re.match(r"\s*(FROM|TO)\s+CPU", sh.title or "", re.I)) else None
 

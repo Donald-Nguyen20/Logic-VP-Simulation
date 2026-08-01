@@ -20,7 +20,6 @@ from core.importer import def_to_circuit, read_pdf
 from core import dbreader
 from ui.canvas import LogicScene
 from ui.graphwindow import SignalGraphPanel
-from ui.condtree_window import CondTreeWindow
 from core.logic_sim import LogicSim, has_behavior
 from core.analog_sim import AnalogSim, has_analog
 
@@ -399,6 +398,21 @@ class MainWindow(QMainWindow):
         self.resize(1280, 800)
         self.circuit = Circuit("SHEET1")
         self.db_path = None
+        self.sim_global = {}      # {(db_path, TEN_TIN_HIEU.upper()): gia_tri} - mo phong XUYEN SHEET,
+                                   # song suot phien lam viec (khong xoa khi doi sheet)
+        self.sim_osc = {}         # {(db_path, sheet_id, net): {"mode","lo","hi","period","rate",
+                                   #  "value","_next","_t"}} - diem ANALOG dang DAO DONG (bat qua
+                                   # chuot phai "Dat dao dong..."), chay NGAM cho moi sheet dang bat,
+                                   # ke ca sheet khong hien thi (xem _osc_tick / _recompute_sheet_bg)
+        self.station_sims = {}    # {(db_path, sheet_id): {bid: sim_object}} - GIU SONG object mo
+                                   # phong khoi TRAM (MV/SV...) xuyen cac lan _apply_sheet_sim lien
+                                   # tiep, de MV (bo tich phan noi) THUC SU tich luy theo thoi gian
+                                   # thay vi luon dung yen (xem core/sheet_dyn._dyn_blocks). Reset khi
+                                   # mo sheet / bat-tat simulate / nguoi dung sua Block parameters.
+        from PySide6.QtCore import QTimer
+        self._osc_timer = QTimer(self)
+        self._osc_timer.timeout.connect(self._osc_tick)
+        self._osc_timer.start(100)   # tick nen 0.1s; tung diem tu quyet dinh luc nao THUC SU cap nhat
         self.nav_history = []
         self.manual = self._load_manual()
         self.internal_map = self._load_internal()
@@ -744,9 +758,11 @@ class MainWindow(QMainWindow):
         self.sheet_scene.on_func_view = self._show_func_table
         # neu dang bat mo phong tren trang -> ap dung cho sheet moi
         if getattr(self, "sim_sheet_act", None) is not None and self.sim_sheet_act.isChecked():
-            self.sim_env = {}
+            self.sim_env = self._default_sim_digital(self.db_path, sheet_id)
             self.sim_analog = self._default_sim_analog(self.db_path, sheet_id)
+            self._seed_sim_global(self.db_path, sheet_id, self.sim_env, self.sim_analog)
             self.sim_dyn_over = {}
+            self.station_sims.pop((self.db_path, sheet_id), None)   # mo sheet -> khoi tram bat dau lai
             self.sheet_scene.on_sim_toggle = self._sim_toggle
             self.sheet_scene.on_sim_set_analog = self._sim_set_analog
             self.sheet_scene.on_sim_dyn_config = self._sim_dyn_config
@@ -920,7 +936,6 @@ class MainWindow(QMainWindow):
         code = (code or "").upper()
         m = QMenu(self)
         a_graph = m.addAction("View signal node diagram")
-        a_cond = m.addAction("View conditions (for signal = 1)")
         a_view = m.addAction("View function (internal logic)")
         a_live = m.addAction("Draw internal logic (design)")
         a_sim = m.addAction("Block parameters (edit for simulation)")
@@ -930,32 +945,11 @@ class MainWindow(QMainWindow):
                   and getattr(self, "cur_sheet", None) is not None)
         a_sim.setEnabled(has_db and bid is not None)
         a_graph.setEnabled(has_db)
-        # "Xem dieu kien" chi co y nghia voi tin hieu DIGITAL (dau ra la 1 phep
-        # logic hoac so sanh nguong) - khoi tinh toan analog thuan (SUM/DIF/
-        # TRAN-BMP...) se cho ra 1 cay rong, khong co gi de xem nen khoa lai.
-        cond_ok = has_db and bid is not None
-        if cond_ok:
-            try:
-                from core.signal_graph import block_output_net
-                from core import cond_tree as CT
-                _net = block_output_net(self.db_path, self.cur_sheet, bid)
-                cond_ok = bool(_net) and CT.is_boolean_signal(self.db_path, self.cur_sheet, _net)
-            except Exception:
-                cond_ok = has_db and bid is not None
-        a_cond.setEnabled(cond_ok)
-        if has_db and bid is not None and not cond_ok:
-            a_cond.setToolTip("Tin hieu ANALOG (qua khoi tinh toan) - khong co cay"
-                              " nguyen nhan boolean de xem")
         act = m.exec(global_pos)
         if act == a_graph:
             from core.signal_graph import block_output_net
             net = block_output_net(self.db_path, self.cur_sheet, bid)
             self._open_node_tab(net, name)
-        elif act == a_cond:
-            from core.signal_graph import block_output_net
-            net = block_output_net(self.db_path, self.cur_sheet, bid)
-            CondTreeWindow(self.db_path, self.cur_sheet, net, name, self,
-                           cpu_paths=getattr(self, "cpu_paths", None)).show()
         elif act == a_view:
             self.show_internal_logic(code, name)
         elif act == a_live:
@@ -987,25 +981,19 @@ class MainWindow(QMainWindow):
             return
         m = QMenu(self)
         a_graph = m.addAction("View signal node diagram")
-        a_cond = m.addAction("View conditions (for signal = 1)")
+        sc = getattr(self, "sheet_scene", None)
+        osc_ok = bool(sc is not None and sc._sim_on() and net in sc.sim_inputs
+                      and sc.sim_kind.get(net) == "A")
+        a_osc = m.addAction("⏲ Set oscillation...")
+        a_osc.setEnabled(osc_ok)
+        if not osc_ok:
+            a_osc.setToolTip("Only for an ANALOG input point, while 'Simulate on sheet' is ON")
         a_ai = m.addAction("Explain (AI)")
-        # chi cho xem cay dieu kien voi tin hieu DIGITAL - xem ghi chu o block_context_menu
-        try:
-            from core import cond_tree as CT
-            cond_ok = CT.is_boolean_signal(self.db_path, self.cur_sheet, net)
-        except Exception:
-            cond_ok = True
-        a_cond.setEnabled(cond_ok)
-        if not cond_ok:
-            a_cond.setToolTip("Tin hieu ANALOG (qua khoi tinh toan) - khong co cay"
-                              " nguyen nhan boolean de xem")
         act = m.exec(global_pos)
         if act == a_graph:
             self._open_node_tab(net, linename or net)
-        elif act == a_cond:
-            CondTreeWindow(self.db_path, self.cur_sheet, net,
-                           linename or net, self,
-                           cpu_paths=getattr(self, "cpu_paths", None)).show()
+        elif act == a_osc:
+            self._open_osc_dialog(net, linename)
         elif act == a_ai:
             try:
                 from core import project_index as PI
@@ -1033,6 +1021,150 @@ class MainWindow(QMainWindow):
         except Exception:
             return {}
 
+    def _seed_sim_global(self, db, sheet, digital, analog, terms=None):
+        """Ap gia tri da tung tinh o SHEET KHAC (luu trong self.sim_global, khoa theo
+        (db, Line Name.upper())) vao cac terminal DAU VAO (ben trai, t.side=='L') cua
+        sheet dang mo, GHI DE len mac dinh 0. Sua truc tiep 2 dict digital/analog truyen vao.
+        terms=None -> lay tu sheet_scene dang hien thi (nhu truoc); truyen terms rieng (tu
+        sheet_render.build_sheet) de dung cho sheet KHONG hien thi (dao dong nen)."""
+        if terms is None:
+            sc = getattr(self, "sheet_scene", None)
+            if sc is None or not getattr(self, "sim_global", None):
+                return
+            terms = sc.sh.terms
+        elif not getattr(self, "sim_global", None):
+            return
+        from core import sheet_sim as SS
+        try:
+            kinds = SS._kind_map(db, sheet)
+        except Exception:
+            kinds = {}
+        for t in terms:
+            if t.side != "L" or not t.lid or not t.linename:
+                continue
+            key = (db, t.linename.strip().upper())
+            if key not in self.sim_global:
+                continue
+            v = self.sim_global[key]
+            if kinds.get(t.lid) == "A":
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    analog[t.lid] = float(v)
+            else:
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    digital[t.lid] = 1 if v > 0.5 else 0
+
+    def _export_sim_global(self, db, sheet, values, terms=None):
+        """Sau khi tinh xong 1 sheet: ghi gia tri cac terminal DAU RA (ben phai, t.side=='R')
+        co ten vao kho toan cuc self.sim_global, de sheet KHAC mo sau se lay duoc.
+        terms=None -> lay tu sheet_scene dang hien thi; truyen rieng cho sheet nen (xem tren)."""
+        if terms is None:
+            sc = getattr(self, "sheet_scene", None)
+            if sc is None:
+                return
+            terms = sc.sh.terms
+        for t in terms:
+            if t.side != "R" or not t.lid or not t.linename:
+                continue
+            v = values.get(t.lid)
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                self.sim_global[(db, t.linename.strip().upper())] = v
+
+    def _default_sim_digital(self, db, sheet):
+        """Cac net DIGITAL la dau vao that (chua co khoi nao mo hinh sinh ra) -> mac dinh = 0,
+        khop voi cach hien thi hien tai (net chua set van ve la '0', khong con trang thai '?').
+        Neu khong lam vay, cac khoi doi hoi DU tat ca dau vao (WSUM, ADD...) se ra rong khi
+        chi 1 trong so cac dau vao chua thuc su duoc bam set, du man hinh van hien '0' nhu binh
+        thuong khien nguoi dung tuong da du du lieu. Nguoi dung van bam de doi lai gia tri khac."""
+        from core import sheet_sim as SS
+        try:
+            kinds = SS._kind_map(db, sheet)
+            return {n: 0 for n, _ in SS.input_nets(db, sheet) if kinds.get(n) != "A"}
+        except Exception:
+            return {}
+
+    def _osc_tick(self):
+        """Tick nen (0.1s) cho tat ca diem dang DAO DONG (self.sim_osc), bat ke sheet nao.
+        Moi diem tu quyet dinh luc nao thuc su can gia tri moi (theo "rate" rieng). Sheet
+        dang HIEN THI thi ve lai ngay (nhu click tay); sheet KHAC thi tinh ngam + xuat sang
+        sim_global de van lan xuyen sheet duoc, khong ve UI (tiet kiem)."""
+        osc = getattr(self, "sim_osc", None)
+        if not osc:
+            return
+        import time, math, random
+        now = time.monotonic()
+        by_sheet = {}
+        for key, cfg in list(osc.items()):
+            db, sheet, net = key
+            if now < cfg.get("_next", 0):
+                continue
+            lo, hi = cfg["lo"], cfg["hi"]
+            if cfg["mode"] == "period":
+                cfg["_t"] = cfg.get("_t", 0.0) + cfg["rate"]
+                mid, amp = (lo + hi) / 2.0, (hi - lo) / 2.0
+                cfg["value"] = mid + amp * math.sin(2 * math.pi * cfg["_t"] / max(cfg["period"], 0.1))
+            else:
+                step = (hi - lo) * 0.15
+                v = cfg.get("value", (lo + hi) / 2.0) + random.uniform(-step, step)
+                cfg["value"] = max(lo, min(hi, v))
+            cfg["_next"] = now + cfg["rate"]
+            by_sheet.setdefault((db, sheet), []).append(net)
+        for (db, sheet), nets in by_sheet.items():
+            if db == getattr(self, "db_path", None) and sheet == getattr(self, "cur_sheet", None):
+                ana = getattr(self, "sim_analog", {})
+                for net in nets:
+                    ana[net] = osc[(db, sheet, net)]["value"]
+                self.sim_analog = ana
+                self._apply_sheet_sim()
+            else:
+                self._recompute_sheet_bg(db, sheet, nets)
+
+    def _recompute_sheet_bg(self, db, sheet, nets):
+        """Tinh ngam 1 sheet dang KHONG hien thi nhung co diem dang dao dong, de gia tri
+        van lan xuyen sheet qua sim_global (giong het co che sheet dang mo). Khong dung
+        sheet_scene (chua bi mo) -> tu dung sheet_render.build_sheet lay terms rieng."""
+        try:
+            from core import sheet_render as SR
+            from core import sheet_sim as SS
+            sh = SR.build_sheet(db, sheet)
+        except Exception:
+            return
+        digital = self._default_sim_digital(db, sheet)
+        analog = self._default_sim_analog(db, sheet)
+        self._seed_sim_global(db, sheet, digital, analog, terms=sh.terms)
+        for net in nets:
+            cfg = self.sim_osc.get((db, sheet, net))
+            if cfg is not None:
+                analog[net] = cfg["value"]
+        try:
+            values, _ = SS.simulate(db, sheet, digital, analog)
+        except Exception:
+            return
+        self._export_sim_global(db, sheet, values, terms=sh.terms)
+
+    def _open_osc_dialog(self, net, linename):
+        """Chuot phai tren 1 tin hieu ANALOG dau vao (dang simulate) -> mo dialog cau hinh
+        dao dong. Chi BAT/DUNG that su khi nguoi dung bam nut trong dialog (khong tu ap
+        dung khi dang go so)."""
+        from ui.osc_dialog import OscillationDialog
+        key = (self.db_path, self.cur_sheet, net)
+        cfg = self.sim_osc.get(key)
+        dlg = OscillationDialog(net, linename, cfg, self)
+        dlg.exec()
+        if dlg.stop_requested:
+            self.sim_osc.pop(key, None)
+            self.status("Da dung dao dong: %s" % (linename or net))
+        elif dlg.result_cfg is not None:
+            import time
+            c = dict(dlg.result_cfg)
+            c["_next"] = time.monotonic()
+            c["_t"] = 0.0
+            c["value"] = getattr(self, "sim_analog", {}).get(net, (c["lo"] + c["hi"]) / 2.0)
+            self.sim_osc[key] = c
+            self.status("Da bat dao dong: %s" % (linename or net))
+        else:
+            return          # bam Dong / Cancel -> khong doi gi
+        self._apply_sheet_sim()
+
     def toggle_sheet_sim(self, on):
         """Bat/tat lop phu mo phong ngay tren trang logic."""
         sc = getattr(self, "sheet_scene", None)
@@ -1043,9 +1175,11 @@ class MainWindow(QMainWindow):
                 self.status("Open a sheet first.")
                 self.sim_sheet_act.setChecked(False)
                 return
-            self.sim_env = {}
+            self.sim_env = self._default_sim_digital(self.db_path, self.cur_sheet)
             self.sim_analog = self._default_sim_analog(self.db_path, self.cur_sheet)
+            self._seed_sim_global(self.db_path, self.cur_sheet, self.sim_env, self.sim_analog)
             self.sim_dyn_over = {}
+            self.station_sims.pop((self.db_path, self.cur_sheet), None)  # bat lai -> khoi tram tu 0
             sc.on_sim_toggle = self._sim_toggle
             sc.on_sim_set_analog = self._sim_set_analog
             sc.on_sim_dyn_config = self._sim_dyn_config
@@ -1053,15 +1187,25 @@ class MainWindow(QMainWindow):
             self.status("Simulation: DIGITAL inputs (▸) click to cycle ? -> 1 -> 0; ANALOG (✎) click to enter a number. Integrator blocks (orange) click to set TI/dt/steps and Run dynamic.")
         else:
             sc.clear_sim()
+            db, sh = getattr(self, "db_path", None), getattr(self, "cur_sheet", None)
+            if getattr(self, "sim_osc", None):     # tat simulate -> dung luon dao dong cua sheet nay
+                for k in [k for k in self.sim_osc if k[0] == db and k[1] == sh]:
+                    self.sim_osc.pop(k, None)
+            self.station_sims.pop((db, sh), None)  # tat -> huy state khoi tram dang tich luy
             self.status("Sheet simulation turned off.")
 
-    def _dyn_info(self, db, sh):
-        """{bid: {ti, out, code, label}} cac khoi dong (tich phan) de danh dau tren sheet."""
+    def _dyn_info(self, db, sh, live_values=None):
+        """{bid: {ti, out, code, label}} cac khoi dong (tich phan) de danh dau tren sheet.
+        live_values: ket qua sheet_sim.simulate() vua tinh - bom vao chan vao khoi TRAM de
+        badge phan anh dung tin hieu dang chay toi (xem ghi chu trong sheet_dyn._dyn_blocks).
+        Dung self.station_sims[(db,sh)] lam sim_cache de MV khoi TRAM tich luy xuyen cac lan goi."""
         from core import sheet_dyn as DYN
         from core import ai_explain as AE
         info = {}
+        cache = self.station_sims.setdefault((db, sh), {})
         try:
-            for b in DYN._dyn_blocks(db, sh, getattr(self, "sim_dyn_over", {})):
+            for b in DYN._dyn_blocks(db, sh, getattr(self, "sim_dyn_over", {}),
+                                     live_values=live_values, sim_cache=cache):
                 if b["kind"] == "S":
                     info[b["bid"]] = {"kind": "S", "code": b["code"],
                                       "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
@@ -1226,6 +1370,10 @@ class MainWindow(QMainWindow):
             if sp_ti.value() > 0:                       # de trong = theo logic goc
                 over[bid]["ti"] = sp_ti.value()
             self.sim_dyn_over = over
+            # nguoi dung vua sua tham so/init_out -> bo sim DANG TICH LUY cua khoi nay de
+            # lan _apply_sheet_sim() ke tiep dung lai tu dau voi cau hinh MOI (khong thi
+            # cai cu se tiep tuc tich luy, bo qua thay doi nguoi dung vua nhap)
+            self.station_sims.get((self.db_path, self.cur_sheet), {}).pop(bid, None)
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
             dlg.accept()
             self.run_dynamic_sim()
@@ -1241,8 +1389,10 @@ class MainWindow(QMainWindow):
         values, _ = SS.simulate(db, sh, getattr(self, "sim_env", {}),
                                 getattr(self, "sim_analog", {}))
         self.sim_values = values          # luu lai de tai su dung (VD trong trinh ve logic noi)
+        self._export_sim_global(db, sh, values)     # cho sheet KHAC mo sau lay lai duoc
+        osc_nets = {net for (d, s, net) in getattr(self, "sim_osc", {}) if d == db and s == sh}
         self.sheet_scene.set_sim(values, kinds, inputs, getattr(self, "sim_analog", {}),
-                                 dyn=self._dyn_info(db, sh))
+                                 dyn=self._dyn_info(db, sh, values), osc_nets=osc_nets)
 
     def run_dynamic_sim(self):
         """Chay mo phong DONG: khoi tich phan/PID tu tien theo thoi gian toi on dinh."""
@@ -1347,6 +1497,8 @@ class MainWindow(QMainWindow):
         else:
             ana.pop(net, None)
         self.sim_analog = ana
+        # set gia tri TAY -> huy dao dong dang bat cho dung net nay (tranh timer ghi de lai)
+        self.sim_osc.pop((self.db_path, self.cur_sheet, net), None)
         self._apply_sheet_sim()
 
     def find_signal(self):
