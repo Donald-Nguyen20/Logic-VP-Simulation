@@ -327,6 +327,9 @@ def _res(R, sheet_id, net):
     if sid is not None:
         return (R["idname"].get((sid, sig), ""), R["num"].get(sid, ""))
     ln = R["idname"].get((sheet_id, net), "")
+    if not ln:
+        # DB kieu EHC: net = dia chi he thong (DZ0005...), ten o CAD_SIGNAL
+        ln = R.get("sysname", {}).get(net, "")
     il = R["idline"].get((sheet_id, net))
     ref = ""
     if il and R["crs"].get(il):

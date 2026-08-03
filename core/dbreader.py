@@ -154,6 +154,18 @@ def _resolvers(path):
             idline[(sid, _clean(sig))] = il
     except Exception:
         pass
+    # Nguon ten thu 2: CAD_SIGNAL (SYSTEMLINE -> LINENAME). Mot so DB (vd 21 EHC MC.db)
+    # dat net tren chan khoi bang THANG dia chi he thong (DZ0005, EW0331...) va ten cua
+    # chung chi nam o CAD_SIGNAL, khong co trong CAD_ID -> dung lam fallback khi CAD_ID
+    # khong khop (app goc cung doc duoc ten cho cac DB nay).
+    sysname = {}
+    try:
+        for sl, ln in c.execute("SELECT SYSTEMLINE,LINENAME FROM CAD_SIGNAL"):
+            sl = _clean(sl); ln = _clean(ln)
+            if sl and ln and sl not in sysname:
+                sysname[sl] = ln
+    except Exception:
+        pass
     crs = defaultdict(list)   # idline -> [(pano,ps),...]
     try:
         for il, cid, pano, ps in c.execute("SELECT IDLINE_ID,CRS_ID,PANO,PASHEETNO FROM CAD_ID_CRS"):
@@ -162,7 +174,8 @@ def _resolvers(path):
         pass
     pacodes = sorted({k[0] for k in code2sheet if k[0]}, key=len, reverse=True)
     _RES.update(path=path, meta=meta, code2sheet=code2sheet, num=num,
-                idname=idname, idline=idline, crs=crs, pacodes=pacodes)
+                idname=idname, idline=idline, crs=crs, pacodes=pacodes,
+                sysname=sysname)
     return _RES
 
 
@@ -281,6 +294,9 @@ def build_circuit(path, sheet_id):
             return (R["idname"].get((sid, sig), ""), R["num"].get(sid, ""))
         # 2) tin hieu cuc bo dinh nghia tren sheet nay -> ten + dich qua CRS
         ln = R["idname"].get((sheet_id, net), "")
+        if not ln:
+            # 3) DB kieu EHC: net = dia chi he thong, ten nam o CAD_SIGNAL
+            ln = R.get("sysname", {}).get(net, "")
         il = R["idline"].get((sheet_id, net))
         ref = ""
         if il and R["crs"].get(il):

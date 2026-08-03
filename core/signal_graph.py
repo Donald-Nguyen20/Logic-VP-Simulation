@@ -197,6 +197,16 @@ def _dbc(db):
             idname[(sid, D._clean(sig))] = D._clean(ln); idline[(sid, D._clean(sig))] = il
     except Exception:
         pass
+    # fallback: CAD_SIGNAL (SYSTEMLINE -> LINENAME) cho DB kieu EHC - net tren chan la
+    # thang dia chi he thong (DZ0005, EW0331...), ten chi co trong CAD_SIGNAL
+    sysname = {}
+    try:
+        for sl, ln in c.execute("SELECT SYSTEMLINE,LINENAME FROM CAD_SIGNAL"):
+            sl = D._clean(sl); ln = D._clean(ln)
+            if sl and ln and sl not in sysname:
+                sysname[sl] = ln
+    except Exception:
+        pass
     pacodes = sorted({k[0] for k in code2sheet if k[0]}, key=len, reverse=True)
     name2 = defaultdict(list)
     for (sid, sig), ln in idname.items():
@@ -212,7 +222,7 @@ def _dbc(db):
     d = {"meta": meta, "code2sheet": code2sheet, "num": num, "idname": idname,
          "idline": idline, "pacodes": pacodes, "name2": name2,
          "cpuno": cpuno, "cpuname": cpuname, "comment1": comment1,
-         "sheetname": sheetname, "nets": {}, "prodn": {}}
+         "sheetname": sheetname, "sysname": sysname, "nets": {}, "prodn": {}}
     _DBC[db] = d
     return d
 
@@ -230,7 +240,8 @@ def _name_of(db, sheet, net):
     sid, sig = D._parse_tag(net, R["pacodes"], R["code2sheet"])
     if sid is not None:
         return R["idname"].get((sid, sig), "")
-    return R["idname"].get((sheet, net), "")
+    return (R["idname"].get((sheet, net), "")
+            or R.get("sysname", {}).get(net, ""))
 
 
 def _nets(db, sheet):
