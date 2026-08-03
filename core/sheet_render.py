@@ -86,8 +86,12 @@ class Sheet:
         self.pa = ""
         self.sheetno = ""
         self.drawno = ""
-        self.loopno = ""       # so loop (CAD_DATA.LOOPNO), vd "011"
+        self.loopno = ""       # so loop (CAD_DATA.LOOPNO), da zfill(3), vd "011"
+        self.loopno_raw = ""   # so loop KHONG zfill (dung de khop dung cot ben trai)
         self.loopsheetno = ""  # so sheet trong loop (CAD_DATA.SHEETNO), vd "80"
+        self.comment1 = ""     # CAD_DATA.COMMENT1 - ten sheet hien o cot ben trai
+        self.cpuno = None      # CAD_CPU.CPUNO - de hien "CPUx  ten" truoc tieu de sheet
+        self.cpuname = ""      # CAD_CPU.CPUNAME
         self.blocks = []
         self.terms = []
         self.wires = []
@@ -103,13 +107,21 @@ def build_sheet(path, sheet_id):
     sh = Sheet()
     sh.id = sheet_id
     meta = c.execute(
-        "SELECT PANO,PASHEETNO,SHEETNAME,DRAWNO,LOOPNO,SHEETNO FROM CAD_DATA WHERE ID=?",
+        "SELECT PANO,PASHEETNO,SHEETNAME,DRAWNO,LOOPNO,SHEETNO,COMMENT1 FROM CAD_DATA WHERE ID=?",
         (sheet_id,)).fetchone()
     if meta:
         sh.pa, sh.sheetno, sh.title, sh.drawno = (D._clean(x) for x in meta[:4])
         loopno, loopsheetno = meta[4], meta[5]
         sh.loopno = str(loopno).zfill(3) if loopno is not None else ""
+        sh.loopno_raw = str(loopno) if loopno is not None else ""
         sh.loopsheetno = str(loopsheetno) if loopsheetno is not None else ""
+        sh.comment1 = D._clean(meta[6]) if len(meta) > 6 else ""
+    try:
+        cpu = c.execute("SELECT CPUNO,CPUNAME FROM CAD_CPU").fetchone()
+        if cpu:
+            sh.cpuno, sh.cpuname = cpu[0], D._clean(cpu[1])
+    except Exception:
+        pass
     _mtitle = re.search(r"CPU0*(\d+)", sh.title or "")
     sheet_partner = int(_mtitle.group(1)) if (_mtitle and re.match(r"\s*(FROM|TO)\s+CPU", sh.title or "", re.I)) else None
 

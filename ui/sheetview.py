@@ -489,12 +489,18 @@ class SheetScene(QGraphicsScene):
         for xx in [0, MARGIN_L, rx, rx + MARGIN_R]:
             self.addLine(xx, top + 22, xx, bot, QPen(COL_GRID, 1))
         self.addLine(0, top + 20, rx + MARGIN_R, top + 20, QPen(COL_GRID, 1))
-        loopsheet = ("%s-%s   " % (self.sh.loopno, self.sh.loopsheetno)
-                     if (self.sh.loopno and self.sh.loopsheetno) else "")
-        info = "%s%s-%s   %s   [%s]" % (loopsheet, self.sh.pa, self.sh.sheetno,
-                                        self.sh.title, self.sh.drawno)
+        # Ten sheet: dung DUNG cong thuc nhu cot ben trai (db_tree/_fmt_sheet) - comment1 +
+        # "Loop x" + "Sheet y" + ten sheet (SHEETNAME) - thay vi ghep pa-sheetno/drawno rieng.
+        # Them "CPUx  ten CPU" o dau (tu CAD_CPU trong chinh file DB nay) giong nhu tren cay.
+        cpu_pfx = ("CPU%s  %s" % (self.sh.cpuno, self.sh.cpuname)
+                   if self.sh.cpuno is not None else "")
+        parts = [cpu_pfx, self.sh.comment1,
+                 ("Loop %s" % self.sh.loopno_raw) if self.sh.loopno_raw else "",
+                 ("Sheet %s" % self.sh.loopsheetno) if self.sh.loopsheetno else "",
+                 self.sh.title]
+        info = "  ".join(p for p in parts if p) or ("Sheet#%s" % self.sh.id)
         ti = self.addText(info, QFont("Segoe UI", 13, QFont.Weight.Bold))
-        ti.setDefaultTextColor(COL_TXT); ti.setPos(0, top - 30)
+        ti.setDefaultTextColor(QColor("#0B3D91")); ti.setPos(0, top - 30)
 
     def _sim_dyn_badges(self):
         """Danh dau khoi DONG (tich phan...) + in TI va gia tri hien tai ngay tren khoi."""

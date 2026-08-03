@@ -109,6 +109,10 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
                 sim.set_param(pname, pval)          # nguoi dung ghi de tren gia tri DB
             for sname, sval in (ov.get("state") or {}).items():
                 sim.state[sname] = sval
+            # nut vat ly tren mat tram (vd OPS_IN5 = nut AUT) - nguon THAT su doc lap voi
+            # moi day, ton tai song song (xem ghi chu trong ui/app.py::_sim_station_config)
+            for opname, opval in (ov.get("ops") or {}).items():
+                sim.ops[opname] = opval
             # bom gia tri THAT dang chay toi tung chan vao (tu ket qua vua tinh ca sheet),
             # roi moi toi gia tri nguoi dung ghi de tay (uu tien cao nhat) - dung thu tu
             # nhu vong lap run() o duoi, chi khac la chi step() 1 lan (snapshot) chu khong
@@ -141,7 +145,8 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
                 last_out = dict(sim.out)   # gia tri xuat phat da nam o dung chan ra
             out.append({"bid": bid, "code": code, "kind": "S", "sim": sim,
                         "in_nets": in_nets, "out_nets": out_nets,
-                        "forced_inputs": ov.get("inputs") or {}, "last_out": last_out})
+                        "forced_inputs": ov.get("inputs") or {},
+                        "forced_ops": ov.get("ops") or {}, "last_out": last_out})
             continue
         if code in INTEG_CODES:
             kind = "I"
@@ -259,6 +264,8 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None, 
                         sim.set_input(nm, v)
                 for nm, v in b["forced_inputs"].items():
                     sim.set_input(nm, v)         # nguoi dung ghi de (uu tien cao nhat)
+                for opname, opval in b.get("forced_ops", {}).items():
+                    sim.ops[opname] = opval       # nut vat ly tren tram (vd AUT = OPS_IN5)
                 b["last_out"] = sim.step()
                 continue
             x = val.get(b["x"])

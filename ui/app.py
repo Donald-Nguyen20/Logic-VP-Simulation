@@ -542,6 +542,15 @@ class MainWindow(QMainWindow):
         label = " ".join(p for p in parts if p)
         return label or ("Sheet#%s" % s["id"])
 
+    def _clear_imported(self):
+        """Xoa het cac DB da import truoc do (cay + meta) - dung khi Import DB/Import
+        folder duoc bam MOI: lan import moi se DE HOAN TOAN len bo cu, duong dan cu
+        khong con lien quan nua (khong gop chung voi lan truoc)."""
+        self.db_tree.clear()
+        self.db_nodes = {}
+        self.meta_by_path = {}
+        self.cpu_paths = {}
+
     def _add_db_to_tree(self, path, meta, sheets):
         # Moi file DB (CPU) la 1 muc top-level -> cac sheet ben trong (khong gom theo Project)
         cpu_item = self.db_nodes.get(path)
@@ -655,10 +664,25 @@ class MainWindow(QMainWindow):
         self.sim_sheet_act.setToolTip("Toggle: color 0/1 on the logic sheet; click inputs to change 0/1")
         self.sim_sheet_act.toggled.connect(self.toggle_sheet_sim)
         tb.addAction(self.sim_sheet_act)
+        tb.addSeparator()
+        act("Cause & Effect Matrix", self.open_ce_matrix,
+            "Tim nguyen nhan goc cho nhieu tin hieu dich (vd MFT, ETS...) va gom thanh 1 bang")
         # dt & so buoc & nut Chay nam trong hop cai dat cua tung khoi tich phan
         # (bam vao khoi cam). Gia tri chung luu o day:
         self._dyn_dt = 0.5
         self._dyn_steps = 300
+
+    def open_ce_matrix(self):
+        """Mo cua so Ma tran nhan qua (chon nhieu tin hieu dich, gom nguyen nhan goc)."""
+        from ui.ce_matrix_dialog import CEMatrixDialog
+        if not getattr(self, "meta_by_path", None):
+            self.status("Import at least one DB first.")
+            return
+        dlg = getattr(self, "_ce_matrix_dlg", None)
+        if dlg is None or not dlg.isVisible():
+            dlg = CEMatrixDialog(self, self)
+            self._ce_matrix_dlg = dlg
+        dlg.show(); dlg.raise_(); dlg.activateWindow()
 
     def add_block(self, btype):
         k = len(self.circuit.blocks)
@@ -699,6 +723,7 @@ class MainWindow(QMainWindow):
             "", "SQLite DB (*.db);;All (*.*)")
         if not paths:
             return
+        self._clear_imported()   # import moi = DE HOAN TOAN len bo cu, khong gop chung
         n = 0; errs = []
         for p in paths:
             try:
@@ -722,6 +747,10 @@ class MainWindow(QMainWindow):
             return
         import glob
         files = sorted(glob.glob(os.path.join(d, "*.db")))
+        if not files:
+            self.status("Khong tim thay file .db nao trong thu muc da chon.")
+            return
+        self._clear_imported()   # import moi = DE HOAN TOAN len bo cu, khong gop chung
         n = 0
         for p in files:
             try:
@@ -820,9 +849,12 @@ class MainWindow(QMainWindow):
                 self._open_cross(c[0], c[1])
 
     def _open_cross(self, path, sheet_id):
-        prev = (self.db_path, self.cur_sheet)
+        # cur_sheet chi ton tai SAU khi da mo it nhat 1 sheet (vd bam thang vao 1
+        # hang trong Ma tran nhan qua truoc khi mo sheet nao) - dung getattr tranh
+        # AttributeError, khong co gi de "quay lai" thi thoi.
+        prev = (getattr(self, "db_path", None), getattr(self, "cur_sheet", None))
         self.db_path = path
-        self._open_sheet(sheet_id, push_prev=prev)
+        self._open_sheet(sheet_id, push_prev=prev if prev[1] is not None else None)
 
     def nav_back(self):
         if getattr(self, "nav_history", None):
@@ -1281,9 +1313,18 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def _sim_station_config(self, bid, cur, over):
-        """Hop cai dat khoi TRAM (MV/SV/MV-POS/SV-MV...): chan nao co day thi chi bao
-        (bam vao day tren sheet de dat), chan nao KHONG co day (Auto/Manual/DLT MV,
-        cuong buc, ABN gia lap...) thi cho nhap thang trong hop nay."""
+        """Hop cai dat khoi TRAM (MV/SV/MV-POS/SV-MV...). Theo dung than lenh TAG_MCR.DEF goc:
+        - Chan CO DAY (Manual/DLT MV/HL-MV/POS/...): CHI hien gia tri THAT tu day (bam vao
+          day tren sheet de doi) - khong sua duoc o day, dung y that ngoai doi (day nao dut
+          day day).
+        - Chan KHONG noi day (FF/MV/OR-R-MV1/OR-MV1/OR-R-MV2/OR-MV2/Hold): sua duoc THANG
+          o day, vi khong co day nao khac de "nhan tu ben ngoai" ca - day la cach duy nhat
+          de dat gia tri cho chung khi mo phong.
+        - RIENG "Auto": than lenh goc co 2 nguon DOC LAP, OR voi nhau, de dua che do Auto len
+          1 - (1) chan vao "Auto" tu day ben ngoai, va (2) nut vat ly "AUT" tren mat tram
+          (OPS_IN5) ma nguoi van hanh bam truc tiep, khong qua day nao. Cho phep dat CA HAI
+          o day: 1 o ep gia tri chan "Auto" (tri-state, mac dinh theo dung day that), VA 1
+          nut AUT rieng (nut vat ly, doc lap voi day)."""
         from core import analog_sim as AS
         from core import signal_graph as SG
         code = cur.get("code")
@@ -1292,6 +1333,7 @@ class MainWindow(QMainWindow):
         ov = dict(over.get(bid, {}))
         ov_in = dict(ov.get("inputs") or {})
         ov_pm = dict(ov.get("params") or {})
+        ov_ops = dict(ov.get("ops") or {})
         real_pm = cur.get("real_params") or {}   # gia tri THAT da cau hinh trong DB (CAD_BLOCK_PARAM)
 
         dlg = QDialog(self)
@@ -1301,25 +1343,70 @@ class MainWindow(QMainWindow):
         form = QFormLayout(scroll_body)
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setWidget(scroll_body)
         outer.addWidget(scroll)
-        form.addRow(QLabel("Wired pins: click their terminal on the sheet to set. "
-                           "Unwired pins below are set here (not on the sheet)."))
-        widgets = {}   # name -> (kind, widget)
+        form.addRow(QLabel("Chan CO DAY: chi hien gia tri that (bam vao day tren sheet de "
+                           "doi). Rieng 'Auto' co them o ep + nut AUT vat ly. Chan KHONG noi "
+                           "day (FF/MV/OR-R-MV1...): sua thang duoc o day."))
+        widgets = {}   # name -> ("ops",opname,cb) nut AUT | ("tri",cb) ep chan Auto |
+                       # ("b"/"n", w) chan khong noi day sua truc tiep
         for name, meta in (spec.get("inputs") or {}).items():
-            if name in in_nets:
+            wired = name in in_nets
+            if wired:
                 net = in_nets[name]
                 sig = SG._name_of(self.db_path, self.cur_sheet, net) or net
-                form.addRow(name + "  (wired):", QLabel(sig or net))
+                form.addRow(name + ":", QLabel("(day: %s)" % (sig or net)))
+            if name == "Auto":
+                had_ov = "Auto" in ov_in
+                cb_ep = QCheckBox()
+                cb_ep.setTristate(True)
+                if had_ov:
+                    cb_ep.setCheckState(Qt.CheckState.Checked if ov_in.get("Auto")
+                                        else Qt.CheckState.Unchecked)
+                else:
+                    cb_ep.setCheckState(Qt.CheckState.PartiallyChecked)
+                form.addRow("  Ep chan 'Auto':", cb_ep)
+                widgets["Auto_ep"] = ("tri", cb_ep)
+                cb_aut = QCheckBox("Nut AUT vat ly tren tram (OPS_IN5) - doc lap voi day")
+                cb_aut.setChecked(bool(ov_ops.get("OPS_IN5")))
+                form.addRow("", cb_aut)
+                widgets["Auto_ops"] = ("ops", "OPS_IN5", cb_aut)
                 continue
+            if name in ("DLT MV", "HL-MV", "LL-MV"):
+                # 3 chan nay THUONG khong tinh duoc gia tri that qua day: DLT MV hay noi
+                # cung vao hang so 0%; HL-MV/LL-MV (gioi han tren/duoi cho MV) nhieu khi
+                # noi toi tin hieu XUYEN SHEET/CPU (vd "MC011-11") ma bo mo phong 1-sheet
+                # khong lay duoc gia tri -> mac dinh ve 0. HL-MV=LL-MV=0 se KEP CUNG MV ve
+                # 0 vinh vien du Auto=1 va DLT MV da ep - day la nguyen nhan pho bien nhat
+                # khi thay "da ep Auto + DLT MV nhung MV van khong len". Cho phep EP ca 3
+                # chan nay de bu lai khi day khong resolve duoc.
+                desc = {"DLT MV": "toc do tang/giam MV", "HL-MV": "gioi han TREN cho MV",
+                        "LL-MV": "gioi han DUOI cho MV"}[name]
+                had_ov = name in ov_in
+                row_w = QWidget(); row_l = QHBoxLayout(row_w)
+                row_l.setContentsMargins(0, 0, 0, 0)
+                chk_ep = QCheckBox("Ep")
+                row_l.addWidget(chk_ep)
+                vw = QDoubleSpinBox(); vw.setRange(-1e9, 1e9); vw.setDecimals(3)
+                vw.setValue(float(ov_in.get(name, 0.0)))
+                vw.setEnabled(had_ov)
+                chk_ep.setChecked(had_ov)
+                chk_ep.toggled.connect(vw.setEnabled)
+                row_l.addWidget(vw)
+                form.addRow("  Ep '%s' (%s):" % (name, desc), row_w)
+                widgets[name] = ("bf", chk_ep, "n", vw)
+                continue
+            if wired:
+                continue
+            # khong noi day gi ca -> sua truc tiep, khong co gi khac de "nhan" ca
             if meta.get("bool"):
                 w = QCheckBox()
                 w.setChecked(bool(ov_in.get(name, meta.get("init", 0))))
                 widgets[name] = ("b", w)
-                form.addRow(name + ":", w)
+                form.addRow(name + "  (khong noi day):", w)
             else:
                 w = QDoubleSpinBox(); w.setRange(-1e9, 1e9); w.setDecimals(3)
                 w.setValue(float(ov_in.get(name, meta.get("init", 0.0))))
                 widgets[name] = ("n", w)
-                form.addRow("%s%s:" % (name, ("  (%s)" % meta["desc"]) if meta.get("desc") else ""), w)
+                form.addRow(name + "  (khong noi day):", w)
         pwidgets = {}
         for pname, pmeta in (spec.get("params") or {}).items():
             w = QDoubleSpinBox(); w.setRange(-1e9, 1e9); w.setDecimals(3)
@@ -1361,10 +1448,26 @@ class MainWindow(QMainWindow):
 
         def _apply_run():
             new_in = {}
-            for name, (k, w) in widgets.items():
-                new_in[name] = (1 if w.isChecked() else 0) if k == "b" else w.value()
+            new_ops = {}
+            for name, tup in widgets.items():
+                if tup[0] == "ops":
+                    _kind, opname, cb = tup
+                    if cb.isChecked():
+                        new_ops[opname] = 1
+                elif tup[0] == "tri":      # ep chan 'Auto' (day) - 3 trang thai
+                    _kind, cb = tup
+                    st = cb.checkState()
+                    if st != Qt.CheckState.PartiallyChecked:
+                        new_in["Auto"] = 1 if st == Qt.CheckState.Checked else 0
+                elif tup[0] == "bf":       # ep chan 'DLT MV' (day, so) - chi khi tick Ep
+                    _kind, chk_ep, k, w = tup
+                    if chk_ep.isChecked():
+                        new_in[name] = w.value()
+                else:                       # chan khong noi day, sua truc tiep
+                    k, w = tup
+                    new_in[name] = (1 if w.isChecked() else 0) if k == "b" else w.value()
             new_pm = {pname: w.value() for pname, w in pwidgets.items()}
-            over[bid] = {"inputs": new_in, "params": new_pm}
+            over[bid] = {"inputs": new_in, "params": new_pm, "ops": new_ops}
             if sp_init.value() > sp_init.minimum():     # de trong = khoi dong nguoi tu 0
                 over[bid]["init_out"] = sp_init.value()
             if sp_ti.value() > 0:                       # de trong = theo logic goc
@@ -1376,6 +1479,15 @@ class MainWindow(QMainWindow):
             self.station_sims.get((self.db_path, self.cur_sheet), {}).pop(bid, None)
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
             dlg.accept()
+            # Cap nhat badge NGAY (mach don-buoc, giong nhu bam 1 tin hieu tay) truoc,
+            # de dau ra da EP hien ra dung ngay ca khi "Simulate on sheet" dang TAT hoac
+            # nguoi dung khong bam "Run dynamic" - khong phai cho chay xong mo phong da
+            # buoc (chi lam viec khi Simulate on sheet dang BAT) moi thay duoc gia tri ep.
+            if getattr(self, "cur_sheet", None) is not None:
+                try:
+                    self._apply_sheet_sim()
+                except Exception:
+                    pass
             self.run_dynamic_sim()
         b_run.clicked.connect(_apply_run)
         b_close.clicked.connect(dlg.reject)
@@ -1541,15 +1653,10 @@ class MainWindow(QMainWindow):
                     PI.build(paths)                 # dung lai index tu dau
                 else:
                     PI.ensure(paths)                # dung/cap nhat index neu can (cache)
-                rows = PI.find(q, db_paths=paths)   # co du phong quet thang DB
+                rows = PI.find(q)                   # tim trong index (~/.tdesigner_index.db)
             except Exception as e:
-                # KHONG im lang: bao loi that va van quet thang cac file DB
-                note = "  [index loi: %s - da quet thang DB]" % e
-                try:
-                    rows = PI.find_direct(q, paths)
-                except Exception as e2:
-                    info.setText("Khong tim duoc: %s" % e2)
-                    return
+                info.setText("Khong tim duoc: %s" % e)
+                return
             for (name, cpuname, cpuno, slbl, db, sheet, sigid) in rows:
                 it = QTreeWidgetItem([cpuname or ("CPU%s" % cpuno), slbl, name])
                 it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
