@@ -51,6 +51,3 @@ llm_config.json
 .tdesigner_llm.json
 .tdesigner_claude_token
 .env
-
-# --- Thu muc nhap cuc bo (ban cu cua llm_client/llm_config, khong phai ma dang chay) ---
-cach get API/
