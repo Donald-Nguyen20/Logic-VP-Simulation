@@ -797,8 +797,8 @@ class MainWindow(QMainWindow):
         act("Cause && Effect Matrix", self.open_ce_matrix,
             "Tim nguyen nhan goc cho nhieu tin hieu dich (vd MFT, ETS...) va gom thanh 1 bang")
         act("Cai dat AI", self.open_ai_settings,
-            "Chon nha cung cap AI cho Explain: 9 nha (Claude, Groq, Gemini, OpenRouter, "
-            "Ollama, Cerebras, NVIDIA...) - TAT CA deu dung duoc mien phi. "
+            "Chon nha cung cap AI cho Explain: 6 nha (Claude, Groq, Gemini, "
+            "Ollama, NVIDIA...) - TAT CA deu dung duoc mien phi. "
             "Co nut lay API key va chon model ngay trong hop thoai")
         # Den bao ket noi Claude: TOI = chua ket noi, SANG NHE = da san sang.
         # Tu kiem tra dinh ky nen dang nhap xong o cua so ngoai la tu sang, khong can mo lai app.

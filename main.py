@@ -108,6 +108,49 @@ QScrollBar::add-page, QScrollBar::sub-page { background: transparent; }
 QToolTip { background: #2B3A55; color: #FFFFFF; border: none; padding: 5px 9px; border-radius: 5px; }
 """
 
+# Luat nay phai ghep rieng vi no can duong dan file anh, ma APP_QSS thi day dau
+# ngoac nhon cua CSS nen khong dung .format() duoc.
+QSS_MUI_TEN = """
+QComboBox::down-arrow { image: url(%s); width: 11px; height: 11px; }
+QComboBox::down-arrow:disabled { image: none; }
+"""
+
+
+def _ve_mui_ten():
+    """Ve mui ten xuong cho o chon, tra ve duong dan file (rong neu that bai).
+
+    Vi sao phai tu ve: luat 'QComboBox::drop-down' o tren dat 'border: none'.
+    He dung vao drop-down bang stylesheet la Qt thoi ve mui ten mac dinh, nen ca
+    9 o chon trong app deu tro thanh o trong tron - nhin nhu o go chu, khong ai
+    biet la bam ra duoc danh sach. QSS chi nhan mui ten qua url() nen khong ve
+    bang CSS thuan duoc (da thu meo tam giac bang vien trong suot: Qt ra hinh
+    chu nhat dac).
+
+    Ve luc chay chu khong de san mot file anh trong repo, vi T-Designer-Lite.spec
+    chi dong goi thu muc 'core' - anh de trong 'ui' se mat khi dong goi.
+    """
+    try:
+        import tempfile
+        from PySide6.QtCore import Qt, QPoint
+        from PySide6.QtGui import QPixmap, QPainter, QPen, QColor
+        p = os.path.join(tempfile.gettempdir(), "tdesigner_mui_ten.png")
+        pm = QPixmap(24, 24)
+        pm.fill(Qt.transparent)
+        ve = QPainter(pm)
+        ve.setRenderHint(QPainter.Antialiasing, True)
+        but = QPen(QColor("#64748B"))
+        but.setWidth(3)
+        but.setCapStyle(Qt.RoundCap)
+        but.setJoinStyle(Qt.RoundJoin)
+        ve.setPen(but)
+        ve.drawPolyline([QPoint(6, 9), QPoint(12, 16), QPoint(18, 9)])
+        ve.end()
+        if not pm.save(p):
+            return ""
+        return p.replace(chr(92), "/")     # QSS chi hieu dau gach cheo xuoi
+    except Exception:
+        return ""                          # khong ve duoc thi thoi, nhu cu
+
 
 def main():
     try:
@@ -119,7 +162,8 @@ def main():
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    app.setStyleSheet(APP_QSS)
+    _mt = _ve_mui_ten()
+    app.setStyleSheet(APP_QSS + (QSS_MUI_TEN % _mt if _mt else ""))
     # Icon: chay tu source hoac tu ban dong goi (PyInstaller)
     try:
         from PySide6.QtGui import QIcon

@@ -7,7 +7,7 @@ chung con tu 9 den 59 nhanh dieu kien bi cat o gioi han truy nguoc - phai TRA CU
 THEM moi du. Vi vay o day them VONG LAP GOI CONG CU (ask), giong dieu Claude dang
 lam, cho ca 3 chuan giao thuc khac nhau:
 
-  - Groq / OpenRouter : chuan OpenAI  -> message.tool_calls  + role "tool"
+  - Groq / NVIDIA     : chuan OpenAI  -> message.tool_calls  + role "tool"
   - Gemini            : chuan Google  -> parts.functionCall  + functionResponse
   - Ollama            : /api/chat     -> message.tool_calls  (ban moi)
 
@@ -32,6 +32,7 @@ from typing import Callable, Dict, List, Tuple
 import requests
 
 from . import ai_toolspec as TS
+from . import llm_nvidia as NV
 from . import llm_providers as PROV
 from .llm_config import api_key as _cfg_key, load_llm_config
 
@@ -176,6 +177,11 @@ def list_models(provider: str, key: str = "", host: str = "", timeout: int = 30)
     de hop thoai cai dat noi ro ly do (sai key / khong mang / Ollama chua chay)."""
     provider = (provider or "").strip().lower()
     key = (key or "").strip()
+
+    # NVIDIA di duong RIENG (core/llm_nvidia.py): danh sach cua ho con lan ca
+    # model da ngung chay va khong khai gi de loc ra - phai do that tung cai.
+    if provider == "nvidia":
+        return NV.models(key, timeout)
 
     if provider in PROV.OPENAI_COMPAT:
         return _openai_models(provider, key, timeout)
@@ -401,6 +407,11 @@ def _raise_http(r, who: str) -> None:
              "sau vai phut, hoac doi model khac trong 'Cai dat AI'" % _RETRY_LAN,
         504: "may chu nha cung cap tra loi qua cham - thu lai sau vai phut",
     }.get(code, "may chu bao loi" if code >= 500 else "loi khong ro")
+    # NVIDIA bao 404 bang mot cau rieng ("Function ... Not found for account")
+    # ma loi 404 chung lai khuyen sai viec phai lam - xem llm_nvidia.
+    nvda = NV.giai_thich_404(r.text or "") if code == 404 else ""
+    if nvda:
+        why = nvda
     ngay = _han_muc_ngay(r.text or "") if code == 429 else ""
     phut = _han_muc_phut(r.text or "") if code in (413, 429) else ""
     if ngay:
@@ -484,8 +495,8 @@ def _gui_co_cho(gui, who: str, on_event=None):
 def _openai_models(provider: str, key: str, timeout: int) -> List[str]:
     """Danh sach model cho moi nha theo chuan OpenAI: GET {goc}/models.
 
-    Vai nha (OpenRouter, NVIDIA, SambaNova) mo cong khai diem cuoi nay nen xem duoc
-    truoc khi co key - vi vay chi gan Authorization khi that su co key."""
+    Rieng NVIDIA mo cong khai diem cuoi nay nen xem duoc truoc khi co key - vi
+    vay chi gan Authorization khi that su co key."""
     d = PROV.OPENAI_COMPAT[provider]
     h = dict(d.get("headers") or {})
     if key:
@@ -503,7 +514,7 @@ def _openai_models(provider: str, key: str, timeout: int) -> List[str]:
             continue
         # Nha nao co khai model nao goi duoc cong cu thi bo cac model khong goi
         # duoc - chon phai la Explain hong ngay tu luot tra cuu dau tien. Moi nha
-        # dat ten truong mot kieu: OpenRouter 'supported_parameters', Groq
+        # dat ten truong mot kieu: co nha 'supported_parameters', Groq
         # 'supported_features' (groq/compound chi co json_mode nen bi loai o day).
         for truong in ("supported_parameters", "supported_features"):
             sp = m.get(truong)
@@ -685,15 +696,6 @@ class LLMClientGroq(OpenAICompatibleClient):
     def __init__(self, key, model):
         d = PROV.OPENAI_COMPAT["groq"]
         super().__init__(key, d["base"], model, timeout=d["timeout"])
-
-
-class LLMClientOpenRouter(OpenAICompatibleClient):
-    name = "OpenRouter"
-
-    def __init__(self, key, model):
-        d = PROV.OPENAI_COMPAT["openrouter"]
-        super().__init__(key, d["base"], model, timeout=d["timeout"],
-                         extra_headers=d.get("headers"))
 
 
 # Google bao ly do dung but o 'finishReason'. Dich sang cau noi duoc phai lam gi.

@@ -32,13 +32,6 @@ OPENAI_COMPAT: Dict[str, Dict[str, Any]] = {
         "env": "GROQ_API_KEY", "timeout": 180, "free": True, "public": False,
         "note": "Mien phi, tra loi nhanh nhat trong cac nha cloud. Dang ky bang email.",
     },
-    "cerebras": {
-        "label": "Cerebras (mien phi - rat nhanh)",
-        "base": "https://api.cerebras.ai/v1",
-        "keys": "https://cloud.cerebras.ai/",
-        "env": "CEREBRAS_API_KEY", "timeout": 180, "free": True, "public": False,
-        "note": "Mien phi, toc do rat cao. Vao Cloud -> API Keys de tao key.",
-    },
     "nvidia": {
         "label": "NVIDIA NIM (mien phi - nhieu model)",
         "base": "https://integrate.api.nvidia.com/v1",
@@ -46,27 +39,12 @@ OPENAI_COMPAT: Dict[str, Dict[str, Any]] = {
         "env": "NVIDIA_API_KEY", "timeout": 220, "free": True, "public": True,
         "note": "Mien phi theo han muc. Chon 1 model roi bam 'Get API Key' tren trang do.",
     },
-    "sambanova": {
-        "label": "SambaNova (mien phi)",
-        "base": "https://api.sambanova.ai/v1",
-        "keys": "https://cloud.sambanova.ai/apis",
-        "env": "SAMBANOVA_API_KEY", "timeout": 220, "free": True, "public": True,
-        "note": "Mien phi theo han muc, chay model lon rat nhanh.",
-    },
     "mistral": {
         "label": "Mistral (mien phi co han muc)",
         "base": "https://api.mistral.ai/v1",
         "keys": "https://console.mistral.ai/api-keys",
         "env": "MISTRAL_API_KEY", "timeout": 180, "free": True, "public": False,
         "note": "Ban mien phi phai bat trong Console truoc khi tao key.",
-    },
-    "openrouter": {
-        "label": "OpenRouter (nhieu model nhat)",
-        "base": "https://openrouter.ai/api/v1",
-        "keys": "https://openrouter.ai/settings/keys",
-        "env": "OPENROUTER_API_KEY", "timeout": 220, "free": True, "public": True,
-        "headers": {"X-Title": "T-Designer Lite"},
-        "note": "Mot key dung duoc gan 400 model. Model co duoi ':free' thi khong mat tien.",
     },
 }
 
@@ -98,9 +76,20 @@ SPECIAL: Dict[str, Dict[str, Any]] = {
 # Chi giu nhung nha DUNG DUOC MIEN PHI - nguoi van hanh khong phai nap the de xem
 # giai thich mot tin hieu. Da bo Together AI, DeepSeek, xAI Grok, OpenAI vi ca bon
 # deu bat nap tien truoc moi goi duoc.
+# Bo Cerebras 8-2026: ho doi phan mien phi thanh $5 credit het han sau 30 ngay,
+# het credit la moi lan goi tra HTTP 402 payment_required du chua dung token nao.
+# Bo OpenRouter 8-2026: ban ':free' chi cho 50 luot/ngay neu chua nap du $10, ma
+# mot lan Explain an trung binh 6,2 luot tra cuu (xem MAX_TURNS) - chua toi 8 cau
+# hoi la het ngay. Cac ban ':free' con chay chung mot be nen hay tra 429 kem
+# 'limit_source: upstream_provider_shared_pool' du ta chua goi qua nhanh.
+# Bo SambaNova 8-2026: diem cuoi /models cua ho khong khai model nao goi duoc
+# cong cu (do that: 0/7 muc co 'supported_parameters'), nen bo loc o
+# _openai_models mu hoan toan voi nha nay - nguoi dung chon phai gemma-4-31B-it
+# la Explain hong ngay luot tra cuu dau ma app khong canh bao truoc duoc.
+# Ngoai ra 3/6 model cua ho da co san o Groq va NVIDIA, nhanh hon.
 ORDER: List[str] = [
     "claude",
-    "groq", "cerebras", "nvidia", "sambanova", "mistral", "openrouter", "gemini",
+    "groq", "nvidia", "mistral", "gemini",
     "ollama",
 ]
 

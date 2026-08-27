@@ -213,8 +213,14 @@ class LLMSettingsDialog(QDialog):
         p = self.provider()
         key = self.ed_key.text().strip() or LC.api_key(p, self.cfg)
         host = self.ed_host.text().strip()
-        self._start(lambda: LClient.list_models(p, key, host),
-                    "hoi danh sach model", self._got_models)
+        # NVIDIA phai GOI THU tung model moi biet cai nao con chay (xem
+        # core/llm_nvidia.py) nen lau hon han cac nha khac - noi truoc de nguoi
+        # dung khoi tuong app treo.
+        self._nvda_do = (p == "nvidia" and bool(key))
+        viec = ("do thu tung model cua NVIDIA - mat khoang 15-30 giay"
+                if self._nvda_do else "hoi danh sach model")
+        self._start(lambda: LClient.list_models(p, key, host), viec,
+                    self._got_models)
 
     def _got_models(self, ok, res):
         if not ok:
@@ -234,6 +240,15 @@ class LLMSettingsDialog(QDialog):
             # Nha cung cap khai tu ban cu lien tuc - nhac ten ban moi nhat de nguoi
             # van hanh khong om mai mot ten cu roi mot hom bi tra ve 404.
             note += "  Moi nhat la '%s'." % res[0]
+        if self.provider() == "nvidia":
+            # Danh sach cua NVIDIA con ca model da ngung chay - phai noi ro
+            # app da do duoc hay chua, dung de nguoi dung tuong nham.
+            note += ("\nNVIDIA van de model DA NGUNG CHAY trong danh sach cua ho. "
+                     + ("App vua goi thu tung cai va da bo nhung cai khong chay "
+                        "- dong dau la cai goi duoc that."
+                        if getattr(self, "_nvda_do", False) else
+                        "Chua co API key nen chua do duoc - danh sach nay con lan "
+                        "model da ngung. Dan key vao o tren roi bam lai nut nay."))
         self.lbl_note.setText(note)
 
     def _ping(self):

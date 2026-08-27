@@ -2,7 +2,7 @@
 """Dinh nghia 3 cong cu tra cuu duoi dang KHONG PHU THUOC nha cung cap.
 
 ai_tools.py da co ban danh cho Claude Agent SDK (@tool + may chu MCP). File nay la
-ban tuong duong cho cac nha cung cap goi qua HTTP thuong (Groq/OpenRouter theo chuan
+ban tuong duong cho cac nha cung cap goi qua HTTP thuong (Groq/NVIDIA theo chuan
 OpenAI, Gemini theo chuan Google), vi hai ben dung dinh dang JSON Schema khac nhau.
 Phan RUOT - ham that su chay - la chung: deu goi ai_explain.
 
@@ -51,7 +51,7 @@ MAX_RESULT_CHARS = 6000
 
 
 def openai_tools():
-    """Dinh dang cho cac diem cuoi tuong thich OpenAI (Groq, OpenRouter)."""
+    """Dinh dang cho cac diem cuoi tuong thich OpenAI (Groq, NVIDIA)."""
     return [{
         "type": "function",
         "function": {
