@@ -66,6 +66,7 @@ class STerm:
         self.targets = []
         self.refs = []
         self.xcpu = None   # so CPU doi tac neu la terminal lien-CPU (C-NET)
+        self.xdb = None    # (db_path, sheet_id) neu ten tin hieu nam o DB CPU khac
 
 
 class SWire:
@@ -201,15 +202,30 @@ def build_sheet(path, sheet_id):
         if codeU == TERM_CODE:
             net = pin1.get(bid, "")
             ln, ref = _res(R, sheet_id, net)
+            # Tag tro sang panel cua CPU khac (vd BNB640-04 tren sheet cua 03 BSM_A.db,
+            # nhung PANO 'BNB' lai nam ben 04 BSM B.db) -> tra ten tiep trong cac DB da
+            # import thay vi de trong hang do.
+            xdb = None
+            if not ln:
+                xln, xrf, xpath, xsid = D.xref_name(path, net)
+                if xpath is not None:
+                    ln, xdb = xln, (xpath, xsid)
+                    ref = ref or xrf
             t = STerm()
             t.side = "L" if x < midx else "R"
             t.x, t.y = x, y
             t.linename, t.ref, t.lid = ln, ref, net
-            t.targets = _targets(c, R, sheet_id, net)
+            t.xdb = xdb
+            t.targets = _targets(c, R, sheet_id, net, side=t.side, path=path)
             t.refs = []
             # self cross-ref: terminal ngo ra ma net con duoc dung boi khoi khac
             # tren cung sheet (fanout noi bo) -> PDF liet ke so cua CHINH sheet (vd 08739)
             if t.side == "R" and self_num and net_local.get(net, 0) >= 2:
+                t.refs.append(_pad(self_num))
+            # DB kieu EHC: dau vao lay tin hieu do CHINH sheet nay sinh ra (hoi tiep noi
+            # bo) -> ban ve goc ghi so cua chinh sheet nay o cot "From" (vd 01180)
+            if (t.side == "L" and self_num and net in R.get("syskeys", ())
+                    and sheet_id in _producers(path).get(net, ())):
                 t.refs.append(_pad(self_num))
             for _sid, _lb in t.targets:
                 s2 = _pad(R["num"].get(_sid))
@@ -346,7 +362,34 @@ def _sheet_label(c, sid):
     return "%s %s  %s" % (pa, ps, nm)
 
 
-def _targets(c, R, sheet_id, net):
+_PROD = {"path": None, "map": {}}
+
+
+def _producers(path):
+    """{net: {sheet_id,...}} - sheet SINH RA tin hieu (net nam tren chan RA cua 1 khoi).
+    Dung cho DB kieu EHC (net = dia chi he thong dung chung khap noi): cot "From" cua
+    terminal DAU VAO phai chi ra DUNG sheet sinh ra no (thuong chi 1), khong phai liet ke
+    moi sheet co dung tin hieu do. Quet 1 lan/DB roi cache (~0.3s cho 76k chan)."""
+    if _PROD["path"] == path:
+        return _PROD["map"]
+    MP = _macro_pins()
+    m = {}
+    try:
+        c = D.connect(path).cursor()
+        for sid, sym, pn, sig in c.execute(
+                "SELECT b.ID,b.SYMBOL,p.PINNO,p.SIGNALID FROM CAD_BLOCK_PIN p "
+                "JOIN CAD_BLOCK b ON p.BLOCK_ID=b.BLOCK_ID "
+                "WHERE p.SIGNALID IS NOT NULL AND TRIM(p.SIGNALID)<>''"):
+            pdef = (MP.get(sym) or {}).get("pins", {})
+            if pdef.get(str(pn), {}).get("side") == "out":
+                m.setdefault(D._clean(sig), set()).add(sid)
+    except Exception:
+        m = {}
+    _PROD.update(path=path, map=m)
+    return m
+
+
+def _targets(c, R, sheet_id, net, side="L", path=None):
     ids = []; seen = set()
     sid, sig = D._parse_tag(net, R["pacodes"], R["code2sheet"])
     if sid is not None and sid != sheet_id and sid not in seen:
@@ -357,4 +400,24 @@ def _targets(c, R, sheet_id, net):
             tsid = R["code2sheet"].get((pano, ps))
             if tsid is not None and tsid != sheet_id and tsid not in seen:
                 seen.add(tsid); ids.append(tsid)
+    # Duong nhay thu 3 (DB kieu EHC): net = dia chi he thong (co trong CAD_SIGNAL),
+    # khong dung CAD_ID_CRS. Phai theo DUNG CHIEU, giong het ban ve goc:
+    #   terminal TRAI  (dau vao, cot "From") -> sheet SINH RA tin hieu (chan RA), thuong 1
+    #   terminal PHAI  (dau ra,  cot "To")   -> cac sheet TIEU THU tin hieu (chan VAO)
+    # Neu khong phan chieu (liet ke moi sheet co dung) thi 1 dau vao se hien hang chuc
+    # diem den - sai voi ban ve that.
+    if not ids and net in R.get("syskeys", ()) and path:
+        try:
+            prod = _producers(path).get(net, set())
+            if side == "L":
+                cand = [s for s in sorted(prod) if s != sheet_id]
+            else:
+                users = {row[0] for row in c.execute(
+                    "SELECT DISTINCT ID FROM CAD_LIN WHERE SIGNALID=?", (net,))}
+                cand = sorted(users - prod - {sheet_id})
+            for tsid in cand[:25]:      # chan tran menu voi tin hieu dung khap noi
+                if tsid not in seen:
+                    seen.add(tsid); ids.append(tsid)
+        except Exception:
+            pass
     return [(i, _sheet_label(c, i)) for i in ids]

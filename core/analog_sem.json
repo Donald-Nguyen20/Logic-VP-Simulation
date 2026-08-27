@@ -1,527 +1,19 @@
 {
- "509A": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 2-input"
+ "0042": {
+  "op": "ADD",
+  "name": "+ - Addition (obs)"
  },
- "509B": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 2-input"
+ "0045": {
+  "op": "MULG",
+  "name": "* - Multiplication (obs)"
  },
- "509C": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 3-input"
- },
- "509D": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 3-input"
- },
- "509E": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 4-input"
- },
- "509F": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 4-input"
- },
- "5100": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 5-input"
- },
- "5101": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 5-input"
- },
- "5102": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 6-input"
- },
- "5103": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 6-input"
- },
- "5104": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 7-input"
- },
- "5105": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 7-input"
- },
- "5106": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 8-input"
- },
- "5107": {
-  "op": "MAX",
-  "name": "Maximum Value Selector - 8-input"
- },
- "5108": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 2-input"
- },
- "5109": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 2-input"
- },
- "510A": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 3-input"
- },
- "510B": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 3-input"
- },
- "510C": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 4-input"
- },
- "510D": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 4-input"
- },
- "510E": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 5-input"
- },
- "510F": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 5-input"
- },
- "5110": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 6-input"
- },
- "5111": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 6-input"
- },
- "5112": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 7-input"
- },
- "5113": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 7-input"
- },
- "5114": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 8-input"
- },
- "5115": {
-  "op": "MIN",
-  "name": "Minimum Value Selector - 8-input"
- },
- "5116": {
-  "op": "MID",
-  "name": "Middle Value Selector"
- },
- "5117": {
-  "op": "MID",
-  "name": "Middle Value Selector"
- },
- "513D": {
-  "op": "SELECT",
-  "name": "Analog Switch"
- },
- "514F": {
-  "op": "MID",
-  "name": "Middle Value Selector(Balance Compensation)"
+ "0057": {
+  "op": "CONST",
+  "name": "SG - Signal setting (hang so, PARAMNO 1)"
  },
  "20FA": {
   "op": "SELECT",
   "name": "Analog Switch(for HCNT)"
- },
- "4042": {
-  "op": "MAX",
-  "name": "> - High Value Selector (in:Left & Downside)"
- },
- "4043": {
-  "op": "MAX",
-  "name": "> - High Value Selector (in:Left & Upside)"
- },
- "4044": {
-  "op": "MAX",
-  "name": "> - High Value Selector (in:Upside & Downside)"
- },
- "4045": {
-  "op": "MIN",
-  "name": "< - Low Value Selector (in:Left & Downside)"
- },
- "4046": {
-  "op": "MIN",
-  "name": "< - Low Value Selector (in:Left & Upside)"
- },
- "4047": {
-  "op": "MIN",
-  "name": "< - Low Value Selector (in:Upside & Downside)"
- },
- "4067": {
-  "op": "MAX",
-  "name": "MAX - Maximum Value Selector"
- },
- "4069": {
-  "op": "MID",
-  "name": "MID - Midium Value Selector"
- },
- "4068": {
-  "op": "MIN",
-  "name": "MIN - Minimum Value Selector"
- },
- "4048": {
-  "op": "SELECT",
-  "name": "T - Transfer 1 (Analog Switch)"
- },
- "4049": {
-  "op": "SELECT",
-  "name": "T - Transfer 2 (Analog Switch)"
- },
- "404A": {
-  "op": "SELECT",
-  "name": "T - Transfer 3 (Analog Switch)"
- },
- "404B": {
-  "op": "SELECT",
-  "name": "T - Transfer 4 (Analog Switch)"
- },
- "404C": {
-  "op": "SELECT",
-  "name": "T - Transfer 5 (Analog Switch)"
- },
- "404D": {
-  "op": "SELECT",
-  "name": "T - Transfer 6 (Analog Switch)"
- },
- "8242": {
-  "op": "SELECT",
-  "name": "LAMP & PB - Selector for Transfer"
- },
- "8240": {
-  "op": "SELECT",
-  "name": "X-SWGR - Switchgear for Transfer"
- },
- "5133": {
-  "op": "PASS",
-  "name": "Level Converter"
- },
- "5134": {
-  "op": "PASS",
-  "name": "Level Converter"
- },
- "5143": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5144": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5145": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5146": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5147": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5148": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "5149": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "514A": {
-  "op": "PASS",
-  "name": "Real -> Integer Converter"
- },
- "514B": {
-  "op": "PASS",
-  "name": "Integer -> Real Converter"
- },
- "514C": {
-  "op": "PASS",
-  "name": "Integer -> Real Converter"
- },
- "40D3": {
-  "op": "PASS",
-  "name": "CBD - Binary -> BCD Converter"
- },
- "40D2": {
-  "op": "PASS",
-  "name": "CBF - Integer -> Real Converter"
- },
- "40D1": {
-  "op": "PASS",
-  "name": "CFB - Real -> Integer Converter"
- },
- "40B7": {
-  "op": "PASS",
-  "name": "DtoI - Digital -> Integer Converter"
- },
- "4102": {
-  "op": "PASS",
-  "name": "Frequency Digital Converter Module Interface"
- },
- "40B6": {
-  "op": "PASS",
-  "name": "ItoD - Integer -> Digital Converter"
- },
- "40D4": {
-  "op": "PASS",
-  "name": "CDB - BCD -> Binary Converter"
- },
- "4129": {
-  "op": "SELECT",
-  "name": "Config Macro for MISO Transfer Function Macro1"
- },
- "412A": {
-  "op": "SELECT",
-  "name": "Config Macro for MISO Transfer Function Macro2"
- },
- "412B": {
-  "op": "SELECT",
-  "name": "Config Macro for MISO Transfer Function Macro3"
- },
- "5136": {
-  "op": "PASS",
-  "name": "Data Transfer (Analog)"
- },
- "5142": {
-  "op": "SELECT",
-  "name": "Bump Less Transfer"
- },
- "409E": {
-  "op": "PASS",
-  "name": "ATA - Data Transfer (Analog)"
- },
- "40AE": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:U)"
- },
- "40AF": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:U)"
- },
- "40B0": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:U)"
- },
- "40B1": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:D)"
- },
- "40B2": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:D)"
- },
- "40B3": {
-  "op": "SELECT",
-  "name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:D)"
- },
- "4073": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:U)"
- },
- "4074": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:U)"
- },
- "4075": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:U)"
- },
- "4076": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:D)"
- },
- "4090": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:D)"
- },
- "4091": {
-  "op": "SELECT",
-  "name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:D)"
- },
- "8241": {
-  "op": "SELECT",
-  "name": "X-DUAL - Dual Gate Sensor for Transfer"
- },
- "8247": {
-  "op": "SELECT",
-  "name": "X-MV - MV Station for Transfer"
- },
- "8246": {
-  "op": "SELECT",
-  "name": "X-SV - SV Station for Transfer"
- },
- "8245": {
-  "op": "SELECT",
-  "name": "X-SV/MV - SV & MV Station for Transfer"
- },
- "8248": {
-  "op": "SELECT",
-  "name": "X-TRIPLE - Triple Gate Sensor for Transfer"
- },
- "506F": {
-  "op": "ABS",
-  "name": "Absolute"
- },
- "5070": {
-  "op": "ABS",
-  "name": "Absolute"
- },
- "5071": {
-  "op": "ABS",
-  "name": "Absolute"
- },
- "5072": {
-  "op": "ABS",
-  "name": "Absolute"
- },
- "4064": {
-  "op": "ABS",
-  "name": "|X| - Absolute Value"
- },
- "8227": {
-  "op": "PASS",
-  "name": "ADL - Analog Data Link"
- },
- "405F": {
-  "op": "WSUM",
-  "name": "DSUM - Digital Summing (2-input)"
- },
- "4060": {
-  "op": "WSUM",
-  "name": "DSUM - Digital Summing (3-input)"
- },
- "4061": {
-  "op": "WSUM",
-  "name": "DSUM - Digital Summing (4-input)"
- },
- "4062": {
-  "op": "WSUM",
-  "name": "DSUM - Digital Summing (5-input)"
- },
- "4063": {
-  "op": "WSUM",
-  "name": "DSUM - Digital Summing (6-input)"
- },
- "4021": {
-  "op": "SUB",
-  "name": "DIF1 - Difference"
- },
- "4022": {
-  "op": "SUB",
-  "name": "DIF2 - Difference"
- },
- "4023": {
-  "op": "SUB",
-  "name": "DIF3 - Difference"
- },
- "4024": {
-  "op": "SUB",
-  "name": "DIF4 - Difference"
- },
- "4025": {
-  "op": "SUB",
-  "name": "DIF5 - Difference"
- },
- "4026": {
-  "op": "SUB",
-  "name": "DIF6 - Difference"
- },
- "401A": {
-  "op": "ADD",
-  "name": "SUM1 - Summing (in:Left & Downside)"
- },
- "401B": {
-  "op": "ADD",
-  "name": "SUM2 - Summing (in:Left & Upside)"
- },
- "401C": {
-  "op": "ADD",
-  "name": "SUM3 - Summing (in:Upside & Downside)"
- },
- "4030": {
-  "op": "ADD",
-  "name": "SWG - Summing with Gain (in:Left & Downside)"
- },
- "4031": {
-  "op": "ADD",
-  "name": "SWG - Summing with Gain (in:Left & Upside)"
- },
- "4032": {
-  "op": "ADD",
-  "name": "SWG - Summing with Gain (in:Upside & Downside)"
- },
- "4107": {
-  "op": "SIGNSUM",
-  "signs": [
-   "+",
-   "+",
-   "+",
-   "+"
-  ],
-  "name": "Summing(4in:++++) for HCNT"
- },
- "4108": {
-  "op": "SIGNSUM",
-  "signs": [
-   "+",
-   "+",
-   "+",
-   "-"
-  ],
-  "name": "Summing(4in:+++-) for HCNT"
- },
- "4109": {
-  "op": "SIGNSUM",
-  "signs": [
-   "+",
-   "+",
-   "-",
-   "-"
-  ],
-  "name": "Summing(4in:++--) for HCNT"
- },
- "410A": {
-  "op": "SIGNSUM",
-  "signs": [
-   "+",
-   "-",
-   "-",
-   "-"
-  ],
-  "name": "Summing(4in:+---) for HCNT"
- },
- "512F": {
-  "op": "PASS",
-  "name": "Dead Band"
- },
- "5130": {
-  "op": "PASS",
-  "name": "Dead Band"
- },
- "5131": {
-  "op": "PASS",
-  "name": "Dead Band"
- },
- "5132": {
-  "op": "PASS",
-  "name": "Dead Band"
- },
- "4065": {
-  "op": "PASS",
-  "name": "DB - Dead Band"
- },
- "4066": {
-  "op": "PASS",
-  "name": "DBZ - Dead Band (Jump Type)"
  },
  "20FF": {
   "op": "SIGNSUM",
@@ -563,21 +55,401 @@
   ],
   "name": "4 Adder(4) for HCNT"
  },
+ "2103": {
+  "op": "PASS",
+  "name": "Upper Limitter(for HCNT)"
+ },
  "2104": {
   "op": "PASS",
   "name": "Lower Limitter(for HCNT)"
+ },
+ "210F": {
+  "op": "CLAMPHI",
+  "name": "Upper Limitter2-External parameter(for HCNT). Y=min(X,L); D=1 khi X>=L."
  },
  "2110": {
   "op": "CLAMPLO",
   "name": "Lower Limitter2-External parameter(for HCNT). Y=max(X,L); D=1 khi X<=L."
  },
- "2103": {
-  "op": "PASS",
-  "name": "Upper Limitter(for HCNT)"
+ "401A": {
+  "op": "ADD",
+  "name": "SUM1 - Summing (in:Left & Downside)"
  },
- "210F": {
+ "401B": {
+  "op": "ADD",
+  "name": "SUM2 - Summing (in:Left & Upside)"
+ },
+ "401C": {
+  "op": "ADD",
+  "name": "SUM3 - Summing (in:Upside & Downside)"
+ },
+ "401D": {
+  "op": "AVG",
+  "name": "AVE1 - Averaging (2 input)"
+ },
+ "401E": {
+  "op": "AVG",
+  "name": "AVE2 - Averaging (2 input)"
+ },
+ "401F": {
+  "op": "AVG",
+  "name": "AVE3 - Averaging (2 input)"
+ },
+ "4020": {
+  "op": "AVG",
+  "name": "AVE4 - Averaging (3 input)"
+ },
+ "4021": {
+  "op": "SUB",
+  "name": "DIF1 - Difference"
+ },
+ "4022": {
+  "op": "SUB",
+  "name": "DIF2 - Difference"
+ },
+ "4023": {
+  "op": "SUB",
+  "name": "DIF3 - Difference"
+ },
+ "4024": {
+  "op": "SUB",
+  "name": "DIF4 - Difference"
+ },
+ "4025": {
+  "op": "SUB",
+  "name": "DIF5 - Difference"
+ },
+ "4026": {
+  "op": "SUB",
+  "name": "DIF6 - Difference"
+ },
+ "4027": {
+  "op": "MUL",
+  "name": "* - Multiplying (in:Left & Downside)"
+ },
+ "4028": {
+  "op": "MUL",
+  "name": "* - Multiplying (in:Left & Upside)"
+ },
+ "4029": {
+  "op": "MUL",
+  "name": "* - Multiplying (in:Upside & Downside)"
+ },
+ "402A": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Left / B:Downside)"
+ },
+ "402B": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Downside / B:Left)"
+ },
+ "402C": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Left / B:Upside)"
+ },
+ "402D": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Upside / B:Left)"
+ },
+ "402E": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Upside / B:Downside)"
+ },
+ "402F": {
+  "op": "DIV",
+  "name": "A/B - Dividing (A:Downside / B:Upside)"
+ },
+ "4030": {
+  "op": "ADD",
+  "name": "SWG - Summing with Gain (in:Left & Downside)"
+ },
+ "4031": {
+  "op": "ADD",
+  "name": "SWG - Summing with Gain (in:Left & Upside)"
+ },
+ "4032": {
+  "op": "ADD",
+  "name": "SWG - Summing with Gain (in:Upside & Downside)"
+ },
+ "4035": {
+  "op": "FUNC",
+  "name": "F(x) - Function Generator (Parameter)"
+ },
+ "4042": {
+  "op": "MAX",
+  "name": "> - High Value Selector (in:Left & Downside)"
+ },
+ "4043": {
+  "op": "MAX",
+  "name": "> - High Value Selector (in:Left & Upside)"
+ },
+ "4044": {
+  "op": "MAX",
+  "name": "> - High Value Selector (in:Upside & Downside)"
+ },
+ "4045": {
+  "op": "MIN",
+  "name": "< - Low Value Selector (in:Left & Downside)"
+ },
+ "4046": {
+  "op": "MIN",
+  "name": "< - Low Value Selector (in:Left & Upside)"
+ },
+ "4047": {
+  "op": "MIN",
+  "name": "< - Low Value Selector (in:Upside & Downside)"
+ },
+ "4048": {
+  "op": "SELECT",
+  "name": "T - Transfer 1 (Analog Switch)"
+ },
+ "4049": {
+  "op": "SELECT",
+  "name": "T - Transfer 2 (Analog Switch)"
+ },
+ "404A": {
+  "op": "SELECT",
+  "name": "T - Transfer 3 (Analog Switch)"
+ },
+ "404B": {
+  "op": "SELECT",
+  "name": "T - Transfer 4 (Analog Switch)"
+ },
+ "404C": {
+  "op": "SELECT",
+  "name": "T - Transfer 5 (Analog Switch)"
+ },
+ "404D": {
+  "op": "SELECT",
+  "name": "T - Transfer 6 (Analog Switch)"
+ },
+ "4052": {
+  "op": "CONST",
+  "name": "SG - Variable Signal Generator (hang so A)"
+ },
+ "4053": {
+  "op": "PASS",
+  "name": "|> - High Limiter (HL:para)"
+ },
+ "4054": {
+  "op": "PASS",
+  "name": "|> - High Limiter (HL:input)"
+ },
+ "4055": {
+  "op": "PASS",
+  "name": "<| - Low Limiter (LL:para)"
+ },
+ "4056": {
+  "op": "PASS",
+  "name": "<| - Low Limiter (LL:input)"
+ },
+ "405E": {
+  "op": "PASS",
+  "name": "DEAD TIME - Pure Delay (without SW)"
+ },
+ "405F": {
+  "op": "WSUM",
+  "name": "DSUM - Digital Summing (2-input)"
+ },
+ "4060": {
+  "op": "WSUM",
+  "name": "DSUM - Digital Summing (3-input)"
+ },
+ "4061": {
+  "op": "WSUM",
+  "name": "DSUM - Digital Summing (4-input)"
+ },
+ "4062": {
+  "op": "WSUM",
+  "name": "DSUM - Digital Summing (5-input)"
+ },
+ "4063": {
+  "op": "WSUM",
+  "name": "DSUM - Digital Summing (6-input)"
+ },
+ "4064": {
+  "op": "ABS",
+  "name": "|X| - Absolute Value"
+ },
+ "4065": {
+  "op": "PASS",
+  "name": "DB - Dead Band"
+ },
+ "4066": {
+  "op": "PASS",
+  "name": "DBZ - Dead Band (Jump Type)"
+ },
+ "4067": {
+  "op": "MAX",
+  "name": "MAX - Maximum Value Selector"
+ },
+ "4068": {
+  "op": "MIN",
+  "name": "MIN - Minimum Value Selector"
+ },
+ "4069": {
+  "op": "MID",
+  "name": "MID - Midium Value Selector"
+ },
+ "406A": {
+  "op": "GAIN",
+  "name": "P - Proportional (PG:para)"
+ },
+ "406B": {
+  "op": "MUL",
+  "name": "P - Proportional (PG:input)"
+ },
+ "4073": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:U)"
+ },
+ "4074": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:U)"
+ },
+ "4075": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:U)"
+ },
+ "4076": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:L /X2:D /SW:D)"
+ },
+ "407A": {
+  "op": "PASS",
+  "name": "Z^(-n) - Sampling Delay Gate"
+ },
+ "4090": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:D /X2:L /SW:D)"
+ },
+ "4091": {
+  "op": "SELECT",
+  "name": "Tb - Bumpless Transfer (X1:U /X2:L /SW:D)"
+ },
+ "409E": {
+  "op": "PASS",
+  "name": "ATA - Data Transfer (Analog)"
+ },
+ "40AE": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:U)"
+ },
+ "40AF": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:U)"
+ },
+ "40B0": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:U)"
+ },
+ "40B1": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:L /X2:D /SW:D)"
+ },
+ "40B2": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:D /X2:L /SW:D)"
+ },
+ "40B3": {
+  "op": "SELECT",
+  "name": "TBL - Bumpless Transfer (LAG) (X1:U /X2:L /SW:D)"
+ },
+ "40B6": {
+  "op": "PASS",
+  "name": "ItoD - Integer -> Digital Converter"
+ },
+ "40B7": {
+  "op": "PASS",
+  "name": "DtoI - Digital -> Integer Converter"
+ },
+ "40D1": {
+  "op": "PASS",
+  "name": "CFB - Real -> Integer Converter"
+ },
+ "40D2": {
+  "op": "PASS",
+  "name": "CBF - Integer -> Real Converter"
+ },
+ "40D3": {
+  "op": "PASS",
+  "name": "CBD - Binary -> BCD Converter"
+ },
+ "40D4": {
+  "op": "PASS",
+  "name": "CDB - BCD -> Binary Converter"
+ },
+ "4102": {
+  "op": "PASS",
+  "name": "Frequency Digital Converter Module Interface"
+ },
+ "4107": {
+  "op": "SIGNSUM",
+  "signs": [
+   "+",
+   "+",
+   "+",
+   "+"
+  ],
+  "name": "Summing(4in:++++) for HCNT"
+ },
+ "4108": {
+  "op": "SIGNSUM",
+  "signs": [
+   "+",
+   "+",
+   "+",
+   "-"
+  ],
+  "name": "Summing(4in:+++-) for HCNT"
+ },
+ "4109": {
+  "op": "SIGNSUM",
+  "signs": [
+   "+",
+   "+",
+   "-",
+   "-"
+  ],
+  "name": "Summing(4in:++--) for HCNT"
+ },
+ "410A": {
+  "op": "SIGNSUM",
+  "signs": [
+   "+",
+   "-",
+   "-",
+   "-"
+  ],
+  "name": "Summing(4in:+---) for HCNT"
+ },
+ "410C": {
+  "op": "PASS",
+  "name": "High Limiter(HL parameter with comparison output)"
+ },
+ "410D": {
   "op": "CLAMPHI",
-  "name": "Upper Limitter2-External parameter(for HCNT). Y=min(X,L); D=1 khi X>=L."
+  "name": "High Limiter(HL input with comparison output). Y=min(X,HL); D=1 khi X>=HL."
+ },
+ "410E": {
+  "op": "PASS",
+  "name": "Low Limiter(LL parameter with comparison output)"
+ },
+ "410F": {
+  "op": "CLAMPLO",
+  "name": "Low Limiter(LL input with comparison output). Y=max(X,LL); D=1 khi X<=LL."
+ },
+ "4129": {
+  "op": "SELECT",
+  "name": "Config Macro for MISO Transfer Function Macro1"
+ },
+ "412A": {
+  "op": "SELECT",
+  "name": "Config Macro for MISO Transfer Function Macro2"
+ },
+ "412B": {
+  "op": "SELECT",
+  "name": "Config Macro for MISO Transfer Function Macro3"
  },
  "503B": {
   "op": "ADD",
@@ -771,6 +643,22 @@
   "op": "DIV",
   "name": "Division with Gain"
  },
+ "506F": {
+  "op": "ABS",
+  "name": "Absolute"
+ },
+ "5070": {
+  "op": "ABS",
+  "name": "Absolute"
+ },
+ "5071": {
+  "op": "ABS",
+  "name": "Absolute"
+ },
+ "5072": {
+  "op": "ABS",
+  "name": "Absolute"
+ },
  "5092": {
   "op": "PASS",
   "name": "Upper Limiter"
@@ -802,6 +690,126 @@
  "5099": {
   "op": "PASS",
   "name": "Lower Limiter"
+ },
+ "509A": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 2-input"
+ },
+ "509B": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 2-input"
+ },
+ "509C": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 3-input"
+ },
+ "509D": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 3-input"
+ },
+ "509E": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 4-input"
+ },
+ "509F": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 4-input"
+ },
+ "5100": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 5-input"
+ },
+ "5101": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 5-input"
+ },
+ "5102": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 6-input"
+ },
+ "5103": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 6-input"
+ },
+ "5104": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 7-input"
+ },
+ "5105": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 7-input"
+ },
+ "5106": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 8-input"
+ },
+ "5107": {
+  "op": "MAX",
+  "name": "Maximum Value Selector - 8-input"
+ },
+ "5108": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 2-input"
+ },
+ "5109": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 2-input"
+ },
+ "510A": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 3-input"
+ },
+ "510B": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 3-input"
+ },
+ "510C": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 4-input"
+ },
+ "510D": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 4-input"
+ },
+ "510E": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 5-input"
+ },
+ "510F": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 5-input"
+ },
+ "5110": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 6-input"
+ },
+ "5111": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 6-input"
+ },
+ "5112": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 7-input"
+ },
+ "5113": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 7-input"
+ },
+ "5114": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 8-input"
+ },
+ "5115": {
+  "op": "MIN",
+  "name": "Minimum Value Selector - 8-input"
+ },
+ "5116": {
+  "op": "MID",
+  "name": "Middle Value Selector"
+ },
+ "5117": {
+  "op": "MID",
+  "name": "Middle Value Selector"
  },
  "5118": {
   "op": "AVG",
@@ -859,101 +867,89 @@
   "op": "AVG",
   "name": "Average - 8-input"
  },
- "401D": {
-  "op": "AVG",
-  "name": "AVE1 - Averaging (2 input)"
- },
- "401E": {
-  "op": "AVG",
-  "name": "AVE2 - Averaging (2 input)"
- },
- "401F": {
-  "op": "AVG",
-  "name": "AVE3 - Averaging (2 input)"
- },
- "4020": {
-  "op": "AVG",
-  "name": "AVE4 - Averaging (3 input)"
- },
- "402A": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Left / B:Downside)"
- },
- "402B": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Downside / B:Left)"
- },
- "402C": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Left / B:Upside)"
- },
- "402D": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Upside / B:Left)"
- },
- "402E": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Upside / B:Downside)"
- },
- "402F": {
-  "op": "DIV",
-  "name": "A/B - Dividing (A:Downside / B:Upside)"
- },
- "4035": {
-  "op": "FUNC",
-  "name": "F(x) - Function Generator (Parameter)"
- },
- "4053": {
+ "512F": {
   "op": "PASS",
-  "name": "|> - High Limiter (HL:para)"
+  "name": "Dead Band"
  },
- "4054": {
+ "5130": {
   "op": "PASS",
-  "name": "|> - High Limiter (HL:input)"
+  "name": "Dead Band"
  },
- "410D": {
-  "op": "CLAMPHI",
-  "name": "High Limiter(HL input with comparison output). Y=min(X,HL); D=1 khi X>=HL."
- },
- "410C": {
+ "5131": {
   "op": "PASS",
-  "name": "High Limiter(HL parameter with comparison output)"
+  "name": "Dead Band"
  },
- "410F": {
-  "op": "CLAMPLO",
-  "name": "Low Limiter(LL input with comparison output). Y=max(X,LL); D=1 khi X<=LL."
- },
- "410E": {
+ "5132": {
   "op": "PASS",
-  "name": "Low Limiter(LL parameter with comparison output)"
+  "name": "Dead Band"
  },
- "4055": {
+ "5133": {
   "op": "PASS",
-  "name": "<| - Low Limiter (LL:para)"
+  "name": "Level Converter"
  },
- "4056": {
+ "5134": {
   "op": "PASS",
-  "name": "<| - Low Limiter (LL:input)"
+  "name": "Level Converter"
  },
- "4027": {
-  "op": "MUL",
-  "name": "* - Multiplying (in:Left & Downside)"
+ "5136": {
+  "op": "PASS",
+  "name": "Data Transfer (Analog)"
  },
- "4028": {
-  "op": "MUL",
-  "name": "* - Multiplying (in:Left & Upside)"
- },
- "4029": {
-  "op": "MUL",
-  "name": "* - Multiplying (in:Upside & Downside)"
- },
- "8243": {
+ "513D": {
   "op": "SELECT",
-  "name": "X-SEQM - Group Sequence (Master) for Transfer"
+  "name": "Analog Switch"
  },
- "8244": {
+ "5142": {
   "op": "SELECT",
-  "name": "X-SEQS - Group Sequence (Step) for Transfer"
+  "name": "Bump Less Transfer"
+ },
+ "5143": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5144": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5145": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5146": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5147": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5148": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "5149": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "514A": {
+  "op": "PASS",
+  "name": "Real -> Integer Converter"
+ },
+ "514B": {
+  "op": "PASS",
+  "name": "Integer -> Real Converter"
+ },
+ "514C": {
+  "op": "PASS",
+  "name": "Integer -> Real Converter"
+ },
+ "514F": {
+  "op": "MID",
+  "name": "Middle Value Selector(Balance Compensation)"
+ },
+ "8227": {
+  "op": "PASS",
+  "name": "ADL - Analog Data Link"
  },
  "823D": {
   "op": "SELECT",
@@ -967,32 +963,40 @@
   "op": "SELECT",
   "name": "X-SOV - Solenoid Valve for Transfer"
  },
- "4052": {
-  "op": "CONST",
-  "name": "SG - Variable Signal Generator (hang so A)"
+ "8240": {
+  "op": "SELECT",
+  "name": "X-SWGR - Switchgear for Transfer"
  },
- "406A": {
-  "op": "GAIN",
-  "name": "P - Proportional (PG:para)"
+ "8241": {
+  "op": "SELECT",
+  "name": "X-DUAL - Dual Gate Sensor for Transfer"
  },
- "406B": {
-  "op": "MUL",
-  "name": "P - Proportional (PG:input)"
+ "8242": {
+  "op": "SELECT",
+  "name": "LAMP & PB - Selector for Transfer"
  },
- "407A": {
-  "op": "PASS",
-  "name": "Z^(-n) - Sampling Delay Gate"
+ "8243": {
+  "op": "SELECT",
+  "name": "X-SEQM - Group Sequence (Master) for Transfer"
  },
- "405E": {
-  "op": "PASS",
-  "name": "DEAD TIME - Pure Delay (without SW)"
+ "8244": {
+  "op": "SELECT",
+  "name": "X-SEQS - Group Sequence (Step) for Transfer"
  },
- "0042": {
-  "op": "ADD",
-  "name": "+ - Addition (obs)"
+ "8245": {
+  "op": "SELECT",
+  "name": "X-SV/MV - SV & MV Station for Transfer"
  },
- "0045": {
-  "op": "MULG",
-  "name": "* - Multiplication (obs)"
+ "8246": {
+  "op": "SELECT",
+  "name": "X-SV - SV Station for Transfer"
+ },
+ "8247": {
+  "op": "SELECT",
+  "name": "X-MV - MV Station for Transfer"
+ },
+ "8248": {
+  "op": "SELECT",
+  "name": "X-TRIPLE - Triple Gate Sensor for Transfer"
  }
 }

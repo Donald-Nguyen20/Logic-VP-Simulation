@@ -8,9 +8,9 @@ from __future__ import annotations
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit,
                                QPushButton, QLabel, QTableWidget, QTableWidgetItem,
                                QMessageBox, QHeaderView, QScrollArea,
-                               QFrame)
+                               QFrame, QListWidget, QListWidgetItem, QDialogButtonBox)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QFont
+from PySide6.QtGui import QColor
 
 from core import ce_matrix as CE
 from core import project_index as PI
@@ -35,7 +35,7 @@ class CEMatrixDialog(QDialog):
         self.chip_area.setSpacing(6)
         chip_wrap = QWidget()
         chip_wrap.setLayout(self.chip_area)
-        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFixedHeight(40)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFixedHeight(46)
         scroll.setWidget(chip_wrap)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         top.addWidget(scroll, 1)
@@ -44,16 +44,38 @@ class CEMatrixDialog(QDialog):
         add_row = QHBoxLayout()
         self.ed = QLineEdit(); self.ed.setPlaceholderText("Go ten tin hieu (vd MFT) roi Enter...")
         btn_add = QPushButton("+ Them")
+        btn_pick = QPushButton("Nap tu tai lieu...")
+        btn_pick.setToolTip("Liet ke moi tin hieu DICH da duoc ghi nhan trong CAD_TAG_FID "
+                            "(quy uoc '<nguyen nhan> (<TEN DICH>)') de chon hang loat")
         btn_rb = QPushButton("Dung lai chi muc")
         btn_rb.setToolTip("Dung lai chi muc tim kiem tu dau (dung khi tim khong ra tin hieu dung ra)")
-        btn_build = QPushButton("Dung ma tran")
         btn_export = QPushButton("Xuat Excel...")
         add_row.addWidget(self.ed, 1)
         add_row.addWidget(btn_add)
+        add_row.addWidget(btn_pick)
         add_row.addWidget(btn_rb)
-        add_row.addWidget(btn_build)
         add_row.addWidget(btn_export)
         lay.addLayout(add_row)
+
+        opt_row = QHBoxLayout()
+        opt_row.addStretch(1)
+        self.btn_layers = QPushButton("Xem theo lop...")
+        self.btn_layers.setToolTip(
+            "Doc nguyen nhan TUNG BUOC thay vi bung het mot luc:\n"
+            "  Lop 1 = cai gi TRUC TIEP gay ra tin hieu dich\n"
+            "  bam 1 nguyen nhan -> lop 2 = cai gi gay ra CAI DO -> ...\n"
+            "Hop khi mach qua day (MFT co the vai tram khoi). Bang phang ben duoi van "
+            "giu nguyen de lam tai lieu / xuat Excel.")
+        self.btn_layers.clicked.connect(self._open_layers)
+        opt_row.addWidget(self.btn_layers)
+        self.btn_diag = QPushButton("Xem so do logic...")
+        self.btn_diag.setToolTip("Mo so do AND/OR cua tin hieu dich dang chon - thay ro CAU TRUC "
+                                 "(cai gi long trong cai gi, nhom AND, phu dinh, chot SR).\n"
+                                 "Chon 1 dong truoc de to do duong dan toi nguyen nhan do.\n"
+                                 "Meo: bam DUP 1 dong cung mo so do.")
+        self.btn_diag.clicked.connect(self._open_diagram)
+        opt_row.addWidget(self.btn_diag)
+        lay.addLayout(opt_row)
 
         self.info = QLabel("")
         self.info.setStyleSheet("color:#64748B; font-size:11px;")
@@ -64,18 +86,20 @@ class CEMatrixDialog(QDialog):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.verticalHeader().setVisible(False)
         self.table.cellClicked.connect(self._on_row_click)
+        self.table.cellDoubleClicked.connect(lambda _r, _c: self._open_diagram())
         lay.addWidget(self.table, 1)
 
-        legend = QLabel("● = nguyen nhan doc lap, mot minh du gay hieu ung (chi hien OR, cac "
-                        "nguyen nhan phai ket hop voi cai khac (AND) da duoc an bot)   |   "
-                        "Bam 1 hang de nhay toi sheet nguon")
+        legend = QLabel("● = nguyen nhan doc lap (mot minh du gay hieu ung)   |   "
+                        "▲Gxx = phai ket hop du ca nhom Gxx moi gay hieu ung (di chuot vao o "
+                        "de xem can them gi)   |   Bam 1 hang de nhay toi sheet nguon")
         legend.setStyleSheet("color:#64748B; font-size:11px;")
+        legend.setWordWrap(True)
         lay.addWidget(legend)
 
-        btn_add.clicked.connect(lambda: self._add_target(False))
-        self.ed.returnPressed.connect(lambda: self._add_target(False))
+        btn_add.clicked.connect(self._add_target)
+        self.ed.returnPressed.connect(self._add_target)
+        btn_pick.clicked.connect(self._pick_targets)
         btn_rb.clicked.connect(self._rebuild_index)
-        btn_build.clicked.connect(self._rebuild)
         btn_export.clicked.connect(self._export_excel)
 
     # ---------------------------------------------------------------- chips
@@ -87,21 +111,46 @@ class CEMatrixDialog(QDialog):
                 w.deleteLater()
         for i, tg in enumerate(self.targets):
             w = QWidget()
-            hl = QHBoxLayout(w); hl.setContentsMargins(6, 2, 6, 2); hl.setSpacing(4)
-            w.setStyleSheet("background:#DBEAFE; border-radius:10px;")
-            lb = QLabel(tg["disp"]); lb.setStyleSheet("color:#1D4ED8; font-size:12px;")
-            x = QPushButton("✕"); x.setFixedSize(16, 16)
-            x.setStyleSheet("border:none; color:#1D4ED8; font-size:10px;")
+            hl = QHBoxLayout(w); hl.setContentsMargins(10, 2, 4, 2); hl.setSpacing(6)
+            w.setStyleSheet("background:#DBEAFE; border-radius:12px;")
+            lb = QLabel(tg["disp"])
+            lb.setStyleSheet("color:#1D4ED8; font-size:12px; font-weight:600; background:transparent;")
+            x = QPushButton("✕")
+            x.setFixedSize(20, 20)
+            x.setCursor(Qt.CursorShape.PointingHandCursor)
+            x.setToolTip("Bo '%s' khoi ma tran" % tg["disp"])
+            x.setStyleSheet(
+                "QPushButton { border:none; border-radius:10px; background:#BFDBFE;"
+                " color:#1D4ED8; font-size:12px; font-weight:bold; }"
+                "QPushButton:hover { background:#EF4444; color:white; }")
             x.clicked.connect(lambda _=False, idx=i: self._remove_target(idx))
             hl.addWidget(lb); hl.addWidget(x)
             self.chip_area.addWidget(w)
+        if self.targets:
+            clr = QPushButton("Xoa het")
+            clr.setCursor(Qt.CursorShape.PointingHandCursor)
+            clr.setToolTip("Bo toan bo tin hieu dich")
+            clr.setStyleSheet(
+                "QPushButton { border:1px solid #CBD5E1; border-radius:12px; padding:2px 10px;"
+                " color:#64748B; font-size:11px; background:white; }"
+                "QPushButton:hover { border-color:#EF4444; color:#EF4444; }")
+            clr.clicked.connect(self._clear_targets)
+            self.chip_area.addWidget(clr)
         self.chip_area.addStretch(1)
+
+    def _clear_targets(self):
+        self.targets = []
+        self._refresh_chips()
+        self._rebuild()
+        self.info.setText("Da bo toan bo tin hieu dich.")
 
     def _remove_target(self, idx):
         if 0 <= idx < len(self.targets):
-            self.targets.pop(idx)
+            gone = self.targets.pop(idx)["disp"]
             self._refresh_chips()
             self._rebuild()
+            # dat sau _rebuild vi ham do cung ghi vao info
+            self.info.setText("Da bo '%s'.  %s" % (gone, self.info.text()))
 
     # ---------------------------------------------------------------- them tin hieu
     def _db_paths(self):
@@ -118,7 +167,77 @@ class CEMatrixDialog(QDialog):
         except Exception as e:
             self.info.setText("Loi khi dung lai chi muc: %s" % e)
 
-    def _add_target(self, force_rebuild=False):
+    def _pick_targets(self):
+        """Liet ke moi TEN TIN HIEU DICH da co nhan tai lieu trong CAD_TAG_FID (quy uoc
+        '<nguyen nhan> (<TEN DICH>)') de chon hang loat, thay vi go tung cai."""
+        paths = self._db_paths()
+        if not paths:
+            self.info.setText("Chua import DB nao.")
+            return
+        try:
+            names = CE.known_targets(paths)
+        except Exception as e:
+            self.info.setText("Khong doc duoc danh sach: %s" % e)
+            return
+        if not names:
+            self.info.setText("Khong tim thay tin hieu dich nao co nhan tai lieu trong CAD_TAG_FID.")
+            return
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Chon tin hieu dich")
+        dlg.resize(560, 520)
+        v = QVBoxLayout(dlg)
+        n_tag = sum(1 for _n, c in names if c > 0)
+        v.addWidget(QLabel(
+            "Goi y %d tin hieu dich: %d co san nhan tai lieu trong CAD_TAG_FID (dam, "
+            "dang tin nhat), %d con lai la tin hieu co ten mang tu khoa bao ve/trip.\n"
+            "Chon nhieu bang Ctrl / Shift:" % (len(names), n_tag, len(names) - n_tag)))
+        ed = QLineEdit(); ed.setPlaceholderText("Loc nhanh...")
+        v.addWidget(ed)
+        lst = QListWidget()
+        lst.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        for nm, n in names:
+            txt = ("%s   (%d nguyen nhan da ghi nhan)" % (nm, n)) if n else nm
+            it = QListWidgetItem(txt)
+            it.setData(Qt.ItemDataRole.UserRole, nm)
+            if n:
+                f = it.font(); f.setBold(True); it.setFont(f)
+            lst.addItem(it)
+        v.addWidget(lst, 1)
+
+        def _filter(txt):
+            q = (txt or "").strip().upper()
+            for i in range(lst.count()):
+                it = lst.item(i)
+                it.setHidden(bool(q) and q not in it.text().upper())
+        ed.textChanged.connect(_filter)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
+                              QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(dlg.accept); bb.rejected.connect(dlg.reject)
+        v.addWidget(bb)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        picked = [it.data(Qt.ItemDataRole.UserRole) for it in lst.selectedItems()]
+        if not picked:
+            return
+        added = skipped = 0
+        for nm in picked:
+            disp = nm.upper()
+            if any(t["disp"] == disp for t in self.targets):
+                continue
+            cands = CE.resolve_target_candidates(nm, paths)
+            if not cands:
+                skipped += 1
+                continue
+            self.targets.append({"disp": disp, "cands": cands})
+            added += 1
+        self._refresh_chips()
+        self._rebuild()
+        # dat sau _rebuild vi ham do cung ghi vao info
+        self.info.setText("Da them %d tin hieu dich%s.  %s"
+                          % (added, (" (%d cai khong xac dinh duoc noi san xuat)" % skipped)
+                             if skipped else "", self.info.text()))
+
+    def _add_target(self):
         name = self.ed.text().strip()
         if not name:
             return
@@ -127,10 +246,7 @@ class CEMatrixDialog(QDialog):
             self.info.setText("Chua import DB nao.")
             return
         try:
-            if force_rebuild:
-                PI.build(paths)
-            else:
-                PI.ensure(paths)
+            PI.ensure(paths)        # tu dung lai neu bo DB da doi (xem project_index)
         except Exception:
             pass
         cands = CE.resolve_target_candidates(name, paths)
@@ -156,13 +272,12 @@ class CEMatrixDialog(QDialog):
             return
         self.targets.append({"disp": disp, "cands": cands})
         self.ed.clear()
-        if len(cands) > 1:
-            self.info.setText("Da them '%s' (gop nguyen nhan tu %d noi cung san xuat tin hieu nay). "
-                              "Bam 'Dung ma tran' de tinh lai." % (disp, len(cands)))
-        else:
-            self.info.setText("Da them '%s'. Bam 'Dung ma tran' de tinh lai." % disp)
         self._refresh_chips()
         self._rebuild()
+        # dat sau _rebuild vi ham do cung ghi vao info
+        note = ("Da them '%s' (gop nguyen nhan tu %d noi cung san xuat tin hieu nay)."
+                % (disp, len(cands))) if len(cands) > 1 else ("Da them '%s'." % disp)
+        self.info.setText("%s  %s" % (note, self.info.text()))
 
     # ---------------------------------------------------------------- dung ma tran
     def _rebuild(self):
@@ -178,20 +293,31 @@ class CEMatrixDialog(QDialog):
             return
         self._render_table()
         n_tag = sum(1 for r in self.rows if r.get("source") == "tag")
-        self.info.setText("%d nguyen nhan (%d tu nhan CAD_TAG_FID co san, %d suy luan tu day)."
-                          % (len(self.rows), n_tag, len(self.rows) - n_tag))
+        n_and = sum(1 for r in self.rows
+                    if any(m.get("kind") == "and" for m in r["marks"].values()))
+        self.info.setText(
+            "%d nguyen nhan (%d tu nhan CAD_TAG_FID co san, %d suy luan tu day)%s."
+            % (len(self.rows), n_tag, len(self.rows) - n_tag,
+               (", trong do %d dong phai KET HOP (nhom AND)" % n_and) if n_and else ""))
 
     def _render_table(self):
-        cols = ["Nguyen nhan goc", "Nguon"] + self.columns
+        rows = self.rows
+        cols = ["Nguyen nhan goc", "Nguon", "CPU"] + self.columns
         self.table.setColumnCount(len(cols))
         self.table.setHorizontalHeaderLabels(cols)
-        self.table.setRowCount(len(self.rows))
-        for r, row in enumerate(self.rows):
+        self.table.setRowCount(len(rows))
+        for r, row in enumerate(rows):
             it = QTableWidgetItem(row["label"])
             it.setData(Qt.ItemDataRole.UserRole, row)
+            if row.get("raw_name"):
+                it.setForeground(QColor("#78716C"))     # dong chua xac dinh duoc ten
+                it.setToolTip("Chua co ten mo ta - chi la ma net trong ban ve")
             self.table.setItem(r, 0, it)
             src = "Tai lieu (TAG)" if row.get("source") == "tag" else "Suy luan tu day"
             self.table.setItem(r, 1, QTableWidgetItem(src))
+            sit = QTableWidgetItem(row.get("source_txt") or "")
+            sit.setToolTip("\n".join(row.get("srcs") or []))
+            self.table.setItem(r, 2, sit)
             for ci, col in enumerate(self.columns):
                 m = row["marks"].get(col)
                 cell = QTableWidgetItem("")
@@ -200,16 +326,69 @@ class CEMatrixDialog(QDialog):
                     if m["kind"] == "or":
                         cell.setText("●")
                         cell.setForeground(QColor("#1D4ED8"))
+                        cell.setToolTip("Mot minh tin hieu nay da du gay ra '%s'" % col)
                     else:
                         cell.setText("▲%s" % m.get("group", ""))
                         cell.setForeground(QColor("#B45309"))
-                        with_txt = ", ".join(m.get("with") or [])
-                        cell.setToolTip("Can du ca nhom:\n%s" % with_txt if with_txt else "Nhom AND")
+                        with_txt = "\n  + ".join(m.get("with") or [])
+                        cell.setToolTip(("Chi gay ra '%s' khi KET HOP du:\n  + %s" % (col, with_txt))
+                                        if with_txt else "Thuoc 1 nhom AND")
                     f = cell.font(); f.setBold(True); cell.setFont(f)
-                self.table.setItem(r, ci + 2, cell)
+                self.table.setItem(r, ci + 3, cell)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for ci in range(1, len(cols)):
             self.table.horizontalHeader().setSectionResizeMode(ci, QHeaderView.ResizeMode.ResizeToContents)
+
+    # ---------------------------------------------------------------- xem theo lop
+    def _current_target(self):
+        """Tin hieu dich ung voi o dang chon (hoac cai dau tien), kem nhan dong dang
+        chon de to do. Tra (target, nhan) - target la None neu chua co gi."""
+        if not self.targets:
+            return None, None
+        tg, hl = self.targets[0], None
+        r, c = self.table.currentRow(), self.table.currentColumn()
+        if r is None or r < 0:
+            return tg, hl
+        it = self.table.item(r, 0)
+        if not it:
+            return tg, hl
+        row = it.data(Qt.ItemDataRole.UserRole) or {}
+        hl = row.get("label")
+        ci = c - 3
+        if 0 <= ci < len(self.columns):
+            want = self.columns[ci]        # dang bam dung 1 o -> lay cot do
+        else:
+            want = next((k for k in self.columns if k in (row.get("marks") or {})),
+                        self.columns[0] if self.columns else None)
+        for t in self.targets:
+            if t["disp"] == want:
+                return t, hl
+        return tg, hl
+
+    def _open_layers(self):
+        tg, _hl = self._current_target()
+        if tg is None:
+            self.info.setText("Chua co tin hieu dich nao - them 1 cai truoc.")
+            return
+        from ui.cause_layers_dialog import CauseLayersDialog
+        self._layers = CauseLayersDialog(tg["disp"], tg.get("cands") or [tg],
+                                         getattr(self.mw, "cpu_paths", None) or {},
+                                         main_window=self.mw, parent=self)
+        self._layers.show()
+
+    # ---------------------------------------------------------------- so do logic
+    def _open_diagram(self):
+        """Mo so do AND/OR cho tin hieu DICH lien quan toi dong dang chon (hoac cot dang
+        chon). Bang cho cai nhin tong quan nhieu tin hieu dich; so do bu phan CAU TRUC."""
+        tg, hl = self._current_target()
+        if tg is None:
+            self.info.setText("Chua co tin hieu dich nao - them 1 cai truoc.")
+            return
+        from ui.cause_tree_dialog import CauseTreeDialog
+        self._diag = CauseTreeDialog(tg["disp"], tg.get("cands") or [tg],
+                                     getattr(self.mw, "cpu_paths", None) or {},
+                                     main_window=self.mw, highlight=hl, parent=self)
+        self._diag.show()
 
     # ---------------------------------------------------------------- dieu huong
     def _on_row_click(self, r, _c):
@@ -235,7 +414,8 @@ class CEMatrixDialog(QDialog):
             return
         try:
             from core import ce_export as CX
-            CX.export_matrix(path, self.columns, self.rows)
+            CX.export_matrix(path, self.columns, self.rows,
+                             db_paths=self._db_paths())
         except Exception as e:
             QMessageBox.warning(self, "Xuat Excel", "Loi khi xuat: %s" % e)
             return

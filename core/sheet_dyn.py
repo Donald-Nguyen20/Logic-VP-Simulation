@@ -34,6 +34,34 @@ STATION_CODES = {"820A", "820B", "820C", "820D", "820E", "820F",
                   "8210", "8211", "8304", "8305"}
 
 
+_HAS_DYN = {}
+
+
+def has_dynamic(db, sheet):
+    """Sheet nay co khoi DONG nao khong (tich phan/dao ham/loc tre/gioi han toc do/khoi
+    TAG co than lenh goc)? Do duoc tren du an: 68% sheet KHONG co khoi nao - voi chung
+    thi chay dong la 301 luot giai tinh de roi khong co gi tien len (0,001s -> 0,56s).
+    Hoi 1 cau SQL (co nho ket qua) re hon nhieu."""
+    key = (db, sheet)
+    if key in _HAS_DYN:
+        return _HAS_DYN[key]
+    ok = False
+    try:
+        from . import def_sim as _DS
+        c = D.connect(db).cursor()
+        for (code,) in c.execute("SELECT MACROCODE FROM CAD_BLOCK WHERE ID=?", (sheet,)):
+            code = (code or "").upper()
+            if (code in INTEG_CODES or code in DERIV_CODES or code in LAG_CODES
+                    or code in RATE_CODES or _DS.can_simulate(code)
+                    or (code in STATION_CODES and AS.has_analog(code))):
+                ok = True
+                break
+    except Exception:
+        ok = False
+    _HAS_DYN[key] = ok
+    return ok
+
+
 def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
     """Danh sach khoi dong tren sheet: {bid, code, out, x(net), sw(net), ti, init, state}
     (I/D/L) hoac {bid, code, kind:'S', sim, in_nets, out_nets, last_out} (tram MV/SV).
@@ -223,17 +251,32 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
     return out
 
 
-def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None, overrides=None):
+def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
+        overrides=None, settle=0, state=None, sim_cache=None, stats=None):
     """Chay dong nsteps buoc. Tra (val cuoi, history{net:[...]}, blocks).
     dig_env: dau vao digital {net:0/1}; ana_env: dau vao analog {net: so}.
     overrides: {bid:{'ti','init'}} ghi de tham so khoi dong.
-    record: danh sach net can ghi lai theo thoi gian."""
+    record: danh sach net can ghi lai theo thoi gian.
+
+    settle > 0: DUNG SOM ngay khi moi khoi dong het thay doi trong 'settle' buoc lien
+        tiep. Do tren du an: hau het sheet on dinh trong vai buoc dau, nen chay du 300
+        buoc la lang phi ~300 lan. nsteps luc nay chi con la tran an toan (khoi tich
+        phan bi lech thuong truc thi ramp mai, khong bao gio on dinh).
+    state: {bid: {"s":.., "xprev":..}} - trang thai khoi I/D/L/R. Doc luc bat dau (neu
+        co) va GHI LAI vao chinh dict do luc ket thuc, de lan chay sau TIEP TUC tu day
+        thay vi nhay ve 0. Truyen None = bat dau lai tu 'init' nhu truoc.
+    sim_cache: {bid: sim} - giu song doi tuong mo phong cua khoi TAG/tram giua cac lan
+        goi (MV cua tram la bo tich luy, khong phai cong thuc tinh thang).
+    stats: dict tuy chon - dien {"steps":.., "settled": True/False} de nguoi goi bao lai.
+    """
     dig_env = dig_env or {}
     ana_env = ana_env or {}
-    blocks = _dyn_blocks(db, sheet, overrides)
+    blocks = _dyn_blocks(db, sheet, overrides, sim_cache=sim_cache)
     for b in blocks:
         if b["kind"] != "S":
-            b["state"] = b.get("init", 0.0); b["xprev"] = None
+            st = (state or {}).get(b["bid"])
+            b["state"] = st["s"] if st else b.get("init", 0.0)
+            b["xprev"] = st.get("xprev") if st else None
         else:
             b["sim"].dt = dt                     # dong bo dt nguoi dung chon cho tram
     hist = defaultdict(list)
@@ -243,7 +286,44 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None, 
     def _num(x):
         return isinstance(x, (int, float)) and not isinstance(x, bool)
 
+    # Net DAU RA cua khoi dong: phai LOAI khoi dig_env truoc khi simulate. Cac net nay
+    # bi coi la "dau vao" luc mo sheet (khoi khong co mo hinh tinh) nen da bi gieo mac
+    # dinh 0 vao dig_env - ma trong simulate() thi overrides(digital) THANG analog, nen
+    # so 0 cu se DE LEN gia tri khoi dong vua tinh (vd Auto=1 cua tram khong bao gio
+    # hien ra day '11' tren sheet - bug da gap that).
+    dynouts = set()
+    for b in blocks:
+        if b["kind"] == "S":
+            dynouts.update(b["out_nets"].values())
+        else:
+            dynouts.add(b["out"])
+    dig = {k: v for k, v in dig_env.items() if k not in dynouts}
+
+    def _snap():
+        """Anh chup trang thai moi khoi dong - de biet da het thay doi hay chua."""
+        o = []
+        for b in blocks:
+            if b["kind"] == "S":
+                o.extend(b["last_out"].get(nm) for nm in sorted(b["out_nets"]))
+            else:
+                o.append(b["state"])
+        return o
+
+    def _same(a, b_):
+        if a is None or len(a) != len(b_):
+            return False
+        for x, y in zip(a, b_):
+            if not (_num(x) and _num(y)):
+                if x != y:
+                    return False
+                continue
+            if abs(x - y) > 1e-6 * max(1.0, abs(x), abs(y)):
+                return False
+        return True
+
+    prev_snap, quiet, done = None, 0, 0
     for _ in range(nsteps + 1):
+        done += 1
         aov = dict(ana_env)
         for b in blocks:
             if b["kind"] == "S":
@@ -251,7 +331,7 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None, 
                     aov[net] = b["last_out"].get(nm, 0.0)
             else:
                 aov[b["out"]] = b["state"]       # dau ra khoi dong = trang thai hien tai
-        val, _it = SS.simulate(db, sheet, dig_env, aov)
+        val, _it = SS.simulate(db, sheet, dig, aov)
         for n in record:
             hist[n].append(val.get(n))
         # tien trang thai khoi dong
@@ -310,4 +390,17 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None, 
                 xp = b["xprev"]
                 b["state"] = 0.0 if xp is None else b["ti"] * (x - xp) / dt
                 b["xprev"] = x
+        if settle:
+            cur = _snap()
+            quiet = quiet + 1 if _same(prev_snap, cur) else 0
+            prev_snap = cur
+            if quiet >= settle:
+                break
+    if state is not None:
+        for b in blocks:
+            if b["kind"] != "S":
+                state[b["bid"]] = {"s": b["state"], "xprev": b["xprev"]}
+    if stats is not None:
+        stats["steps"] = done
+        stats["settled"] = bool(settle and quiet >= settle)
     return val, dict(hist), blocks

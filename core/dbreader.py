@@ -17,6 +17,7 @@ from collections import defaultdict
 from .model import Circuit, BLOCK_SPECS, _manual_terms
 
 _NAME_BY_CODE = {}
+_INFO_BY_CODE = {}     # code -> (short, mo ta day du, nhom)
 
 
 def _load_names():
@@ -26,7 +27,20 @@ def _load_names():
     p = os.path.join(os.path.dirname(__file__), "macro_catalog.json")
     if os.path.exists(p):
         for m in json.load(open(p, encoding="utf-8")).get("macros", []):
-            _NAME_BY_CODE[m["code"].upper()] = m["short"]
+            code = m["code"].upper()
+            _NAME_BY_CODE[code] = m["short"]
+            # "H/ - Signal Monitor (High)" -> bo phan ky hieu ve, giu phan mo ta
+            nm = m.get("name") or ""
+            desc = nm.split(" - ", 1)[1] if " - " in nm else nm
+            _INFO_BY_CODE[code] = (m["short"], desc.strip(), m.get("category") or "")
+
+
+def macro_info(code):
+    """(ten ngan, mo ta day du, nhom) cua 1 macro. Ten ngan mot minh de bi doc sai:
+    'DI' khong phai Digital Input ma la Delay Initiation, 'TRANS2' khong phai transmitter
+    ma la cong tac chon analog. Gui ca mo ta thi khong con doan mo."""
+    _load_names()
+    return _INFO_BY_CODE.get((code or "").upper(), ("", "", ""))
 
 
 def _clean(s):
@@ -86,6 +100,16 @@ def db_meta(path):
     }
 
 
+def loop_names(path):
+    """{loopno: ten loop} tu CAD_LOOP - ten CHUC NANG that cua tung mach dieu khien
+    (vd 184 -> 'M-BFP MIN FLW CTRL', 156 -> 'BFPT A'), dung de gom cay sheet theo Loop."""
+    try:
+        c = connect(path).cursor()
+        return {ln: _clean(nm) for ln, nm in c.execute("SELECT LOOPNO,LOOPNAME FROM CAD_LOOP")}
+    except Exception:
+        return {}
+
+
 def list_sheets(path):
     c = connect(path).cursor()
     counts = dict(c.execute("SELECT ID,COUNT(*) FROM CAD_BLOCK GROUP BY ID"))
@@ -96,11 +120,13 @@ def list_sheets(path):
             meta[sid] = (_clean(pano), _clean(ps), _clean(nm), _clean(c1), loop, sno)
     except Exception:
         pass
+    lnames = loop_names(path)
     res = []
     for sid, n in counts.items():
         pa, ps, nm, c1, loop, sno = meta.get(sid, ("", "", "", "", None, None))
         res.append({"id": sid, "pa": pa, "sheetno": ps, "name": nm, "nblocks": n,
-                    "comment1": c1, "loopno": loop, "sheetno_num": sno})
+                    "comment1": c1, "loopno": loop, "sheetno_num": sno,
+                    "loopname": lnames.get(loop, "")})
     res.sort(key=lambda d: (d["pa"], d["sheetno"], d["id"]))
     return res
 
@@ -159,10 +185,14 @@ def _resolvers(path):
     # chung chi nam o CAD_SIGNAL, khong co trong CAD_ID -> dung lam fallback khi CAD_ID
     # khong khop (app goc cung doc duoc ten cho cac DB nay).
     sysname = {}
+    syskeys = set()   # MOI dia chi he thong (ke ca chua dat ten) - de biet net nao la global
     try:
         for sl, ln in c.execute("SELECT SYSTEMLINE,LINENAME FROM CAD_SIGNAL"):
             sl = _clean(sl); ln = _clean(ln)
-            if sl and ln and sl not in sysname:
+            if not sl:
+                continue
+            syskeys.add(sl)
+            if ln and sl not in sysname:
                 sysname[sl] = ln
     except Exception:
         pass
@@ -175,8 +205,121 @@ def _resolvers(path):
     pacodes = sorted({k[0] for k in code2sheet if k[0]}, key=len, reverse=True)
     _RES.update(path=path, meta=meta, code2sheet=code2sheet, num=num,
                 idname=idname, idline=idline, crs=crs, pacodes=pacodes,
-                sysname=sysname)
+                sysname=sysname, syskeys=syskeys)
     return _RES
+
+
+# ---------------------------------------------------------------------------
+# Ten tin hieu nam o DB KHAC (cung du an, khac CPU)
+# ---------------------------------------------------------------------------
+# Vi du that: 03 BSM_A.db, sheet BN-203 RUNBACK 3 co 5 dau vao la 5 may nghien:
+# BNA640-04, BNB640-04, BNC640-04, BND640-04, BNE640-04. Nhung DB nay chi chua PANO
+# 'BNA' va 'BND'; con 'BNB','BNC','BNE' nam o 04 BSM B.db (CPU4) - cung he BMS, khac
+# CPU. Tra ten trong pham vi 1 DB thi 3 hang giua BO TRONG. Tim tiep sang cac DB da
+# import thi ra "PULV B I/S", "PULV C I/S", "PULV E I/S".
+_XPATHS = []              # DB da import (app dat vao qua set_project_paths)
+_XIDX = {"key": None, "pano": {}}      # PANO -> [db_path,...]
+_XRES = {}                # db_path -> resolver rut gon {pacodes, code2sheet, idname, num}
+_XMISS = set()            # (db, net) da tim hut - khong quet lai
+
+
+def set_project_paths(paths):
+    """App goi moi khi import / bo DB. De rong -> tu do cac file .db cung thu muc."""
+    global _XPATHS
+    _XPATHS = list(paths or [])
+    _XIDX["key"] = None
+    _XMISS.clear()
+
+
+def _xsiblings(path):
+    lst = list(_XPATHS)
+    if not lst:
+        try:
+            d = os.path.dirname(os.path.abspath(path))
+            lst = [os.path.join(d, f) for f in sorted(os.listdir(d))
+                   if f.lower().endswith(".db")]
+        except Exception:
+            lst = []
+    ap = os.path.abspath(path or "")
+    return [p for p in lst if os.path.abspath(p) != ap]
+
+
+def _xpano(path):
+    """{PANO: [db_path,...]} cua cac DB anh em. Chi doc DISTINCT PANO nen rat nhe."""
+    sibs = _xsiblings(path)
+    key = tuple(sibs)
+    if _XIDX["key"] == key:
+        return _XIDX["pano"]
+    m = defaultdict(list)
+    for p in sibs:
+        try:
+            for (pa,) in connect(p).cursor().execute("SELECT DISTINCT PANO FROM CAD_DATA"):
+                pa = _clean(pa)
+                if pa:
+                    m[pa].append(p)
+        except Exception:
+            continue
+    _XIDX.update(key=key, pano=dict(m))
+    return _XIDX["pano"]
+
+
+def _xres(p):
+    """Resolver rut gon cua 1 DB anh em (chi phan can de tra ten tag)."""
+    r = _XRES.get(p)
+    if r is not None:
+        return r
+    code2sheet, num, idname = {}, {}, {}
+    try:
+        c = connect(p).cursor()
+        for sid, pano, ps, loop, sh in c.execute(
+                "SELECT ID,PANO,PASHEETNO,LOOPNO,SHEETNO FROM CAD_DATA"):
+            code2sheet[(_clean(pano), _clean(ps))] = sid
+            loop, sh = _clean(loop), _clean(sh)
+            num[sid] = (loop + sh.zfill(2)) if (loop and sh) else (loop or sh)
+        for sid, sig, ln in c.execute("SELECT ID,SIGNALID,LINENAME FROM CAD_ID"):
+            ln = _clean(ln)
+            if ln:
+                idname[(sid, _clean(sig))] = ln
+    except Exception:
+        pass
+    r = {"pacodes": sorted({k[0] for k in code2sheet if k[0]}, key=len, reverse=True),
+         "code2sheet": code2sheet, "idname": idname, "num": num}
+    _XRES[p] = r
+    return r
+
+
+def xref_name(path, net):
+    """Ten tin hieu cho tag tro sang DB KHAC.
+    -> (linename, so_sheet, db_path, sheet_id); khong thay -> ("", "", None, None)."""
+    net = _clean(net)
+    base, _, sig = net.rpartition("-")
+    if not path or not base or not sig:
+        return ("", "", None, None)
+    key = (os.path.abspath(path), net)
+    if key in _XMISS:
+        return ("", "", None, None)
+    idx = _xpano(path)
+    cands = []
+    for pa in sorted(idx, key=len, reverse=True):     # PANO dai truoc: 'BNB' truoc 'BN'
+        if base.startswith(pa):
+            for p in idx[pa]:
+                if p not in cands:
+                    cands.append(p)
+    hit = None
+    for p in cands:
+        Rx = _xres(p)
+        sid, s2 = _parse_tag(net, Rx["pacodes"], Rx["code2sheet"])
+        if sid is None:
+            continue
+        ln = Rx["idname"].get((sid, s2), "")
+        if ln:
+            return (ln, Rx["num"].get(sid, ""), p, sid)
+        if hit is None:      # co sheet nhung chua dat ten -> van cho nhay sang xem
+            hit = ("", Rx["num"].get(sid, ""), p, sid)
+    if hit:
+        return hit
+    _XMISS.add(key)
+    return ("", "", None, None)
 
 
 def _parse_tag(tag, pacodes, code2sheet):
@@ -302,6 +445,11 @@ def build_circuit(path, sheet_id):
         if il and R["crs"].get(il):
             pano, ps = R["crs"][il][0]
             ref = R["num"].get(R["code2sheet"].get((pano, ps)), "")
+        if not ln:                       # 4) ten nam o DB cua CPU khac
+            xln, xrf, xpath, _xsid = xref_name(path, net)
+            if xpath is not None:
+                ln = xln or ln
+                ref = ref or xrf
         return (ln, ref)
 
     in_name = resolve

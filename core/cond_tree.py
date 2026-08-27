@@ -385,31 +385,31 @@ def formula(db, sheet, net):
     labels = [(("/" if ns else "") + rname(innet, {net})) for (innet, ns) in ins if innet]
     if s is None:
         b = D.macro_name(code, sym)
-        return ("qua %s" % b, b)
+        return ("through %s" % b, b)
     op = s["op"]
     if op == "AND":
-        return ("VÀ( %s )" % ", ".join(labels), "VÀ")
+        return ("AND( %s )" % ", ".join(labels), "AND")
     if op == "NAND":
-        return ("KHÔNG-VÀ( %s )" % ", ".join(labels), "KHÔNG-VÀ")
+        return ("NAND( %s )" % ", ".join(labels), "NAND")
     if op == "OR":
-        return ("HOẶC( %s )" % ", ".join(labels), "HOẶC")
+        return ("OR( %s )" % ", ".join(labels), "OR")
     if op == "NOR":
-        return ("KHÔNG-HOẶC( %s )" % ", ".join(labels), "KHÔNG-HOẶC")
+        return ("NOR( %s )" % ", ".join(labels), "NOR")
     if op == "NOT":
-        return ("đảo( %s )" % (labels[0] if labels else ""), "đảo")
+        return ("NOT( %s )" % (labels[0] if labels else ""), "NOT")
     if op == "XOR":
         return ("XOR( %s )" % ", ".join(labels), "XOR")
     if op == "SR":
         L = labels + ["?", "?"]
-        return ("chốt: SET=%s, RESET=%s" % (L[0], L[1]), "chốt SR")
+        return ("SR latch: SET=%s, RESET=%s" % (L[0], L[1]), "SR latch")
     if op == "PASS":
         nt = s.get("note", "")
-        w = "trễ" if "timer" in nt else "đệm"
+        w = "delay" if "timer" in nt else "buffer"
         return ("%s (%s)" % ((labels[0] if labels else ""), w), w)
     if op == "CMP":
-        rel = {">=": "≥ ngưỡng", "<=": "≤ ngưỡng"}.get(s.get("rel"), "so sánh")
-        return ("%s %s" % ((labels[0] if labels else ""), rel), "so sánh")
+        rel = {">=": ">= setpoint", "<=": "<= setpoint"}.get(s.get("rel"), "compare")
+        return ("%s %s" % ((labels[0] if labels else ""), rel), "compare")
     if op == "CONST":
-        return ("hằng số = %d" % int(s.get("val", 0)), "hằng số")
+        return ("constant = %d" % int(s.get("val", 0)), "constant")
     b = D.macro_name(code, sym)
-    return ("qua %s" % b, b)
+    return ("through %s" % b, b)

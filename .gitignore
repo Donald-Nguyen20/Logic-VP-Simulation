@@ -45,3 +45,12 @@ _v*.png
 # --- Du lieu du an T-Designer (khong commit DB/file luu cuc bo) ---
 *.db
 *.tdl
+
+# --- API key / cau hinh AI (KHONG BAO GIO commit) ---
+llm_config.json
+.tdesigner_llm.json
+.tdesigner_claude_token
+.env
+
+# --- Thu muc nhap cuc bo (ban cu cua llm_client/llm_config, khong phai ma dang chay) ---
+cach get API/

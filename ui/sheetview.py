@@ -434,7 +434,8 @@ class SheetScene(QGraphicsScene):
         simon = self._sim_on()
         for t in self.sh.terms:
             y = self.sy(t.y)
-            has = bool(t.targets) or bool(getattr(t, "xcpu", None))
+            has = (bool(t.targets) or bool(getattr(t, "xcpu", None))
+                   or bool(getattr(t, "xdb", None)))
             # mau mo phong cho o ten tin hieu
             bg = fg = None
             isin = simon and t.lid in self.sim_inputs
@@ -449,7 +450,10 @@ class SheetScene(QGraphicsScene):
                     self._cell(330, 110, y, t.lid, clickable=has, bg=bg, fg=fg)
                 rh = max(ch, lh, 20)
                 rct = QRectF(0, y - 10, MARGIN_L, rh)
-                rct_lid = QRectF(330, y - 10, MARGIN_L - 330, rh)     # rieng cot LID
+                # Vung bam-de-SET chi cao bang o badge (42px), KHONG keo theo chieu cao
+                # ca hang (rh) - hang co danh sach ref dai (vd EVER [0] tren EHC) se phu
+                # trum xuong terminal duoi, bam o duoi lai set nham tin hieu o tren.
+                rct_lid = QRectF(330, y - 10, MARGIN_L - 330, 42)     # rieng cot LID
                 if has:
                     self._hits.append((rct, t))
             else:
@@ -462,7 +466,7 @@ class SheetScene(QGraphicsScene):
                 lh = self._cell(x0 + 180, 260, y, t.linename, wrap=True, bg=bg, fg=fg)
                 rh = max(ch, lh, 20)
                 rct = QRectF(x0, y - 10, MARGIN_R, rh)
-                rct_lid = QRectF(x0, y - 10, 90, rh)                  # rieng cot LID
+                rct_lid = QRectF(x0, y - 10, 90, 42)                  # rieng cot LID (42 = cao o badge)
                 if has:
                     self._hits.append((rct, t))
             if t.lid:
@@ -559,9 +563,17 @@ class SheetScene(QGraphicsScene):
         # che do mo phong: click dau vao -> digital doi 0/1, analog nhap so
         if self._sim_on():
             net = None
+            # diem bam co the nam trong NHIEU vung (cac o badge cua terminal ve sat nhau
+            # co the de mep 7-10px, vd EHC) -> chon vung co TAM gan diem bam nhat,
+            # khong lay vung dau tien theo thu tu danh sach (de bam nham o ke ben)
+            best = None
             for rect, n in self._sim_lid_hits:      # chi vung cot LID moi set gia tri
                 if rect.contains(sp) and n in self.sim_inputs:
-                    net = n; break
+                    d = (rect.center().x() - sp.x()) ** 2 + (rect.center().y() - sp.y()) ** 2
+                    if best is None or d < best[0]:
+                        best = (d, n)
+            if best is not None:
+                net = best[1]
             if net is None:                        # thu diem settable NOI BO tren day
                 for rect, n in getattr(self, "_sim_wire_hits", []):
                     if rect.contains(sp):

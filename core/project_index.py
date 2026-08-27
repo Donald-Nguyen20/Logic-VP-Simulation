@@ -29,6 +29,33 @@ def _sig(db_paths):
     return h.hexdigest()
 
 
+def _sig_sheets(cur):
+    """{systemline: [sheet_id,...]} cho DB kieu EHC - ten tin hieu nam o CAD_SIGNAL
+    (khong co so sheet), phai tu tra xem dia chi do dung o sheet nao qua chan khoi.
+    Uu tien sheet SINH RA (net tren chan RA); khong co thi lay cac sheet co dung."""
+    from . import sheet_render as SR
+    MP = SR._macro_pins()
+    prod = {}
+    used = {}
+    try:
+        for sid, sym, pn, sig in cur.execute(
+                "SELECT b.ID,b.SYMBOL,p.PINNO,p.SIGNALID FROM CAD_BLOCK_PIN p "
+                "JOIN CAD_BLOCK b ON p.BLOCK_ID=b.BLOCK_ID "
+                "WHERE p.SIGNALID IS NOT NULL AND TRIM(p.SIGNALID)<>''"):
+            s = D._clean(sig)
+            if not s:
+                continue
+            side = (MP.get(sym) or {}).get("pins", {}).get(str(pn), {}).get("side")
+            (prod if side == "out" else used).setdefault(s, set()).add(sid)
+    except Exception:
+        return {}
+    out = {}
+    for s in set(prod) | set(used):
+        ids = prod.get(s) or used.get(s) or set()
+        out[s] = sorted(ids)[:10]      # tin hieu he thong dung khap noi -> chan bot
+    return out
+
+
 def _num_map(cur):
     num = {}
     try:
@@ -74,15 +101,40 @@ def build(db_paths, out_path=None):
                     rows = c.execute("SELECT ID,SIGNALID,LINENAME,SYSTEMLINE FROM CAD_ID").fetchall()
                 except Exception:
                     rows = []
+                seen_names = set()
                 for sid, sigid, ln, sysl in rows:
                     ln = D._clean(ln); sysl = D._clean(sysl); sigid = D._clean(sigid)
                     slbl = num.get(sid, str(sid))
                     if ln:
+                        seen_names.add(ln.upper())
                         con.execute("INSERT INTO sig VALUES(?,?,?,?,?,?,?)",
                                     (ln, p, cpuno, cpuname, sid, slbl, sigid))
                     if sysl:
                         con.execute("INSERT INTO cnet VALUES(?,?,?,?,?,?,?)",
                                     (sysl, ln, cpuno, cpuname, p, sid, slbl))
+                # Nguon ten thu 2 (DB kieu EHC): CAD_SIGNAL. Nhieu DB (21 EHC MC, 23/25
+                # BFPT...) KHONG dat ten trong CAD_ID - vd 'TURBINE TRIP COMMAND' chi co o
+                # CAD_SIGNAL - neu khong nap vao day thi tim kiem se khong ra du man hinh
+                # van hien ten. Chi nap ten CHUA co trong CAD_ID de khong sinh dong trung.
+                try:
+                    srows = c.execute("SELECT SYSTEMLINE,LINENAME FROM CAD_SIGNAL").fetchall()
+                except Exception:
+                    srows = []
+                if srows:
+                    sheets_of = _sig_sheets(c) if any(
+                        D._clean(l) and D._clean(l).upper() not in seen_names
+                        for _s, l in srows) else {}
+                    for sysl, ln in srows:
+                        sysl = D._clean(sysl); ln = D._clean(ln)
+                        if not ln or ln.upper() in seen_names:
+                            continue
+                        for sid in (sheets_of.get(sysl) or [None]):
+                            slbl = num.get(sid, str(sid)) if sid is not None else ""
+                            con.execute("INSERT INTO sig VALUES(?,?,?,?,?,?,?)",
+                                        (ln, p, cpuno, cpuname, sid, slbl, sysl))
+                        if sysl:
+                            con.execute("INSERT INTO cnet VALUES(?,?,?,?,?,?,?)",
+                                        (sysl, ln, cpuno, cpuname, p, None, ""))
             except Exception:
                 continue
             finally:
