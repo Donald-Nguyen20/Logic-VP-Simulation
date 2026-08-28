@@ -538,7 +538,9 @@ class SheetScene(QGraphicsScene):
                     off = info.get("toff")
                     if isinstance(off, (int, float)):
                         tstr = "%s/%gs" % (tstr, off)     # PG: nua chu ky BAT/TAT
-                    txt = "%s  T=%s  y=%s" % (info.get("tmr") or "timer", tstr, vs)
+                    lf = info.get("left")
+                    con = ("  con %.1fs" % lf) if isinstance(lf, (int, float)) else ""
+                    txt = "%s  T=%s  y=%s%s" % (info.get("tmr") or "timer", tstr, vs, con)
                 elif k == "D":
                     txt = "d/dt  G=%s  y=%s" % (pstr, vs)
                 elif k == "L":

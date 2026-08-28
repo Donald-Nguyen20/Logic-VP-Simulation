@@ -52,6 +52,30 @@ def timer_codes():
     return _TIMER_CODES
 
 
+def timer_left(b):
+    """Con bao nhieu giay nua thi khoi timer 'b' doi trang thai. None = dang khong dem.
+
+    Badge chi ghi "y=1" thi nguoi dung khong phan biet duoc timer DANG GIU delay voi
+    timer da het gio - hai cai nhin y het nhau. Suy tu (xp, y, acc) theo dung nghia
+    tung ho da ghi o _step_timer()."""
+    T = b.get("Tef", b.get("T"))
+    if not isinstance(T, (int, float)) or T <= 0:
+        return None
+    acc, fam, y, xp = b.get("acc") or 0.0, b.get("tmr"), b.get("y"), b.get("xp")
+    if fam == "PG":
+        off = b.get("toff") if isinstance(b.get("toff"), (int, float)) else 0.0
+        if xp != 1 or T + off <= 0:
+            return None
+        return T - acc if acc < T else T + off - acc     # con bao lau thi lat nua chu ky
+    if fam in ("DI", "DIL"):
+        dem = xp == 1 and not y                  # dang cho du gio de BAT
+    elif fam == "DT":
+        dem = xp != 1 and bool(y)                # dang giu them sau khi dau vao da tat
+    else:
+        dem = bool(y)                            # PO/TDWO: xung dang phat
+    return max(T - acc, 0.0) if dem else None
+
+
 def _step_timer(b, x, val, dt):
     """Tien 1 buoc dt cho 1 khoi delay/xung so. x = gia tri chan vao (0/1/None).
 
@@ -77,6 +101,7 @@ def _step_timer(b, x, val, dt):
             T = float(v) * 60.0 if b["tunit"] == "min" else float(v)
     if T is None or T < 0:
         T = 0.0
+    b["Tef"] = T                                 # thoi gian THUC SU dung - badge doc o day
     x = 1 if x == 1 else 0
     xp = b["xp"]
     if xp is None:
@@ -396,7 +421,8 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
 
 
 def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
-        overrides=None, settle=0, state=None, sim_cache=None, stats=None):
+        overrides=None, settle=0, state=None, sim_cache=None, stats=None,
+        freeze_tmr=False):
     """Chay dong nsteps buoc. Tra (val cuoi, history{net:[...]}, blocks).
     dig_env: dau vao digital {net:0/1}; ana_env: dau vao analog {net: so}.
     overrides: {bid:{'ti','init'}} ghi de tham so khoi dong.
@@ -413,6 +439,11 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
     sim_cache: {bid: sim} - giu song doi tuong mo phong cua khoi TAG/tram giua cac lan
         goi (MV cua tram la bo tich luy, khong phai cong thuc tinh thang).
     stats: dict tuy chon - dien {"steps":.., "settled": True/False} de nguoi goi bao lai.
+    freeze_tmr: DONG BANG dong ho cua khoi timer - chay ca vong lap voi dt=0 RIENG cho
+        nhom T. Dung khi nguoi goi chi muon "giai lai mach cho on dinh" sau khi doi 1 dau
+        vao: thoi gian THAT chua troi giay nao nen delay khong duoc phep tu tieu di. Van
+        goi _step_timer (chu khong bo qua) de cac buoc TUC THOI van chay dung: T=0 len
+        ngay, DT thay dau vao len thi bat ngay, PO nhan suon len la phat xung.
     """
     dig_env = dig_env or {}
     ana_env = ana_env or {}
@@ -511,7 +542,7 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
                 b["last_out"] = sim.step()
                 continue
             if b["kind"] == "T":
-                _step_timer(b, val.get(b["x"]), val, dt)
+                _step_timer(b, val.get(b["x"]), val, 0.0 if freeze_tmr else dt)
                 continue
             x = val.get(b["x"])
             sw = val.get(b["sw"]) if b["sw"] else None

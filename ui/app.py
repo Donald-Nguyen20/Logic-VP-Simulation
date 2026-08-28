@@ -1516,8 +1516,8 @@ class MainWindow(QMainWindow):
                     # b["ti"] o day se nem KeyError va lam mat sach badge cua MOI khoi
                     # dong tren sheet do.
                     info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
-                                      "tmr": b.get("tmr"), "T": b.get("T"),
-                                      "toff": b.get("toff")}
+                                      "tmr": b.get("tmr"), "T": b.get("Tef", b.get("T")),
+                                      "toff": b.get("toff"), "left": DYN.timer_left(b)}
                 else:
                     info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
                                       "kind": b.get("kind", "I")}
@@ -2010,10 +2010,17 @@ class MainWindow(QMainWindow):
         else:
             nsteps, settle = getattr(self, "_dyn_steps", 300), 4
         st = {}
+        # advance=None nghia la "doi dau vao roi giai lai cho on dinh" - chay toi 300
+        # buoc dt, tuc NHAY 150s thoi gian mo phong. Voi khoi tich phan/loc tre do dung la
+        # cai ta muon (gia tri xac lap), nhung voi TIMER thi no an mat sach delay: bam dau
+        # vao 1->0 la khoi DT dem het 15s ngay trong 1 lan ve lai, nguoi dung thay dau ra
+        # rot ve 0 tuc thi (loi da gap that). Timer chi duoc tien khi THOI GIAN THAT troi:
+        # nhip dong ho "Run time" hoac dao dong (advance=1).
         val, _hist, blocks = DYN.run(
             db, sh, getattr(self, "sim_env", {}), getattr(self, "sim_analog", {}),
             dt=dt, nsteps=nsteps, overrides=getattr(self, "sim_dyn_over", {}),
-            settle=settle, state=state, sim_cache=cache, stats=st)
+            settle=settle, state=state, sim_cache=cache, stats=st,
+            freeze_tmr=not advance)
         kinds = SS._kind_map(db, sh)
         dynouts = self._dyn_outs(blocks)
         inputs = [n for n, _ in SS.input_nets(db, sh) if n not in dynouts]
@@ -2023,10 +2030,30 @@ class MainWindow(QMainWindow):
         self.sheet_scene.set_sim(val, kinds, inputs, getattr(self, "sim_analog", {}),
                                  dyn=self._dyninfo(blocks), osc_nets=osc_nets)
         self._dyn_last = (st.get("steps", 0), bool(st.get("settled")), len(blocks), dt)
+        if not advance:
+            self._tmr_hint(blocks)
+
+    def _tmr_hint(self, blocks):
+        """Nhac khi co timer dang dem: con bao lau, va bam nut nao cho thoi gian troi.
+
+        Sau khi da dong bang timer thi doi dau vao xong man hinh dung im - phai noi ro
+        la dang GIU delay, khong thi nguoi dung tuong mo phong bi treo."""
+        from core import sheet_dyn as DYN
+        dem = [(b, DYN.timer_left(b)) for b in blocks if b["kind"] == "T"]
+        dem = [(b, v) for b, v in dem if v is not None]
+        if not dem:
+            return
+        b, v = min(dem, key=lambda t: t[1])
+        act = getattr(self, "sim_run_act", None)
+        self.status("%d khoi timer dang dem - %s con %.1fs.%s"
+                    % (len(dem), b.get("tmr") or "timer", v,
+                       "" if (act is not None and act.isChecked())
+                       else " Bam '\u25b6 Run time' de thoi gian troi."))
 
     def _dyninfo(self, blocks):
         """{bid: thong tin badge} tu danh sach khoi dong tra ve boi sheet_dyn."""
         from core import ai_explain as AE
+        from core import sheet_dyn as DYN
         info = {}
         for b in blocks:
             if b["kind"] == "S":
@@ -2039,8 +2066,8 @@ class MainWindow(QMainWindow):
                 # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang b["ti"] o day
                 # se nem KeyError va lam mat sach badge cua moi khoi dong tren sheet do.
                 info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
-                                  "tmr": b.get("tmr"), "T": b.get("T"),
-                                  "toff": b.get("toff")}
+                                  "tmr": b.get("tmr"), "T": b.get("Tef", b.get("T")),
+                                  "toff": b.get("toff"), "left": DYN.timer_left(b)}
             else:
                 info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
                                   "kind": b.get("kind", "I")}
