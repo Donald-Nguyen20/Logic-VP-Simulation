@@ -83,8 +83,22 @@ def _cmp_threshold(db, sheet, p):
     return v
 
 
-def _compute(net, prod, sem, val, thr=None):
+def _const_value(db, sheet, p):
+    """Gia tri THAT cua 1 khoi hang so digital, lay tu param '2' cua chinh khoi do.
+    Khoi DSW (D-CONST, macrocode 4018) la cong tac cai bang tay: cung mot ma khoi
+    nhung moi cai dat 0 hoac 1 rieng - tren ban ve so nay in ngay trong o khoi.
+    Do that tren 18 file DB du an: 479 khoi 4018, trong do 221 khoi cai '1'; neu
+    lay 'val' co dinh trong logic_sem.json thi ca 221 khoi nay mo phong ra 0,
+    nguoc voi con so hien tren ban ve. Cac khoi hang so co dinh (EVO 40A4 = 1,
+    EVF 40A5 = 0) khong co param nao -> tra None de dung lai 'val' cua bang.
+    Duong analog da lam dung cach nay tu truoc (xem op CONST trong _eval_analog)."""
+    pm = _params(db, sheet).get(p["bid"], {})
+    return _num(pm.get("2"))
+
+
+def _compute(net, prod, sem, val, thr=None, cst=None):
     thr = thr or {}
+    cst = cst or {}
     p = prod.get(net)
     if not p:
         return val.get(net)                 # net nguon: giu (None neu chua set)
@@ -99,7 +113,10 @@ def _compute(net, prod, sem, val, thr=None):
             v = 1 - v
         ins.append(v)
     if op == "CONST":
-        return int(s.get("val", 0))
+        v = cst.get(net)                    # cai dat rieng cua khoi (DSW)
+        if v is None:
+            v = s.get("val", 0)             # hang so co dinh theo loai khoi
+        return 1 if v else 0
     if op == "PASS":
         return ins[0] if ins else None
     if op == "CMP":
@@ -132,6 +149,18 @@ def _compute(net, prod, sem, val, thr=None):
         return 1 - ins[0] if ins else 1
     if op == "XOR":
         return sum(ins) % 2
+    if op == "SELECT":
+        # Cong tac chuyen mach tin hieu so: SW=1 -> Y=X1, SW=0 -> Y=X2.
+        # Nguon: manual macro trang 117 muc "Transfer (Digital Switch) 40D5H" - bang
+        # chan ly ghi ro SW=ON thi Y=X1, SW=OFF thi Y=X2; toa do chu trong ban ve
+        # symbol dat SW o goc tren-trai, X1 ben trai, X2 phia duoi, Y ben phai.
+        # Vi tri 3 chan vao lay tu logic_sem vi hai loai khoi xep chan khac nhau:
+        # do trong DEF/MCR/MacroDef.db cua hang thi 1030 co SW o chan 3 con 40D5
+        # co SW o chan 1 (40D5 trung khit hinh hoc chan voi 4073, khoi ma ten macro
+        # cua hang ghi thang quy uoc "(X1:L /X2:D /SW:U)").
+        if len(ins) < 3:
+            return val.get(net)
+        return ins[s["x1"]] if ins[s["sw"]] else ins[s["x2"]]
     if op == "SR":
         S = ins[0] if len(ins) > 0 else None
         Rr = ins[1] if len(ins) > 1 else None
@@ -159,11 +188,15 @@ def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
     prod = CT._producers(db, sheet)
     aprod = _analog_producers(db, sheet)
     nets = _all_nets(db, sheet) | set(prod) | set(aprod) | set(overrides) | set(analog)
-    # nguong cho cac khoi so sanh
+    # cai dat rieng cua tung khoi: nguong so sanh (CMP) va gia tri cong tac (CONST)
     thr = {}
+    cst = {}
     for onet, p in prod.items():
-        if (sem.get(p["code"]) or {}).get("op") == "CMP":
+        op0 = (sem.get(p["code"]) or {}).get("op")
+        if op0 == "CMP":
             thr[onet] = _cmp_threshold(db, sheet, p)
+        elif op0 == "CONST":
+            cst[onet] = _const_value(db, sheet, p)
     val = {}
     for n in nets:
         if n in overrides:
@@ -183,7 +216,7 @@ def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
             elif n in aprod:
                 nv = _eval_analog(n, aprod, val, db, sheet)
             else:
-                nv = _compute(n, prod, sem, val, thr)
+                nv = _compute(n, prod, sem, val, thr, cst)
             if val.get(n) != nv:
                 val[n] = nv; changed = True
         if not changed:

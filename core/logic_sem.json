@@ -347,6 +347,24 @@
 "nout": 1,
 "name": "D_CONS"
 },
+"1030": {
+"op": "SELECT",
+"sw": 2,
+"x1": 0,
+"x2": 1,
+"nin": 3,
+"nout": 1,
+"name": "DSW_TS"
+},
+"40D5": {
+"op": "SELECT",
+"sw": 0,
+"x1": 1,
+"x2": 2,
+"nin": 3,
+"nout": 1,
+"name": "40D5_I"
+},
 "400A": {
 "op": "OR",
 "nin": 5,

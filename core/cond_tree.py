@@ -72,6 +72,20 @@ def _producers(db, sheet):
     return prod
 
 
+def const_of(db, sheet, prod, s):
+    """Gia tri that cua 1 khoi hang so digital: uu tien cai dat rieng cua khoi
+    (param '2'), khong co thi lay hang so co dinh cua loai khoi trong logic_sem.
+    Khoi DSW (4018) cai bang tay tung cai nen bat buoc phai doc theo khoi, neu
+    khong thi cay giai thich se noi 'constant = 0' cho ca nhung khoi cai '1'.
+    Nap muon sheet_sim vi module do da import nguoc lai cond_tree - va chi o do
+    moi co gia tri nguoi dung sua tam trong cua so 'Block parameters'."""
+    from . import sheet_sim as SS
+    v = SS._num(SS._params(db, sheet).get(prod["bid"], {}).get("2"))
+    if v is None:
+        v = s.get("val", 0)
+    return 1 if v else 0
+
+
 def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
     cpu_paths = cpu_paths or {}
     R = SG._dbc(db)
@@ -94,6 +108,30 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
         if extra:
             nd.update(extra)
         return nd
+
+    def sel_node(net, prod, s, blabel, dep, vis2, via):
+        """Cong tac chuyen mach (1030/40D5): Y = X1 khi SW=1, Y = X2 khi SW=0.
+        Dien giai thanh (SW VA X1) HOAC (KHONG SW VA X2) - dung nguyen nghia khoi,
+        va chi dung cac kieu nut da co (gate AND/OR) nen cua so cay dieu kien lan
+        Ma tran C&E khong phai sua gi de hieu duoc khoi nay."""
+        pins = prod["ins"]
+        swn, swns = pins[s["sw"]]
+        node = {"id": nid(), "type": "gate", "op": "OR", "net": net, "label": label(net),
+                "block": blabel, "sheet": sheet, "cpu": cpu, "db": db, "sheetlbl": slbl,
+                "via": via, "neg": False, "children": []}
+        for role, want_sw in (("x1", True), ("x2", False)):
+            xn, xns = pins[s[role]]
+            sw_ch = rec(swn, dep - 1, vis2, [])
+            # SW=1 chon X1, SW=0 chon X2; dau cham NOT tren chan SW dao them lan nua
+            sw_ch["neg"] = bool(swns) if want_sw else not bool(swns)
+            x_ch = rec(xn, dep - 1, vis2, [])
+            if xns:
+                x_ch["neg"] = not x_ch.get("neg", False)
+            node["children"].append(
+                {"id": nid(), "type": "gate", "op": "AND", "net": net, "label": label(net),
+                 "block": blabel, "sheet": sheet, "cpu": cpu, "db": db, "sheetlbl": slbl,
+                 "via": [], "neg": False, "children": [sw_ch, x_ch]})
+        return node
 
     def rec(net, dep, visited, via):
         if not net:
@@ -119,8 +157,9 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
                     "in_nets": [n for (n, _ns) in prod["ins"]], "expandable": True}
         op = s["op"]
         if op == "CONST":
-            return {"id": nid(), "type": "const", "val": int(s.get("val", 0)),
-                    "label": "%s (=%d)" % (blabel, int(s.get("val", 0))), "block": blabel,
+            cv = const_of(db, sheet, prod, s)
+            return {"id": nid(), "type": "const", "val": cv,
+                    "label": "%s (=%d)" % (blabel, cv), "block": blabel,
                     "net": net, "neg": False, "via": via, "kind": "const", "db": db, "sheet": sheet, "sheetlbl": slbl}
         if op == "PASS":
             insn = [n for (n, _ns) in prod["ins"] if n]
@@ -133,6 +172,10 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
                     "block": blabel, "rel": s.get("rel", "cmp"), "sheet": sheet, "cpu": cpu, "db": db, "sheetlbl": slbl,
                     "neg": False, "via": via, "kind": "cmp",
                     "in_nets": [n for (n, _ns) in prod["ins"]], "expandable": True}
+        if op == "SELECT":
+            if len(prod["ins"]) > max(s["sw"], s["x1"], s["x2"]):
+                return sel_node(net, prod, s, blabel, dep, vis2, via)
+            return leaf(net, "source", via)
         base = {"AND": "AND", "NAND": "AND", "OR": "OR", "NOR": "OR",
                 "NOT": "NOT", "XOR": "XOR", "SR": "SR"}[op]
         node = {"id": nid(), "type": "gate", "op": base, "net": net, "label": label(net),
@@ -410,6 +453,11 @@ def formula(db, sheet, net):
         rel = {">=": ">= setpoint", "<=": "<= setpoint"}.get(s.get("rel"), "compare")
         return ("%s %s" % ((labels[0] if labels else ""), rel), "compare")
     if op == "CONST":
-        return ("constant = %d" % int(s.get("val", 0)), "constant")
+        return ("constant = %d" % const_of(db, psheet, prod, s), "constant")
+    if op == "SELECT":
+        if len(ins) > max(s["sw"], s["x1"], s["x2"]):
+            L = [rname(ins[s[k]][0], {net}) for k in ("sw", "x1", "x2")]
+            return ("switch %s: 1 -> %s, 0 -> %s" % tuple(L), "switch")
+        return ("switch", "switch")
     b = D.macro_name(code, sym)
     return ("through %s" % b, b)
