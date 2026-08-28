@@ -312,6 +312,9 @@ class CEMatrixDialog(QDialog):
             if row.get("raw_name"):
                 it.setForeground(QColor("#78716C"))     # dong chua xac dinh duoc ten
                 it.setToolTip("Chua co ten mo ta - chi la ma net trong ban ve")
+            if row.get("note"):
+                # nguong la duong cong F(x) - de nguyen cum diem gay khuc trong chu thich
+                it.setToolTip(row["note"])
             self.table.setItem(r, 0, it)
             src = "Tai lieu (TAG)" if row.get("source") == "tag" else "Suy luan tu day"
             self.table.setItem(r, 1, QTableWidgetItem(src))

@@ -196,13 +196,36 @@ class CauseLayersDialog(QDialog):
                 self._add_term(g, n, chain, left)
             g.setExpanded(True)      # nhom AND luon mo - giau di la hieu sai nguy hiem
 
+    def _add_curve(self, parent, note):
+        """Nguong cua nhieu mach bao ve khong phai 1 con so ma la 1 DUONG CONG F(x)
+        (vd MFT: nhiet do cho phep chay theo ap suat). Treo luon cum diem gay khuc
+        ngay duoi dieu kien do - mo san - de doc tai cho, khoi mo sheet tra bang."""
+        dong = [d.strip() for d in (note or "").splitlines()[1:] if d.strip()]
+        if not dong:
+            return
+        g = QTreeWidgetItem(parent)
+        g.setText(0, dong[0])
+        g.setForeground(0, COL_MUTED)
+        g.setToolTip(0, note)
+        g.setData(0, ROLE_LOADED, True)
+        for d in dong[1:]:
+            c = QTreeWidgetItem(g)
+            c.setText(0, d)
+            c.setForeground(0, COL_MUTED)
+            c.setData(0, ROLE_LOADED, True)
+        g.setExpanded(True)
+        parent.setData(0, ROLE_LOADED, True)    # _on_expanded co takeChildren() - phai chan
+        parent.setExpanded(True)
+
     def _add_term(self, parent, node, chain, left):
         it = QTreeWidgetItem(parent)
         it.setText(0, CE.term_label(node))
         it.setText(1, self._src_txt(node))
         it.setData(0, ROLE_NODE, node)
         it.setData(0, ROLE_CHAIN, chain)
-        it.setToolTip(0, CE.term_label(node))
+        note = CE.cmp_note(node) if (node.get("type") == "cmp"
+                                     or node.get("kind") == "cmp") else ""
+        it.setToolTip(0, note or CE.term_label(node))
         if node.get("kind") == "cross":
             it.setForeground(0, COL_CROSS)
         elif node.get("type") == "cmp" or node.get("kind") == "cmp":
@@ -233,6 +256,7 @@ class CauseLayersDialog(QDialog):
             it.setForeground(2, COL_MUTED)
             it.setToolTip(2, "Da toi nguyen nhan goc: tin hieu tu ben ngoai, so sanh nguong, "
                              "hoac khong bung them duoc")
+            self._add_curve(it, note)
         return it
 
     def _count_items(self):

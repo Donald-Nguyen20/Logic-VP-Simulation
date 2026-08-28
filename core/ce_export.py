@@ -44,6 +44,10 @@ def export_matrix(path, columns, rows, db_paths=None):
         c1.alignment = wrap
         if row.get("raw_name"):
             c1.font = raw_font
+        if row.get("note"):
+            # Nguong la 1 DUONG CONG F(x) chu khong phai 1 con so: dinh ca cum diem gay
+            # khuc vao o de nguoi doc tai lieu tra tai cho, khong phai mo lai ban ve.
+            c1.comment = Comment(row["note"], "T-Designer", width=460, height=170)
         ws.cell(row=ri, column=2,
                 value=("Tai lieu (TAG)" if row.get("source") == "tag" else "Suy luan tu day"))
         ws.cell(row=ri, column=3, value=row.get("source_txt")

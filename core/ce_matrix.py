@@ -111,48 +111,34 @@ def expand_full(db, sheet, net, cpu_paths=None, max_expansions=400):
     return walk(tree)
 
 
-_REL_TXT = {">=": "≥", "<=": "≤", ">": ">", "<": "<", "==": "="}
+def _cmp_info(node):
+    """core.cmp_detail.describe() cho 1 la CMP (so sanh nguong analog). None neu doc
+    khong duoc. Xem cmp_detail de biet vi sao khong doc thang param 2 nua."""
+    db = node.get("db"); sh = node.get("sheet"); net = node.get("net")
+    if not db or sh is None or not net:
+        return None
+    try:
+        from . import cmp_detail as CD
+        return CD.describe(db, sh, net)
+    except Exception:
+        return None
 
 
 def _cmp_detail(node):
-    """Voi la CMP (so sanh nguong analog): tra chuoi '<tin hieu do> ≥ <nguong> <don vi>'
-    lay tu THAM SO THAT cua khoi, vd 'DRUM LEVEL ≥ 250 mm'. Rong neu khong doc duoc.
-    Lam tai lieu dung duoc ngay, khong phai mo sheet tra nguong."""
-    db = node.get("db"); sh = node.get("sheet"); net = node.get("net")
-    if not db or sh is None or not net:
-        return ""
-    try:
-        from . import sheet_sim as SS
-        for onet, innet, rel, thr in SS.comparators(db, sh):
-            if onet != net:
-                continue
-            src = (SG._name_of(db, sh, innet) or innet) if innet else ""
-            r = _REL_TXT.get(rel, rel or "so sanh")
-            if thr is None:
-                return ("%s %s nguong (dong)" % (src, r)).strip()
-            v = ("%g" % thr) if isinstance(thr, float) else str(thr)
-            unit = _unit_of(db, sh, innet)
-            return ("%s %s %s%s" % (src, r, v, (" " + unit) if unit else "")).strip()
-    except Exception:
-        pass
-    return ""
+    """1 dong ngan gon cho la CMP, vd 'DRUM LEVEL ≥ 250 mm' hoac - khi nguong la 1
+    tin hieu/duong cong - 'SPR I/L MANF FLUID TEMP A ≥ SPR INL MAINF TEMP(MFT)(...)'.
+    Rong neu khong doc duoc. Lam tai lieu dung duoc ngay, khong phai mo sheet tra."""
+    d = _cmp_info(node)
+    return (d or {}).get("text", "")
 
 
-def _unit_of(db, sheet, net):
-    """Don vi ky thuat cua 1 tin hieu analog (CAD_ID.SENSOR dang '0 100 %')."""
-    if not net:
+def cmp_note(node):
+    """Chu thich day du cho la CMP: dieu kien that + cum diem gay khuc cua duong cong
+    dung lam nguong (neu co). Dung lam tooltip / cot ghi chu khi xuat tai lieu."""
+    d = _cmp_info(node)
+    if not d:
         return ""
-    try:
-        import sqlite3
-        from . import dbreader as D2
-        c = D2.connect(db).cursor()
-        r = c.execute("SELECT SENSOR FROM CAD_ID WHERE ID=? AND SIGNALID=?",
-                      (sheet, net)).fetchone()
-        s = (D2._clean(r[0]) if r else "") or ""
-        parts = s.split()
-        return parts[-1] if len(parts) >= 2 else ""
-    except Exception:
-        return ""
+    return d["note"] if d.get("fx") else ""
 
 
 def _block_desc(node):
@@ -247,7 +233,8 @@ def _collect(node, target_disp, rows, and_stack):
     if row is None:
         row = {"label": _label_of(node), "db": node.get("db"), "sheet": node.get("sheet"),
                "sheetlbl": node.get("sheetlbl"), "net": node.get("net"),
-               "kind": node.get("kind") or t, "marks": {}, "source": "tree"}
+               "kind": node.get("kind") or t, "marks": {}, "source": "tree",
+               "note": cmp_note(node) if t == "cmp" or node.get("kind") == "cmp" else ""}
         rows[key] = row
     if and_stack:
         gid, others = and_stack[-1]

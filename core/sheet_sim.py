@@ -257,19 +257,32 @@ def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
     return val, it
 
 
-def comparators(db, sheet):
-    """Danh sach khoi so sanh tren sheet: (out_net, in_net, rel, threshold).
-    De hien nguong len giao dien."""
+def cmp_blocks(db, sheet):
+    """{out_net: {bid, code, rel, thr, hyst, unit, innet}} cho moi khoi so sanh nguong.
+
+    Day du hon comparators(): kem DON VI ky thuat (param 4) va do TRE/hysteresis
+    (param 3) - hai thu ghi san trong DB ma truoc gio khong ai doc toi. Do tren du an:
+    4235/4237 khoi so sanh co don vi o param 4, 4234/4237 co so tre o param 3."""
     sem = CT._sem()
-    prod = CT._producers(db, sheet)
-    out = []
-    for onet, p in prod.items():
+    pm_all = _params(db, sheet)
+    out = {}
+    for onet, p in CT._producers(db, sheet).items():
         s = sem.get(p["code"]) or {}
         if s.get("op") != "CMP":
             continue
-        innet = p["ins"][0][0] if p["ins"] else None
-        out.append((onet, innet, s.get("rel", ">="), _cmp_threshold(db, sheet, p)))
+        pm = pm_all.get(p["bid"], {})
+        out[onet] = {"bid": p["bid"], "code": p["code"], "rel": s.get("rel", ">="),
+                     "thr": _num(pm.get("2")), "hyst": _num(pm.get("3")),
+                     "unit": (pm.get("4") or "").strip(),
+                     "innet": p["ins"][0][0] if p["ins"] else None}
     return out
+
+
+def comparators(db, sheet):
+    """Danh sach khoi so sanh tren sheet: (out_net, in_net, rel, threshold).
+    De hien nguong len giao dien."""
+    return [(onet, c["innet"], c["rel"], c["thr"])
+            for onet, c in cmp_blocks(db, sheet).items()]
 
 
 _KIND_CACHE = {}
@@ -421,7 +434,14 @@ def _resolve_transfer(ins, name, box):
 
 
 def func_points(db, sheet, bid):
-    """Bang gay khuc F(x): danh sach (x, y) da sap theo x. Cac cap tu param6 tro di."""
+    """Bang gay khuc F(x): danh sach (x, y) da sap theo x. Cac cap tu param6 tro di.
+
+    Bang LUON co 15 o (param 6..35) nhung so diem THAT SU dung nam o param 2 - o thua
+    giu lai rac cua lan sua truoc. Khong cat thi rac lot vao duong cong: khoi 3360001
+    (03 BSM_A sheet 336) khai 8 diem, cac o thua con (0,0) nen sau khi sap xep chung
+    nhay len DAU bang, tai x=0 tra 0 thay vi 1.3. Do tren ca 4322 khoi F(x) cua du an:
+    3322 khoi khai it hon so o doc duoc, va 382 khoi (9%) doi han ket qua noi suy -
+    khoi 3120009 tai x=1000 truoc tra 9.5, dung ra la 0.95."""
     pm = _params(db, sheet).get(bid, {})
     pts = []
     i = 6
@@ -430,6 +450,9 @@ def func_points(db, sheet, bid):
         if xv is None or yv is None:
             break
         pts.append((xv, yv)); i += 2
+    n = _num(pm.get("2"))
+    if n is not None and 1 <= int(n) < len(pts):
+        pts = pts[:int(n)]
     pts.sort()
     return pts
 
@@ -439,6 +462,16 @@ def func_name(db, sheet, bid):
     pm = _params(db, sheet).get(bid, {})
     nm = (pm.get("5") or "").strip()
     return nm
+
+
+def func_info(db, sheet, bid):
+    """Mo ta day du 1 khoi F(x) de hien len tai lieu: nhan tag (param1), ten chuc nang
+    (param5), don vi truc X/Y (param3/param4) va bang gay khuc. Nguong dong cua nhieu
+    mach bao ve la 1 duong cong nhu the nay chu khong phai 1 con so."""
+    pm = _params(db, sheet).get(bid, {})
+    return {"bid": bid, "tag": (pm.get("1") or "").strip(),
+            "name": (pm.get("5") or "").strip(), "xunit": (pm.get("3") or "").strip(),
+            "yunit": (pm.get("4") or "").strip(), "pts": func_points(db, sheet, bid)}
 
 
 def func_blocks(db, sheet):
