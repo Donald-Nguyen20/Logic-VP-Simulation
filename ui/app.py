@@ -1511,6 +1511,13 @@ class MainWindow(QMainWindow):
                                       "outs": dict(b.get("last_out") or {}),
                                       "in_nets": b["in_nets"], "out_nets": b["out_nets"],
                                       "real_params": dict(b["sim"].params)}
+                elif b["kind"] == "T":
+                    # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang
+                    # b["ti"] o day se nem KeyError va lam mat sach badge cua MOI khoi
+                    # dong tren sheet do.
+                    info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
+                                      "tmr": b.get("tmr"), "T": b.get("T"),
+                                      "toff": b.get("toff")}
                 else:
                     info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
                                       "kind": b.get("kind", "I")}
@@ -1521,12 +1528,69 @@ class MainWindow(QMainWindow):
             pass
         return info
 
+    def _sim_timer_config(self, bid, cur, over):
+        """Click khoi delay/xung: cai thoi gian (giay), dt, so buoc + nut Chay.
+
+        Khoi tich phan co TI va "gia tri dau"; timer thi khong - no chi co DUY NHAT 1
+        con so la thoi gian dat. Dung chung hop thoai cu se hien 2 o vo nghia va ghi
+        nham khoa 'ti' vao overrides."""
+        ten = {"DI": "Tre BAT (on-delay)", "DIL": "Tre BAT (on-delay, dat bang phut)",
+               "DT": "Tre TAT (off-delay)", "PO": "Xung mot nhat SS1 (giu 1 khoang T)",
+               "TDWO": "Xung mot nhat SS2 (dau vao tat la cat xung ngay)",
+               "PG": "Mach dao dong co cong"}
+        fam = cur.get("tmr") or "timer"
+        dlg = QDialog(self)
+        dlg.setWindowTitle("%s - %s" % (fam, ten.get(fam, "delay/xung")))
+        form = QFormLayout(dlg)
+        cur_t = over.get(bid, {}).get("tsec", cur.get("T"))
+        sp_t = QDoubleSpinBox(); sp_t.setRange(0.0, 1e6); sp_t.setDecimals(3)
+        sp_t.setValue(float(cur_t) if cur_t is not None else 0.0)
+        # Quy HET ve giay (DIL dat bang phut tren ban ve da doi san) de so thang voi dt.
+        form.addRow("T - thoi gian (giay):", sp_t)
+        if fam == "PG":
+            off = cur.get("toff")
+            form.addRow("Nua chu ky TAT (giay):",
+                        QLabel("%g" % off if isinstance(off, (int, float)) else "?"))
+        sp_dt = QDoubleSpinBox(); sp_dt.setRange(0.01, 60.0); sp_dt.setDecimals(2)
+        sp_dt.setSingleStep(0.1); sp_dt.setValue(float(getattr(self, "_dyn_dt", 0.5)))
+        sp_steps = QSpinBox(); sp_steps.setRange(1, 100000)
+        sp_steps.setValue(int(getattr(self, "_dyn_steps", 300)))
+        form.addRow("dt - time step (seconds):", sp_dt)
+        form.addRow("Steps:", sp_steps)
+        lbl_t = QLabel(""); form.addRow("Total time:", lbl_t)
+
+        def _upd():
+            # Canh bao thang: dt qua tho thi timer khong bao gio dem toi noi.
+            tong = sp_dt.value() * sp_steps.value()
+            th = " - CHUA DU DAI cho T=%gs!" % sp_t.value() if tong < sp_t.value() else ""
+            lbl_t.setText("%.1f s%s" % (tong, th))
+        for w in (sp_dt, sp_steps, sp_t):
+            w.valueChanged.connect(_upd)
+        _upd()
+        row = QHBoxLayout()
+        b_run = QPushButton("\u25b6 Run dynamic"); b_close = QPushButton("Close")
+        row.addStretch(1); row.addWidget(b_close); row.addWidget(b_run)
+        form.addRow(row)
+
+        def _apply_run():
+            over[bid] = {"tsec": sp_t.value()}
+            self.sim_dyn_over = over
+            self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
+            dlg.accept()
+            self.run_dynamic_sim()
+        b_run.clicked.connect(_apply_run)
+        b_close.clicked.connect(dlg.reject)
+        dlg.exec()
+
     def _sim_dyn_config(self, bid):
         """Click khoi dong (cam): hop cai dat TI, gia tri dau, dt, so buoc + nut Chay."""
         over = getattr(self, "sim_dyn_over", {})
         cur = dict(self.sheet_scene.sim_dyn.get(bid, {}))
         if cur.get("kind") == "S":
             self._sim_station_config(bid, cur, over)
+            return
+        if cur.get("kind") == "T":
+            self._sim_timer_config(bid, cur, over)
             return
         cur_ti = over.get(bid, {}).get("ti", cur.get("ti") or 1.0)
         cur_init = over.get(bid, {}).get("init", 0.0)
@@ -1971,6 +2035,12 @@ class MainWindow(QMainWindow):
                                   "outs": dict(b.get("last_out") or {}),
                                   "in_nets": b["in_nets"], "out_nets": b["out_nets"],
                                   "real_params": dict(b["sim"].params)}
+            elif b["kind"] == "T":
+                # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang b["ti"] o day
+                # se nem KeyError va lam mat sach badge cua moi khoi dong tren sheet do.
+                info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
+                                  "tmr": b.get("tmr"), "T": b.get("T"),
+                                  "toff": b.get("toff")}
             else:
                 info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
                                   "kind": b.get("kind", "I")}

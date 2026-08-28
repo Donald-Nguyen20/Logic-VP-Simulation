@@ -5,8 +5,12 @@ Mo phong DONG cho sheet: chay theo buoc thoi gian dt. Moi buoc:
  2) Tien trang thai cac khoi dong (tich phan) mot buoc dt.
 Lap nsteps buoc -> gia tri hoi tu. Chi doc DB.
 
-v1: mo hinh khoi TICH PHAN (I - Integral with Limit). Cac khoi dong khac
-(PID, lead/lag, station) se bo sung sau.
+Cac loai khoi co trang thai rieng, phan biet bang khoa "kind":
+  I  tich phan | D  dao ham | L  loc tre bac nhat | R  gioi han toc do doi
+  S  tram MV/SV va khoi TAG chay bang than lenh goc (core/def_sim.py)
+  T  delay/xung SO: DI, DIL, DT, PO, TDWO, ho TON/TOF cua HCNT, PG dao dong
+Rieng nhom T la tin hieu SO - dau ra phai di vao dict overrides DIGITAL cua
+sheet_sim.simulate(), khong phai analog (xem ghi chu trong run()).
 """
 from __future__ import annotations
 from collections import defaultdict
@@ -33,6 +37,93 @@ RATE_CODES = RATE_PARA_CODES | RATE_INPUT_CODES
 STATION_CODES = {"820A", "820B", "820C", "820D", "820E", "820F",
                   "8210", "8211", "8304", "8305"}
 
+_TIMER_CODES = None
+
+
+def timer_codes():
+    """Ma cac khoi delay/xung SO (DI, DIL, DT, PO, TDWO, ho TON/TOF/SS1/SS2 cua HCNT, PG).
+    Lay THANG tu logic_sem.json - muc nao co khoa "tmr" thi la timer. Nho vay bang ngu
+    nghia la NOI DUY NHAT khai bao ho timer: them 1 ma moi chi phai sua 1 file."""
+    global _TIMER_CODES
+    if _TIMER_CODES is None:
+        from . import cond_tree as CT
+        _TIMER_CODES = {k.upper() for k, v in (CT._sem() or {}).items()
+                        if isinstance(v, dict) and v.get("tmr")}
+    return _TIMER_CODES
+
+
+def _step_timer(b, x, val, dt):
+    """Tien 1 buoc dt cho 1 khoi delay/xung so. x = gia tri chan vao (0/1/None).
+
+    Nghia tung ho lay tu sach macro goc cua hang (truong "explain" trong
+    core/macro_manual.json, nguyen van tieng Anh cua Toshiba):
+      DI/DIL (on-delay):  "After input changes to ON, output is turned ON after a delay
+              of the specified time." -> X len 1 va GIU du T thi Y len 1; X ve 0 -> Y ve
+              0 NGAY va dong ho dem lai tu dau.
+      DT (off-delay): nguoc lai - X len 1 thi Y len 1 ngay, X ve 0 thi Y con GIU them T.
+      PO (SS1, one-shot 1): "A time-limit pulse for a specified time is output starting
+              when input changes from OFF to ON." -> chi SUON LEN moi phat xung; X ve 0
+              KHONG cat xung.
+      TDWO (SS2, one-shot 2): nhu PO nhung X ve 0 la cat xung ngay ("wipe out").
+      PG (dao dong co cong): X=1 thi phat vuong ON=T / OFF=toff; X=0 thi tat.
+
+    'acc' bi CHAN lai ngay khi dong ho het gio (khong cong don vo han) de _snap() con
+    nhan ra khoi da dung yen - neu de acc chay mai thi moi sheet co timer se khong bao
+    gio "settle" va luon phai chay du nsteps buoc."""
+    T = b["T"]
+    if T is None and b["tnet"]:                  # bien the "T:input": thoi gian den tu day
+        v = val.get(b["tnet"])
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            T = float(v) * 60.0 if b["tunit"] == "min" else float(v)
+    if T is None or T < 0:
+        T = 0.0
+    x = 1 if x == 1 else 0
+    xp = b["xp"]
+    if xp is None:
+        xp = x            # buoc dau: coi nhu dau vao da on dinh -> khong tu phat xung ma
+    fam = b["tmr"]
+    if fam in ("DI", "DIL"):
+        if not x:
+            b["acc"] = 0.0
+            b["y"] = 0
+        elif not b["y"]:
+            b["acc"] += dt
+            if b["acc"] + 1e-9 >= T:
+                b["y"] = 1
+    elif fam == "DT":
+        if x:
+            b["acc"] = 0.0
+            b["y"] = 1
+        elif b["y"]:
+            b["acc"] += dt
+            if b["acc"] + 1e-9 >= T:
+                b["y"] = 0
+    elif fam in ("PO", "TDWO"):
+        if x and not xp:
+            b["acc"] = 0.0
+            b["y"] = 1
+        elif b["y"]:
+            b["acc"] += dt
+            if b["acc"] + 1e-9 >= T:
+                b["y"] = 0
+        if fam == "TDWO" and not x:
+            b["y"] = 0                           # SS2: dau vao tat la cat xung ngay
+    elif fam == "PG":
+        off = b["toff"] if isinstance(b["toff"], (int, float)) else 0.0
+        per = T + off
+        if not x:
+            b["acc"] = 0.0
+            b["y"] = 0
+        elif per <= 0:
+            b["y"] = 0                           # ca hai nua chu ky = 0 -> khong dao dong
+        else:
+            # Doc dau ra theo goc pha HIEN TAI roi moi tien dong ho. Neu tien truoc roi
+            # moi doc thi nua chu ky ON bi ngan mat dung 1 buoc dt (do that: ON=1s voi
+            # dt=0,5s chi ra 1 buoc bat thay vi 2).
+            b["y"] = 1 if b["acc"] < T else 0
+            b["acc"] = (b["acc"] + dt) % per
+    b["xp"] = x
+
 
 _HAS_DYN = {}
 
@@ -52,7 +143,8 @@ def has_dynamic(db, sheet):
         for (code,) in c.execute("SELECT MACROCODE FROM CAD_BLOCK WHERE ID=?", (sheet,)):
             code = (code or "").upper()
             if (code in INTEG_CODES or code in DERIV_CODES or code in LAG_CODES
-                    or code in RATE_CODES or _DS.can_simulate(code)
+                    or code in RATE_CODES or code in timer_codes()
+                    or _DS.can_simulate(code)
                     or (code in STATION_CODES and AS.has_analog(code))):
                 ok = True
                 break
@@ -62,10 +154,56 @@ def has_dynamic(db, sheet):
     return ok
 
 
+def _sem_of(code):
+    from . import cond_tree as CT
+    return (CT._sem() or {}).get(code) or {}
+
+
+def _timer_block(bid, code, pl, pdef, db, sheet, ov):
+    """Mo ta 1 khoi delay/xung so tu danh sach chan. None neu thieu chan vao hoac ra.
+
+    Chan nhan theo TEN in tren ban ve goc (core/macro_pins.json, do tu MacroDef.db):
+      - chan VAO ten "T"  = thoi gian lay tu DAY (bien the "T:input"), thay cho tham so
+                            trong CAD_BLOCK_PARAM;
+      - chan VAO con lai  = X (dau vao chinh; ten in la "DI"/"PO"/... hoac de trong);
+      - chan RA ten "C"   = so dem cua dong ho. KHONG mo phong: sach macro cua hang khong
+                            ghi day la thoi gian DA TROI hay CON LAI, ma trong du an co
+                            255 khoi dang noi day chan nay - doan bua se sai het. De
+                            nguyen "chua biet" nhu truoc.
+      - chan RA con lai   = Y (ket qua logic), ten in la "s"/"M"/"S".
+    """
+    s = _sem_of(code)
+    xnet = ynet = tnet = None
+    for pn, net, _pt in pl:
+        info = pdef.get(str(pn), {})
+        nm = (info.get("name") or "").strip()
+        if not net:
+            continue
+        if info.get("side") == "in":
+            if nm == "T":
+                tnet = tnet or net
+            elif xnet is None:
+                xnet = net
+        elif info.get("side") == "out" and nm != "C" and ynet is None:
+            ynet = net
+    if not xnet or not ynet:
+        return None
+    T = SS.timer_secs(db, sheet, s, bid)
+    if ov.get("tsec") is not None:               # nguoi dung ghi de thoi gian cho de xem
+        T = ov["tsec"]
+    toff = None
+    if s.get("toff"):                            # PG: nua chu ky TAT nam o 1 tham so khac
+        toff = SS._num(SS._params(db, sheet).get(bid, {}).get(s["toff"]))
+    return {"bid": bid, "code": code, "kind": "T", "out": ynet, "x": xnet, "tnet": tnet,
+            "tmr": s.get("tmr"), "tunit": s.get("tunit"), "T": T, "toff": toff,
+            "y": 0, "acc": 0.0, "xp": None}
+
+
 def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
     """Danh sach khoi dong tren sheet: {bid, code, out, x(net), sw(net), ti, init, state}
-    (I/D/L) hoac {bid, code, kind:'S', sim, in_nets, out_nets, last_out} (tram MV/SV).
-    overrides: {bid: {'ti':.., 'init':..}} (I/D/L) hoac
+    (I/D/L), {bid, code, kind:'S', sim, in_nets, out_nets, last_out} (tram MV/SV), hoac
+    {bid, code, kind:'T', out, x, tnet, tmr, tunit, T, toff, y, acc, xp} (delay/xung so).
+    overrides: {bid: {'ti':.., 'init':..}} (I/D/L), {bid: {'tsec':..}} (timer) hoac
                {bid: {'inputs':{...}, 'params':{...}, 'state':{...}}} (tram).
     live_values: {net: gia_tri} - KET QUA VUA TINH cua ca sheet (SS.simulate), de bom vao
     chan vao (in_nets) cua khoi TRAM truoc khi step() 1 lan, giong het cach run() (mo phong
@@ -95,6 +233,12 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
     out = []
     for bid, pl in pins.items():
         sym, code = binfo[bid]
+        if code in timer_codes():
+            tb = _timer_block(bid, code, pl, (MP.get(sym) or {}).get("pins", {}),
+                              db, sheet, overrides.get(bid, {}))
+            if tb:
+                out.append(tb)
+            continue
         from core import def_sim as _DS
         # Chay bang THAN LOGIC GOC cho MOI khoi TAG co du lenh ho tro (khong chi 10 ma
         # tram): van, may cat, bao dong, data link, nut nhan... Khoi nao con lenh chua
@@ -262,9 +406,10 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
         tiep. Do tren du an: hau het sheet on dinh trong vai buoc dau, nen chay du 300
         buoc la lang phi ~300 lan. nsteps luc nay chi con la tran an toan (khoi tich
         phan bi lech thuong truc thi ramp mai, khong bao gio on dinh).
-    state: {bid: {"s":.., "xprev":..}} - trang thai khoi I/D/L/R. Doc luc bat dau (neu
-        co) va GHI LAI vao chinh dict do luc ket thuc, de lan chay sau TIEP TUC tu day
-        thay vi nhay ve 0. Truyen None = bat dau lai tu 'init' nhu truoc.
+    state: {bid: {"s":.., "xprev":..}} cho khoi I/D/L/R, {bid: {"y","acc","xp"}} cho
+        timer. Doc luc bat dau (neu co) va GHI LAI vao chinh dict do luc ket thuc, de
+        lan chay sau TIEP TUC tu day thay vi nhay ve 0. Truyen None = bat dau lai tu
+        'init' (I/D/L/R) hoac tu trang thai TAT (timer).
     sim_cache: {bid: sim} - giu song doi tuong mo phong cua khoi TAG/tram giua cac lan
         goi (MV cua tram la bo tich luy, khong phai cong thuc tinh thang).
     stats: dict tuy chon - dien {"steps":.., "settled": True/False} de nguoi goi bao lai.
@@ -273,12 +418,19 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
     ana_env = ana_env or {}
     blocks = _dyn_blocks(db, sheet, overrides, sim_cache=sim_cache)
     for b in blocks:
-        if b["kind"] != "S":
+        if b["kind"] == "S":
+            b["sim"].dt = dt                     # dong bo dt nguoi dung chon cho tram
+        elif b["kind"] == "T":
+            # timer giu 3 thu: y (dau ra), acc (da dem bao lau), xp (dau vao buoc truoc,
+            # de nhan SUON LEN). Chay tiep tu lan truoc neu nguoi goi co giu 'state'.
+            st = (state or {}).get(b["bid"]) or {}
+            b["y"] = st.get("y", b["y"])
+            b["acc"] = st.get("acc", b["acc"])
+            b["xp"] = st.get("xp", b["xp"])
+        else:
             st = (state or {}).get(b["bid"])
             b["state"] = st["s"] if st else b.get("init", 0.0)
             b["xprev"] = st.get("xprev") if st else None
-        else:
-            b["sim"].dt = dt                     # dong bo dt nguoi dung chon cho tram
     hist = defaultdict(list)
     record = record or []
     val = {}
@@ -298,6 +450,7 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
         else:
             dynouts.add(b["out"])
     dig = {k: v for k, v in dig_env.items() if k not in dynouts}
+    has_tmr = any(b["kind"] == "T" for b in blocks)
 
     def _snap():
         """Anh chup trang thai moi khoi dong - de biet da het thay doi hay chua."""
@@ -305,6 +458,9 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
         for b in blocks:
             if b["kind"] == "S":
                 o.extend(b["last_out"].get(nm) for nm in sorted(b["out_nets"]))
+            elif b["kind"] == "T":
+                o.append(b["y"])
+                o.append(b["acc"])
             else:
                 o.append(b["state"])
         return o
@@ -325,13 +481,19 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
     for _ in range(nsteps + 1):
         done += 1
         aov = dict(ana_env)
+        dov = dict(dig) if has_tmr else dig
         for b in blocks:
             if b["kind"] == "S":
                 for nm, net in b["out_nets"].items():
                     aov[net] = b["last_out"].get(nm, 0.0)
+            elif b["kind"] == "T":
+                # Dau ra timer la tin hieu SO nen phai vao dict overrides DIGITAL: trong
+                # simulate() thi overrides(digital) THANG analog, bo vao aov se bi chinh
+                # dig (con giu so 0 gieo luc mo sheet) de len va timer khong bao gio hien.
+                dov[b["out"]] = b["y"]
             else:
                 aov[b["out"]] = b["state"]       # dau ra khoi dong = trang thai hien tai
-        val, _it = SS.simulate(db, sheet, dig, aov)
+        val, _it = SS.simulate(db, sheet, dov, aov)
         for n in record:
             hist[n].append(val.get(n))
         # tien trang thai khoi dong
@@ -347,6 +509,9 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
                 for opname, opval in b.get("forced_ops", {}).items():
                     sim.ops[opname] = opval       # nut vat ly tren tram (vd AUT = OPS_IN5)
                 b["last_out"] = sim.step()
+                continue
+            if b["kind"] == "T":
+                _step_timer(b, val.get(b["x"]), val, dt)
                 continue
             x = val.get(b["x"])
             sw = val.get(b["sw"]) if b["sw"] else None
@@ -398,7 +563,9 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
                 break
     if state is not None:
         for b in blocks:
-            if b["kind"] != "S":
+            if b["kind"] == "T":
+                state[b["bid"]] = {"y": b["y"], "acc": b["acc"], "xp": b["xp"]}
+            elif b["kind"] != "S":
                 state[b["bid"]] = {"s": b["state"], "xprev": b["xprev"]}
     if stats is not None:
         stats["steps"] = done

@@ -83,6 +83,28 @@ def _cmp_threshold(db, sheet, p):
     return v
 
 
+def timer_secs(db, sheet, sem_entry, bid):
+    """Thoi gian cai dat cua 1 khoi delay/xung, quy ve GIAY. None khi khong doc duoc.
+
+    Do that tren 18 file DB du an: moi khoi DI/DIL/DT/PO/TDWO deu CO thoi gian rieng
+    trong CAD_BLOCK_PARAM, chi la truoc day khong ai doc toi. Vi tri PARAMNO khac nhau
+    theo loai khoi (ho 40xx de o param 2 vi param 1 la ten tag; ho 20xx cho HCNT de o
+    param 1) nen lay tu 'tpar' trong logic_sem.json thay vi doan.
+    Don vi: DI/DT/PO/TDWO va ho (H) tinh bang giay - trong DB co ca gia tri le (2,5s;
+    0,07s) nen phai doc so thuc, khong lam tron. Rieng DIL ("Delay Initiation (L)",
+    Long) tinh bang PHUT: hang cho no tran 32767 trong khi DI chi 1500, va gia tri thuc
+    te cai toi 2880 = 2 ngay.
+    Tra None khi khoi thuoc bien the "T:input" (thoi gian den tu chan vao ten "T",
+    khong co trong tham so) - noi goi phai tu doc gia tri dang chay tren day do."""
+    tp = sem_entry.get("tpar")
+    if not tp:
+        return None
+    v = _num(_params(db, sheet).get(bid, {}).get(tp))
+    if v is None:
+        return None
+    return v * 60.0 if sem_entry.get("tunit") == "min" else v
+
+
 def _const_value(db, sheet, p):
     """Gia tri THAT cua 1 khoi hang so digital, lay tu param '2' cua chinh khoi do.
     Khoi DSW (D-CONST, macrocode 4018) la cong tac cai bang tay: cung mot ma khoi
@@ -119,6 +141,17 @@ def _compute(net, prod, sem, val, thr=None, cst=None):
         return 1 if v else 0
     if op == "PASS":
         return ins[0] if ins else None
+    if op == "PULSE":
+        # Xung MOT NHAT (PO/TDWO, tuc SS1/SS2 theo ten tieng Nhat cua hang trong
+        # DEF/SR21E/macro_master.csv). Sach macro: "A time-limit pulse for a specified
+        # time is output starting when input changes from OFF to ON" - dau ra chi len
+        # trong T giay ke tu SUON LEN, khong bam theo dau vao. Vay o trang thai XAC LAP
+        # (dau vao giu nguyen) xung da tat -> luon 0, khong phu thuoc dau vao. Mo hinh
+        # PASS cu tra 1 khi dau vao dang 1, nguoc voi thuc te tren 4.008 khoi.
+        # Muon thay chinh cai xung thi dung cua so mo phong DONG (core/sheet_dyn.py).
+        # PG (4019) la mach dao dong co cong: khong co trang thai xac lap nao ca, tra
+        # None de hien "chua biet" thay vi bia ra 0 hay 1.
+        return None if s.get("tmr") == "PG" else 0
     if op == "CMP":
         rel = s.get("rel", ">=")
         t = thr.get(net)                    # nguong tinh (param) hoac None (dong)

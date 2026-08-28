@@ -239,6 +239,12 @@ def _compute_op(op, ins, roles, sem):
         return s[len(s) // 2]
     if op == "ABS":
         return abs(vals[0]) if vals else None
+    if op == "PULSE":
+        # Xung mot nhat (PO/TDWO): o trang thai XAC LAP xung da tat nen ra 0, khong bam
+        # theo dau vao. Phai tra dung nhu core/sheet_sim.py, neu khong thi so do noi va
+        # sheet se hien 2 gia tri khac nhau cho cung 1 khoi. PG la mach dao dong, khong
+        # co trang thai xac lap nao -> None ("chua biet") thay vi bia ra 0 hay 1.
+        return None if (sem or {}).get("tmr") == "PG" else 0
     if op in ("GAIN", "PASS"):
         return vals[0] if vals else None      # GAIN: thieu tham so k -> tam coi k=1
     if op == "CONST":

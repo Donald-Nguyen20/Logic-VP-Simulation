@@ -14,12 +14,19 @@
 },
 "4080": {
 "op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "min",
 "nin": 1,
 "nout": 2,
 "name": "DIL3"
 },
 "407C": {
 "op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tunit": "s",
 "nin": 2,
 "nout": 1,
 "name": "DI2"
@@ -171,8 +178,11 @@
 "name": "FLIP1"
 },
 "4016": {
-"op": "PASS",
+"op": "PULSE",
 "note": "timer/pulse",
+"tmr": "PO",
+"tpar": "2",
+"tunit": "s",
 "nin": 1,
 "nout": 1,
 "name": "PO"
@@ -186,6 +196,9 @@
 "4015": {
 "op": "PASS",
 "note": "timer/pulse",
+"tmr": "DT",
+"tpar": "2",
+"tunit": "s",
 "nin": 1,
 "nout": 1,
 "name": "DT"
@@ -284,13 +297,20 @@
 },
 "407D": {
 "op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "s",
 "nin": 1,
 "nout": 2,
 "name": "DI3"
 },
 "4017": {
-"op": "PASS",
+"op": "PULSE",
 "note": "timer/pulse",
+"tmr": "TDWO",
+"tpar": "2",
+"tunit": "s",
 "nin": 1,
 "nout": 1,
 "name": "TDWO"
@@ -304,6 +324,9 @@
 "4013": {
 "op": "PASS",
 "note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "s",
 "nin": 1,
 "nout": 1,
 "name": "DI"
@@ -318,6 +341,9 @@
 "4014": {
 "op": "PASS",
 "note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "min",
 "nin": 1,
 "nout": 1,
 "name": "DIL"
@@ -598,5 +624,257 @@
 "nin": 3,
 "nout": 1,
 "name": "ORR"
+},
+"407E": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tunit": "s",
+"nin": 2,
+"nout": 2,
+"name": "DI4"
+},
+"407F": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tunit": "min",
+"nin": 2,
+"nout": 1,
+"name": "DIL2"
+},
+"4081": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tunit": "min",
+"nin": 2,
+"nout": 2,
+"name": "DIL4"
+},
+"4082": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tunit": "s",
+"nin": 2,
+"nout": 1,
+"name": "DT2"
+},
+"4083": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 2,
+"name": "DT3"
+},
+"4084": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tunit": "s",
+"nin": 2,
+"nout": 2,
+"name": "DT4"
+},
+"4085": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tunit": "s",
+"nin": 2,
+"nout": 1,
+"name": "PO2"
+},
+"4086": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 2,
+"name": "PO3"
+},
+"4087": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tunit": "s",
+"nin": 2,
+"nout": 2,
+"name": "PO4"
+},
+"4088": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tunit": "s",
+"nin": 2,
+"nout": 1,
+"name": "TDWO2"
+},
+"4089": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 2,
+"name": "TDWO3"
+},
+"408A": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tunit": "s",
+"nin": 2,
+"nout": 2,
+"name": "TDWO4"
+},
+"20E1": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "TONH"
+},
+"20E2": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "TOFH"
+},
+"20E3": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "SS1H"
+},
+"20E4": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "SS2H"
+},
+"20F5": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "TONH2"
+},
+"20F6": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "TOFH2"
+},
+"20F7": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "SS12H"
+},
+"20F8": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tpar": "1",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "SS22H"
+},
+"4143": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "DI_NT"
+},
+"4144": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DI",
+"tpar": "2",
+"tunit": "min",
+"nin": 1,
+"nout": 1,
+"name": "DIL_NT"
+},
+"4145": {
+"op": "PASS",
+"note": "timer/pulse",
+"tmr": "DT",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "DT_NT"
+},
+"4146": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PO",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "PO_NT"
+},
+"4147": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "TDWO",
+"tpar": "2",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "TDWO_NT"
+},
+"4019": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "PG",
+"tpar": "2",
+"toff": "3",
+"tunit": "s",
+"nin": 1,
+"nout": 1,
+"name": "PG"
 }
 }

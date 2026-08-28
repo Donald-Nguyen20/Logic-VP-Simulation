@@ -532,7 +532,14 @@ class SheetScene(QGraphicsScene):
                 outv = self.sim_values.get(info.get("out")) if self.sim_values else None
                 vs = ("%g" % outv) if isinstance(outv, (int, float)) and not isinstance(outv, bool) else "?"
                 pstr = ("%g" % ti) if ti is not None else "?"
-                if k == "D":
+                if k == "T":
+                    ts = info.get("T")
+                    tstr = ("%gs" % ts) if isinstance(ts, (int, float)) else "?"
+                    off = info.get("toff")
+                    if isinstance(off, (int, float)):
+                        tstr = "%s/%gs" % (tstr, off)     # PG: nua chu ky BAT/TAT
+                    txt = "%s  T=%s  y=%s" % (info.get("tmr") or "timer", tstr, vs)
+                elif k == "D":
                     txt = "d/dt  G=%s  y=%s" % (pstr, vs)
                 elif k == "L":
                     txt = "F(t)  T=%s  y=%s" % (pstr, vs)

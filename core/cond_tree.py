@@ -72,6 +72,17 @@ def _producers(db, sheet):
     return prod
 
 
+def tmr_note(db, sheet, prod, s):
+    """Chu thich ngan gan vao duong di khi cay di xuyen qua 1 khoi delay/xung,
+    vd " (pulse 5s)". Co thoi gian cu the thi nguoi doc moi biet tin hieu nay chi
+    ton tai trong choc lat chu khong duy tri."""
+    from . import sheet_sim as SS
+    fam = s.get("tmr")
+    w = "pulse" if fam in ("PO", "TDWO") else ("oscillator" if fam == "PG" else "delay")
+    t = SS.timer_secs(db, sheet, s, prod["bid"])
+    return " (%s)" % w if t is None else " (%s %gs)" % (w, t)
+
+
 def const_of(db, sheet, prod, s):
     """Gia tri that cua 1 khoi hang so digital: uu tien cai dat rieng cua khoi
     (param '2'), khong co thi lay hang so co dinh cua loai khoi trong logic_sem.
@@ -176,6 +187,16 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
             if len(prod["ins"]) > max(s["sw"], s["x1"], s["x2"]):
                 return sel_node(net, prod, s, blabel, dep, vis2, via)
             return leaf(net, "source", via)
+        if op == "PULSE":
+            # Xung mot nhat / mach dao dong. VAN truy nguoc qua khoi: xet ve nhan qua
+            # thi nguyen nhan co toi duoc ket qua (Ma tran C&E dua tren cay nay, neu
+            # chan lai thi moi chuoi di qua khoi xung deu dut). Chi ghi them thoi gian
+            # xung vao duong di de doc xong biet day la tin hieu thoang qua.
+            insn = [n for (n, _ns) in prod["ins"] if n]
+            nv = list(via) + [blabel + tmr_note(db, sheet, prod, s)]
+            if insn:
+                return rec(insn[0], dep - 1, vis2, nv)
+            return leaf(net, "source", nv)
         base = {"AND": "AND", "NAND": "AND", "OR": "OR", "NOR": "OR",
                 "NOT": "NOT", "XOR": "XOR", "SR": "SR"}[op]
         node = {"id": nid(), "type": "gate", "op": base, "net": net, "label": label(net),
@@ -392,6 +413,13 @@ def is_boolean_signal(db, sheet, net):
 
 
 # ---- cong thuc 1 dong cho 1 tin hieu (de nhung vao so do node) ----
+def SS_secs(db, sheet, s, bid):
+    """Goi tat sang sheet_sim.timer_secs - nap muon vi sheet_sim import nguoc lai
+    module nay (xem ghi chu trong const_of)."""
+    from . import sheet_sim as SS
+    return SS.timer_secs(db, sheet, s, bid)
+
+
 def formula(db, sheet, net):
     """Tra ve (text, opword): tin hieu = phep(cac dau vao). '' neu la nguon."""
     sem = _sem()
@@ -420,7 +448,7 @@ def formula(db, sheet, net):
         if not p:
             return innet
         ps = sem.get(p["code"])
-        if ps and ps["op"] == "PASS":
+        if ps and ps["op"] in ("PASS", "PULSE"):
             inn = [x for (x, _n) in p["ins"] if x]
             return rname(inn[0], guard | {innet}) if inn else innet
         return "(%s)" % D.macro_name(p["code"], p["sym"])
@@ -445,6 +473,12 @@ def formula(db, sheet, net):
     if op == "SR":
         L = labels + ["?", "?"]
         return ("SR latch: SET=%s, RESET=%s" % (L[0], L[1]), "SR latch")
+    if op == "PULSE":
+        fam = s.get("tmr")
+        w = "oscillator" if fam == "PG" else "pulse"
+        t = SS_secs(db, psheet, s, prod["bid"])
+        lb = labels[0] if labels else ""
+        return ("%s (%s%s)" % (lb, w, "" if t is None else " %gs" % t), w)
     if op == "PASS":
         nt = s.get("note", "")
         w = "delay" if "timer" in nt else "buffer"
