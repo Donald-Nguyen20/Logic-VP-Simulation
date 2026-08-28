@@ -16,10 +16,11 @@ Vi du that - 06 BPS A, sheet 314 "BT-124 MFT ITEM":
 Nguong o day la mot DUONG CONG theo ap suat chu khong phai con so co dinh, nen in
 luon cum diem gay khuc de tra cuu tai cho, khoi phai mo sheet.
 
-Ngoai ra lay dung DON VI va do TRE: hai thu nay ghi san o param 4 va param 3 cua
-chinh khoi so sanh (do duoc: 4235 va 4234 tren 4237 khoi co), truoc day doc nham o
-CAD_ID.SENSOR cua day vao - ma day trung gian thi khong co, do duoc 0/242 nhan lay
-duoc don vi.
+Ngoai ra lay dung DON VI (param 4) - truoc day doc nham o CAD_ID.SENSOR cua day
+vao, ma day trung gian thi khong co ban ghi do, do duoc 0/242 nhan lay duoc don vi -
+va DIEM TRO VE (param 3). Ten macro cua hang goi 2 tham so nay la "S & R": S = Set
+(nguong tac dong), R = Reset (nguong nha), deu la tri so tuyet doi cung don vi. Nen
+in ra la "tro ve khi ..." chu khong phai "tre ...": no khong phai thoi gian.
 
 Van con 705/4276 khoi in ra ma net tho, va khong phai loi cua module nay: 504 cai
 co day vao KHONG CO khoi nao tren sheet sinh ra (tin hieu tu sheet khac / card vao,
@@ -36,6 +37,10 @@ from . import sheet_sim as SS
 from . import signal_graph as SG
 
 REL_TXT = {">=": "≥", "<=": "≤", ">": ">", "<": "<", "==": "="}
+
+# Chieu NHA cua khoi so sanh la chieu nguoc lai chieu TAC DONG: len o 250 thi phai
+# tut xuong duoi diem tro ve moi nha. '=' khong co chieu nguoc nen bo qua.
+_NGUOC = {"≥": "≤", ">": "<", "≤": "≥", "<": ">"}
 
 # DB ghi "-" cho tin hieu khong co don vi (dem cai, ty le...) - in ra thi rac mat
 _KHONG_DON_VI = {"", "-", "--", "n/a"}
@@ -166,8 +171,15 @@ def describe(db, sheet, net):
         txt = "%s %s %s" % (cap[0], r, cap[1])
     else:
         txt = "%s %s %s%s" % (trai, r, _so(thr), (" " + dv) if dv else "")
-    h = c["hyst"]
-    if h:
-        txt += ", tre %s%s" % (_so(h), (" " + dv) if dv else "")
+    # param 3 la diem TRO VE (Reset) - tri so tuyet doi cung don vi, khong phai thoi
+    # gian va khong phai do rong vung tre. Bang nguong tac dung thi khong co vung tre,
+    # in ra chi lam nhieu (2882/4204 khoi cua du an roi vao truong hop nay).
+    ve_lai = _NGUOC.get(r)
+    if c["reset"] is not None and c["reset"] != thr and ve_lai:
+        # dang gon "A >= B" da giau mat phep tru, nen phai noi ro diem tro ve do tren
+        # HIEU cua 2 ve - lap lai ca 2 ten thi dong dai gap doi, khong doc noi
+        dau = "hieu " if (cap and thr == 0) else ""
+        txt += " (tro ve khi %s%s %s%s)" % (dau, ve_lai, _so(c["reset"]),
+                                            (" " + dv) if dv else "")
     note = "\n".join([txt] + [fx_dong(f) for f in fxs])
     return {"text": txt, "fx": fxs, "note": note}

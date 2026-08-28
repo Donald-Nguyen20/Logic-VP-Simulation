@@ -258,11 +258,14 @@ def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
 
 
 def cmp_blocks(db, sheet):
-    """{out_net: {bid, code, rel, thr, hyst, unit, innet}} cho moi khoi so sanh nguong.
+    """{out_net: {bid, code, rel, thr, reset, unit, innet}} cho moi khoi so sanh nguong.
 
-    Day du hon comparators(): kem DON VI ky thuat (param 4) va do TRE/hysteresis
-    (param 3) - hai thu ghi san trong DB ma truoc gio khong ai doc toi. Do tren du an:
-    4235/4237 khoi so sanh co don vi o param 4, 4234/4237 co so tre o param 3."""
+    Day du hon comparators(): kem DON VI ky thuat (param 4) va DIEM TRO VE (param 3).
+    Ten macro cua hang noi ro y nghia 2 tham so nay - 404E la "H/ - Signal Monitor
+    (High) (S & R:para)": param 2 la S (Set, nguong tac dong), param 3 la R (Reset,
+    nguong nha) - la mot TRI SO TUYET DOI cung don vi, khong phai do rong vung tre va
+    khong phai thoi gian. Kiem lai tren du an: 1322 khoi co R khac S, va CA 1322 deu
+    dung chieu (loai H/ co R < S, loai /L co R > S), khong mot ngoai le."""
     sem = CT._sem()
     pm_all = _params(db, sheet)
     out = {}
@@ -272,7 +275,7 @@ def cmp_blocks(db, sheet):
             continue
         pm = pm_all.get(p["bid"], {})
         out[onet] = {"bid": p["bid"], "code": p["code"], "rel": s.get("rel", ">="),
-                     "thr": _num(pm.get("2")), "hyst": _num(pm.get("3")),
+                     "thr": _num(pm.get("2")), "reset": _num(pm.get("3")),
                      "unit": (pm.get("4") or "").strip(),
                      "innet": p["ins"][0][0] if p["ins"] else None}
     return out
