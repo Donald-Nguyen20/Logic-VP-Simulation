@@ -100,6 +100,11 @@ class DefSim:
         self.ti_override = None
         self._tmr = {}
         self._dt_buf = {}         # bo dem cho lenh tre van chuyen FDT
+        # Dong ho trong than lenh (TON, FDT) chi duoc chay khi THOI GIAN THAT troi. Khi
+        # nguoi dung chi doi 1 dau vao roi giai lai cho mach on dinh (settle chay hang
+        # tram vong) ma van cho dong ho chay thi delay bi an sach - bao dong cai tre 30s
+        # keu ngay lap tuc. sheet_dyn.run() bat co nay o duong "doi dau vao".
+        self.freeze_tmr = False
         self._acc = None
         self._rung = False
         try:
@@ -309,7 +314,8 @@ class DefSim:
             elif op == "TON" and len(o) >= 3:
                 T = self._get(o[0]); key = o[2]
                 on = bool(self._acc and self._acc > 0.5)
-                self._tmr[key] = (self._tmr.get(key, 0.0) + self.dt) if on else 0.0
+                buoc = 0.0 if self.freeze_tmr else self.dt
+                self._tmr[key] = (self._tmr.get(key, 0.0) + buoc) if on else 0.0
                 self._put(key, 1.0 if (on and self._tmr[key] >= T) else 0.0)
                 self._clear()
 
@@ -366,11 +372,12 @@ class DefSim:
                 x = self._get(o[0]); en = self._get(o[1]); T = self._get(o[2])
                 key = o[4].split("-")[0]
                 buf = self._dt_buf.setdefault(key, [])
-                if en > 0.5:
-                    buf.append(x)
-                n = max(1, int(round(T / self.dt))) if self.dt else 1
-                while len(buf) > n:
-                    buf.pop(0)
+                if not self.freeze_tmr:      # dong bang: khong day them, khong cat bot.
+                    if en > 0.5:             # (dat dt=0 thi n tut ve 1 va XOA sach hang doi)
+                        buf.append(x)
+                    n = max(1, int(round(T / self.dt))) if self.dt else 1
+                    while len(buf) > n:
+                        buf.pop(0)
                 self._put(key, buf[0] if buf else x); self._clear()
 
             else:

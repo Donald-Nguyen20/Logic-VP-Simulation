@@ -224,7 +224,8 @@ def _timer_block(bid, code, pl, pdef, db, sheet, ov):
             "y": 0, "acc": 0.0, "xp": None}
 
 
-def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
+def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None,
+                freeze_tmr=False):
     """Danh sach khoi dong tren sheet: {bid, code, out, x(net), sw(net), ti, init, state}
     (I/D/L), {bid, code, kind:'S', sim, in_nets, out_nets, last_out} (tram MV/SV), hoac
     {bid, code, kind:'T', out, x, tnet, tmr, tunit, T, toff, y, acc, xp} (delay/xung so).
@@ -326,6 +327,12 @@ def _dyn_blocks(db, sheet, overrides=None, live_values=None, sim_cache=None):
                     sim.set_input(nm, v)
                 except Exception:
                     pass
+            # Dong ho trong than lenh tram (TON tre bat, FDT tre van chuyen) chi duoc
+            # chay khi THOI GIAN THAT troi. Buoc step() ngay duoi day chay MOI LAN ve lai
+            # sheet, ke ca khi nguoi dung chi bam doi 1 dau vao - khong chan lai thi bam
+            # 60 lan la an mat 30s cua mot cai tre bao dong.
+            if hasattr(sim, "freeze_tmr"):
+                sim.freeze_tmr = freeze_tmr
             last_out = sim.step()          # tien 1 buoc - neu la sim TAI SU DUNG thi tiep noi tu state cu
             # DIEM XUAT PHAT cho bo tich phan (chi la tro giup MO PHONG - khoi that
             # KHONG co chan nao de dat MV ban dau; MV nam trong bo nho noi cua khoi va
@@ -444,13 +451,21 @@ def run(db, sheet, dig_env=None, ana_env=None, dt=0.5, nsteps=200, record=None,
         vao: thoi gian THAT chua troi giay nao nen delay khong duoc phep tu tieu di. Van
         goi _step_timer (chu khong bo qua) de cac buoc TUC THOI van chay dung: T=0 len
         ngay, DT thay dau vao len thi bat ngay, PO nhan suon len la phat xung.
+        Cung dong bang dong ho NAM TRONG than lenh khoi tram (TON, FDT) - xem
+        DefSim.freeze_tmr.
     """
     dig_env = dig_env or {}
     ana_env = ana_env or {}
-    blocks = _dyn_blocks(db, sheet, overrides, sim_cache=sim_cache)
+    blocks = _dyn_blocks(db, sheet, overrides, sim_cache=sim_cache,
+                         freeze_tmr=freeze_tmr)
     for b in blocks:
         if b["kind"] == "S":
             b["sim"].dt = dt                     # dong bo dt nguoi dung chon cho tram
+            # Tram cung co dong ho rieng trong than lenh - dong bang y het nhom T
+            # (do duoc: 1417 khoi tram trong du an co TON/FDT). KHONG duoc dong bang
+            # bang cach dat sim.dt = 0: FDT tinh do dai hang doi n = round(T/dt) va bo
+            # qua khi dt=0 -> n tut ve 1, hang doi tre van chuyen bi cat sach.
+            b["sim"].freeze_tmr = freeze_tmr
         elif b["kind"] == "T":
             # timer giu 3 thu: y (dau ra), acc (da dem bao lau), xp (dau vao buoc truoc,
             # de nhan SUON LEN). Chay tiep tu lan truoc neu nguoi goi co giu 'state'.

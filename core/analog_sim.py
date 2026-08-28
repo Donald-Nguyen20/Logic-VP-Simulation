@@ -36,6 +36,7 @@ class AnalogSim:
             self.inputs[n] = float(meta.get("init", 0.0))
         self.params = {k: float(v.get("val", 0.0)) for k, v in self.spec.get("params", {}).items()}
         self.state = {}
+        self.freeze_tmr = False      # xem def_sim.DefSim.freeze_tmr - cung mot ly do
         self._pid_prev = {}
         self.last_memo = {}          # gia tri tung node o buoc step() gan nhat (cho xem so do)
 
@@ -215,7 +216,8 @@ class AnalogSim:
                 x = val(nd["in"][0])
                 T = self._P(nd.get("t", 0.0))
                 if x > 0.5:
-                    acc = self.state.get(name + ".acc", 0.0) + dt
+                    buoc = 0.0 if self.freeze_tmr else dt
+                    acc = self.state.get(name + ".acc", 0.0) + buoc
                     self.state[name + ".acc"] = acc
                     r = 1.0 if acc >= T else 0.0
                 else:
