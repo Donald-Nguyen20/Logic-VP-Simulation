@@ -10,7 +10,7 @@ kieu do (54% qua |X|, 26% qua DIF).
 Vi du that - 06 BPS A, sheet 314 "BT-124 MFT ITEM":
     cu :  c6 >= 0
     moi:  SPR I/L MANF FLUID TEMP A >= SPR INL MAINF TEMP(MFT)(SDT O/L STM PRS)
-          tre -5 degC
+          (set), hieu <= -5 degC (reset)
           Fx-1  SPR INL MAINF TEMP(MFT):  MPa -> degC
             0->363  5->363  8.4->392  ...  30->471
 Nguong o day la mot DUONG CONG theo ap suat chu khong phai con so co dinh, nen in
@@ -19,8 +19,9 @@ luon cum diem gay khuc de tra cuu tai cho, khoi phai mo sheet.
 Ngoai ra lay dung DON VI (param 4) - truoc day doc nham o CAD_ID.SENSOR cua day
 vao, ma day trung gian thi khong co ban ghi do, do duoc 0/242 nhan lay duoc don vi -
 va DIEM TRO VE (param 3). Ten macro cua hang goi 2 tham so nay la "S & R": S = Set
-(nguong tac dong), R = Reset (nguong nha), deu la tri so tuyet doi cung don vi. Nen
-in ra la "tro ve khi ..." chu khong phai "tre ...": no khong phai thoi gian.
+(nguong tac dong), R = Reset (nguong nha), deu la tri so tuyet doi cung don vi.
+Giu nguyen 2 chu Set / Reset cua hang khi in ra, de nguoi doc doi chieu thang duoc
+voi ban ve va tai lieu goc - va de khong ai doc nham thanh do tre thoi gian.
 
 Van con 705/4276 khoi in ra ma net tho, va khong phai loi cua module nay: 504 cai
 co day vao KHONG CO khoi nao tren sheet sinh ra (tin hieu tu sheet khac / card vao,
@@ -153,7 +154,7 @@ def fx_dong(fx):
 def describe(db, sheet, net):
     """Doc 1 net LA DAU RA khoi so sanh -> {'text', 'fx', 'note'}; None neu net do
     khong phai dau ra khoi so sanh nao.
-      text = 1 dong ngan gon dat thang vao nhan (da co don vi + do tre)
+      text = 1 dong ngan gon dat thang vao nhan (co don vi + diem set/reset)
       fx   = danh sach cum F(x) tham gia lam nguong (thuong rong)
       note = text + cac cum F(x) trai ra, de lam chu thich / xuat tai lieu"""
     c = SS.cmp_blocks(db, sheet).get(net)
@@ -179,7 +180,7 @@ def describe(db, sheet, net):
         # dang gon "A >= B" da giau mat phep tru, nen phai noi ro diem tro ve do tren
         # HIEU cua 2 ve - lap lai ca 2 ten thi dong dai gap doi, khong doc noi
         dau = "hieu " if (cap and thr == 0) else ""
-        txt += " (tro ve khi %s%s %s%s)" % (dau, ve_lai, _so(c["reset"]),
-                                            (" " + dv) if dv else "")
+        txt += " (set), %s%s %s%s (reset)" % (dau, ve_lai, _so(c["reset"]),
+                                              (" " + dv) if dv else "")
     note = "\n".join([txt] + [fx_dong(f) for f in fxs])
     return {"text": txt, "fx": fxs, "note": note}
