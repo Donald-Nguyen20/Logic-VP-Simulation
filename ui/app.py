@@ -2186,60 +2186,100 @@ class MainWindow(QMainWindow):
         self._apply_sheet_sim()
 
     def find_signal(self):
-        """Tim ten tin hieu nam o sheet nao (tra khap cac DB da import)."""
-        import sqlite3
-        from core import signal_graph as SG
+        """Tim theo TEN TIN HIEU hoac theo CHUC NANG (ke ca go tieng Viet).
+
+        Hai nhom ket qua vi hai duong vao khac han nhau: biet ten tin hieu thi tra
+        thang, con khi chi biet chuc nang ("trinh tu danh lua voi dau") thi phai di
+        qua ten loop / ten trang / ten khoi F(x). Cau hoi duoc tu_dien mo rong sang
+        dang viet tat ma ban ve thuc su dung (IGNITOR -> IGNTR, COLD -> CLD...)."""
+        from PySide6.QtWidgets import QApplication
         paths = list(getattr(self, "meta_by_path", {}).keys())
         if not paths:
             self.status("Import at least one DB first.")
             return
         dlg = QDialog(self)
-        dlg.setWindowTitle("Find signal")
-        dlg.resize(640, 460)
+        dlg.setWindowTitle("Tim tin hieu / chuc nang")
+        dlg.resize(820, 520)
         lay = QVBoxLayout(dlg)
         row = QHBoxLayout()
-        ed = QLineEdit(); ed.setPlaceholderText("Type signal name (e.g. O2 MSTR AUTO CTRL CMD) then Enter...")
-        btn = QPushButton("Search")
-        btn_rb = QPushButton("Rebuild index")
-        btn_rb.setToolTip("Dung lai chi muc tu dau (dung khi tim khong ra du ten dung)")
+        ed = QLineEdit()
+        ed.setPlaceholderText("Ten tin hieu, hoac chuc nang bang tieng Viet "
+                              "(vd: trinh tu danh lua voi dau) roi Enter...")
+        btn = QPushButton("Tim")
+        btn_rb = QPushButton("Dung lai chi muc")
+        btn_rb.setToolTip("Quet lai toan bo DB (~35 giay) - dung khi da doi file DB")
         row.addWidget(ed, 1); row.addWidget(btn); row.addWidget(btn_rb)
         lay.addLayout(row)
         info = QLabel(""); info.setStyleSheet("color:#64748B;font-size:11px;")
+        info.setWordWrap(True)
         lay.addWidget(info)
-        res = QTreeWidget(); res.setHeaderLabels(["CPU", "Sheet", "Signal name"])
-        res.setColumnWidth(0, 150); res.setColumnWidth(1, 90)
+        res = QTreeWidget()
+        res.setHeaderLabels(["CPU", "Trang", "Ten", "Thuoc ve"])
+        res.setColumnWidth(0, 130); res.setColumnWidth(1, 80); res.setColumnWidth(2, 330)
         lay.addWidget(res, 1)
 
         from core import project_index as PI
+        from core import tu_dien as TD
+
+        def _nhom(nhan):
+            g = QTreeWidgetItem([nhan, "", "", ""])
+            g.setFirstColumnSpanned(True)
+            res.addTopLevelItem(g)
+            g.setExpanded(True)
+            return g
+
+        def _con(cha, cot, db, sheet):
+            it = QTreeWidgetItem(cot)
+            if sheet is not None:
+                it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
+            cha.addChild(it)
 
         def run(force_rebuild=False):
             q = ed.text().strip()
             res.clear()
             if len(q) < 2:
-                info.setText("Enter at least 2 characters.")
+                info.setText("Go it nhat 2 ky tu.")
                 return
-            note = ""
-            rows = []
+            o = TD.o_tra(q)
+            if not o:
+                info.setText("Cau hoi khong con tu khoa nao dung duoc.")
+                return
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             try:
+                # lan dau (hoac sau khi doi DB) phai quet lai ~35 giay: ngoai ten tin
+                # hieu con phai duyet 4.290 khoi F(x) de lay ten duong cong
                 if force_rebuild:
-                    PI.build(paths)                 # dung lai index tu dau
+                    PI.build(paths)
                 else:
-                    PI.ensure(paths)                # dung/cap nhat index neu can (cache)
-                rows = PI.find(q)                   # tim trong index (~/.tdesigner_index.db)
+                    PI.ensure(paths)
+                chuc_nang = PI.find_muc(o)
+                tin_hieu = PI.find_bo(o)
             except Exception as e:
                 info.setText("Khong tim duoc: %s" % e)
                 return
-            for (name, cpuname, cpuno, slbl, db, sheet, sigid) in rows:
-                it = QTreeWidgetItem([cpuname or ("CPU%s" % cpuno), slbl, name])
-                it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
-                res.addTopLevelItem(it)
-            if not rows:
-                info.setText("Khong tim thay '%s' trong %d file DB (tim theo TEN tin hieu - "
-                             "LINENAME). Thu tu khoa ngan hon, hoac bam 'Rebuild index'.%s"
-                             % (q, len(paths), note))
+            finally:
+                QApplication.restoreOverrideCursor()
+
+            if chuc_nang:
+                g = _nhom("Chuc nang / trang  (%d)" % len(chuc_nang))
+                for kind, txt, db, cpuno, cpuname, sheet, slbl, extra in chuc_nang:
+                    ghi = {"loop": extra, "fx": "F(x) %s" % extra}.get(kind, extra)
+                    _con(g, [cpuname or ("CPU%s" % cpuno), slbl, txt, ghi], db, sheet)
+            if tin_hieu:
+                g = _nhom("Tin hieu  (%d)" % len(tin_hieu))
+                for name, cpuname, cpuno, slbl, db, sheet, sigid in tin_hieu:
+                    _con(g, [cpuname or ("CPU%s" % cpuno), slbl, name, sigid or ""],
+                         db, sheet)
+
+            # Cho thay minh da tra bang nhung tu nao: nguoi dung hoc dan tu viet tat
+            # cua ban ve, va biet ngay vi sao ket qua lech (tu nao chua co trong tu dien)
+            da_tra = "  +  ".join(" / ".join(x) for x in o)
+            if not chuc_nang and not tin_hieu:
+                info.setText("Khong thay gi voi tu khoa: %s\nThu it tu hon, hoac bo "
+                             "sung tu vao core/tu_dien.py, hoac bam 'Dung lai chi muc'."
+                             % da_tra)
             else:
-                info.setText("Found %d result(s). Double-click to open the sheet.%s"
-                             % (len(rows), note))
+                info.setText("Tu khoa da tra: %s   -   bam doi de mo trang." % da_tra)
 
         def open_hit(item, _c=0):
             data = item.data(0, Qt.ItemDataRole.UserRole)
