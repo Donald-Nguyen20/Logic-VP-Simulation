@@ -2186,12 +2186,19 @@ class MainWindow(QMainWindow):
         self._apply_sheet_sim()
 
     def find_signal(self):
-        """Tim theo TEN TIN HIEU hoac theo CHUC NANG (ke ca go tieng Viet).
+        """Tim theo TEN TIN HIEU hoac theo CHUC NANG. Cau hoi go bang TIENG ANH.
 
         Hai nhom ket qua vi hai duong vao khac han nhau: biet ten tin hieu thi tra
-        thang, con khi chi biet chuc nang ("trinh tu danh lua voi dau") thi phai di
+        thang, con khi chi biet chuc nang ("ignitor pre-light sequence") thi phai di
         qua ten loop / ten trang / ten khoi F(x). Cau hoi duoc tu_dien mo rong sang
-        dang viet tat ma ban ve thuc su dung (IGNITOR -> IGNTR, COLD -> CLD...)."""
+        dang viet tat ma ban ve thuc su dung (IGNITER -> IGNTR, MILL -> PULV...).
+
+        Ba lop, lop sau chi chay khi lop truoc khong du:
+          1. tu dien tinh   - offline, tuc thi, do san tren corpus that
+          2. sua chinh ta   - doi chieu bang `tu` cua chi muc (presure -> PRESSURE)
+          3. AI goi y tu    - chi khi khong thay gi; tu AI van phai co trong DB moi
+                              duoc dung, va AI khong bao gio duoc noi CPU/loop/trang
+        """
         from PySide6.QtWidgets import QApplication
         paths = list(getattr(self, "meta_by_path", {}).keys())
         if not paths:
@@ -2199,17 +2206,26 @@ class MainWindow(QMainWindow):
             return
         dlg = QDialog(self)
         dlg.setWindowTitle("Tim tin hieu / chuc nang")
-        dlg.resize(820, 520)
+        dlg.resize(860, 560)
         lay = QVBoxLayout(dlg)
         row = QHBoxLayout()
         ed = QLineEdit()
-        ed.setPlaceholderText("Ten tin hieu, hoac chuc nang bang tieng Viet "
-                              "(vd: trinh tu danh lua voi dau) roi Enter...")
+        ed.setPlaceholderText("Go TIENG ANH: ten tin hieu, hoac chuc nang "
+                              "(vd: ignitor pre-light sequence) roi Enter...")
         btn = QPushButton("Tim")
+        btn_ai = QPushButton("Hoi AI")
+        btn_ai.setToolTip("Nho AI doan them tu khoa cho cau nay. Tu nao ban ve khong "
+                          "co se bi loai; AI khong duoc chi dinh CPU/loop/trang.")
         btn_rb = QPushButton("Dung lai chi muc")
-        btn_rb.setToolTip("Quet lai toan bo DB (~35 giay) - dung khi da doi file DB")
-        row.addWidget(ed, 1); row.addWidget(btn); row.addWidget(btn_rb)
+        btn_rb.setToolTip("Quet lai toan bo DB (~40 giay) - dung khi da doi file DB")
+        row.addWidget(ed, 1); row.addWidget(btn); row.addWidget(btn_ai)
+        row.addWidget(btn_rb)
         lay.addLayout(row)
+        cb_ai = QCheckBox("Tu dong hoi AI khi khong tim thay gi")
+        cb_ai.setChecked(True)
+        cb_ai.setToolTip("Chi goi khi tu dien tinh da that bai, va ket qua duoc luu "
+                         "lai nen hoi lan hai la offline.")
+        lay.addWidget(cb_ai)
         info = QLabel(""); info.setStyleSheet("color:#64748B;font-size:11px;")
         info.setWordWrap(True)
         lay.addWidget(info)
@@ -2234,26 +2250,30 @@ class MainWindow(QMainWindow):
                 it.setData(0, Qt.ItemDataRole.UserRole, (db, sheet))
             cha.addChild(it)
 
-        def run(force_rebuild=False):
+        def run(force_rebuild=False, them=None, ghi_ai=""):
             q = ed.text().strip()
             res.clear()
             if len(q) < 2:
                 info.setText("Go it nhat 2 ky tu.")
                 return
-            o = TD.o_tra(q)
-            if not o:
-                info.setText("Cau hoi khong con tu khoa nao dung duoc.")
-                return
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             try:
-                # lan dau (hoac sau khi doi DB) phai quet lai ~35 giay: ngoai ten tin
+                # lan dau (hoac sau khi doi DB) phai quet lai ~40 giay: ngoai ten tin
                 # hieu con phai duyet 4.290 khoi F(x) de lay ten duong cong
                 if force_rebuild:
                     PI.build(paths)
                 else:
                     PI.ensure(paths)
-                chuc_nang = PI.find_muc(o)
-                tin_hieu = PI.find_bo(o)
+                # o_sua chu khong o_tra: phai co chi muc roi moi doi chieu chinh ta
+                # duoc, nen goi SAU ensure()
+                o, sua = TD.o_sua(q, them=them)
+                if not o:
+                    info.setText("Cau hoi khong con tu khoa nao dung duoc.")
+                    return
+                ct_m, ct_s = {}, {}
+                chuc_nang = PI.find_muc(o, chi_tiet=ct_m)
+                tin_hieu = PI.find_bo(o, chi_tiet=ct_s)
+                hut = PI.o_hut(o, ct_m, ct_s)
             except Exception as e:
                 info.setText("Khong tim duoc: %s" % e)
                 return
@@ -2272,14 +2292,49 @@ class MainWindow(QMainWindow):
                          db, sheet)
 
             # Cho thay minh da tra bang nhung tu nao: nguoi dung hoc dan tu viet tat
-            # cua ban ve, va biet ngay vi sao ket qua lech (tu nao chua co trong tu dien)
-            da_tra = "  +  ".join(" / ".join(x) for x in o)
+            # cua ban ve, va biet ngay vi sao ket qua lech.
+            # Danh dau ro o nao ca du an KHONG he co: hoi 'mill A overload' ma khong
+            # ban ve nao noi den OVERLOAD thi ket qua chi con la 'mill A' - bao ra de
+            # nguoi dung biet do la thuc te cua ban ve, khong phai tra sai.
+            da_tra = "  +  ".join(("[khong co] " if i in hut else "")
+                                  + " / ".join(x) for i, x in enumerate(o))
+            dong = []
+            if sua:
+                dong.append("Da sua chinh ta theo ban ve: %s"
+                            % ", ".join("%s -> %s" % x for x in sua))
+            if ghi_ai:
+                dong.append(ghi_ai)
             if not chuc_nang and not tin_hieu:
-                info.setText("Khong thay gi voi tu khoa: %s\nThu it tu hon, hoac bo "
-                             "sung tu vao core/tu_dien.py, hoac bam 'Dung lai chi muc'."
-                             % da_tra)
+                dong.append("Khong thay gi voi tu khoa: %s" % da_tra)
+                if them is None and cb_ai.isChecked():
+                    dong.append("Dang hoi AI them tu khoa...")
+                    info.setText("\n".join(dong))
+                    hoi_ai(q)
+                    return
+                dong.append("Thu it tu hon, doi sang tu ban ve hay dung "
+                            "(PULV, IGNTR, O/L), hoac bam 'Dung lai chi muc'.")
             else:
-                info.setText("Tu khoa da tra: %s   -   bam doi de mo trang." % da_tra)
+                dong.append("Tu khoa da tra: %s   -   bam doi de mo trang." % da_tra)
+            info.setText("\n".join(dong))
+
+        def hoi_ai(q):
+            """Goi AI o luong nen. Khoa nut trong luc cho de khong ban hai lan."""
+            if getattr(dlg, "_ai_worker", None) is not None:
+                return
+            from ui.tim_ai import GoiYWorker
+            btn_ai.setEnabled(False)
+
+            def xong(them, ghi):
+                dlg._ai_worker = None
+                btn_ai.setEnabled(True)
+                # them rong van chay lai: de nguoi dung thay ghi chu vi sao that bai,
+                # va de them={} chan vong lap hoi AI lan nua
+                run(False, them=them or {}, ghi_ai=ghi)
+
+            w = GoiYWorker(q, parent=dlg)
+            w.xong.connect(xong)
+            dlg._ai_worker = w
+            w.start()
 
         def open_hit(item, _c=0):
             data = item.data(0, Qt.ItemDataRole.UserRole)
@@ -2289,6 +2344,7 @@ class MainWindow(QMainWindow):
 
         btn.clicked.connect(lambda: run(False))
         btn_rb.clicked.connect(lambda: run(True))
+        btn_ai.clicked.connect(lambda: hoi_ai(ed.text().strip()))
         ed.returnPressed.connect(lambda: run(False))
         res.itemDoubleClicked.connect(open_hit)
         ed.setFocus()

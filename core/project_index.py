@@ -9,9 +9,15 @@ va lan goi build()/rebuild ke tiep se bao WinError 32 (file dang duoc dung boi t
 khac - thuc ra la CHINH minh, do ket noi truoc chua dong het)."""
 from __future__ import annotations
 import os
+import math
 import sqlite3
 import hashlib
+import re
 from . import dbreader as D
+
+# Doi so nay moi khi SO DO bang thay doi. No duoc tron vao chu ky file DB nen index cu
+# tu dong dung lai, khoi phai nho bam "Dung lai chi muc" bang tay.
+_PHIEN = "3"
 
 
 def index_path():
@@ -38,6 +44,7 @@ def _gon_duong(db_paths):
 
 def _sig(db_paths):
     h = hashlib.sha1()
+    h.update(("phien%s;" % _PHIEN).encode())
     for p in sorted(_gon_duong(db_paths)):
         try:
             h.update(("%s|%d|%d;" % (os.path.abspath(p), int(os.path.getmtime(p)),
@@ -45,6 +52,42 @@ def _sig(db_paths):
         except Exception:
             h.update(p.encode())
     return h.hexdigest()
+
+
+_RE_TU = re.compile(r"[A-Z0-9][A-Z0-9/\-]*")
+
+
+def _tach_tu(s):
+    """Ten -> tap TU. Giu ca dang co gach ("O/L", "PRE-LIGHT") lan cac manh cua no,
+    vi ban ve dung lan lon: co cho viet "O/L STM TEMP", co cho viet "OUTLET"."""
+    ra = set()
+    for t in _RE_TU.findall((s or "").upper()):
+        t = t.strip("/-")
+        if len(t) < 2 or t.isdigit():
+            continue
+        ra.add(t)
+        for m in re.split(r"[/\-]", t):
+            if len(m) >= 2 and not m.isdigit():
+                ra.add(m)
+    return ra
+
+
+def _nap_tu(con):
+    """Bang `tu`: moi TU trong ten kem so ten chua no. Dung cho hai viec, ca hai deu
+    la CHONG DOAN BUA:
+      - kiem chung: tu nao AI (hoac nguoi dung) dua ra ma DB khong he co thi loai ngay,
+        nen AI khong the day ket qua di lac;
+      - goi y tu gan dung: nguoi tra go "IGNITER" trong khi ban ve viet "IGNITOR" -
+        lech 1 chu cai, tim duoc bang khoang cach sua chuoi."""
+    dm, ds = {}, {}
+    for (t,) in con.execute("SELECT text FROM muc"):
+        for w in _tach_tu(t):
+            dm[w] = dm.get(w, 0) + 1
+    for (n,) in con.execute("SELECT name FROM sig"):
+        for w in _tach_tu(n):
+            ds[w] = ds.get(w, 0) + 1
+    for w in set(dm) | set(ds):
+        con.execute("INSERT INTO tu VALUES(?,?,?)", (w, dm.get(w, 0), ds.get(w, 0)))
 
 
 def _sig_sheets(cur):
@@ -172,6 +215,7 @@ def build(db_paths, out_path=None):
         # tu chuc nang ("trinh tu danh lua voi dau") chu chua biet ten tin hieu nao.
         con.execute("CREATE TABLE muc(kind TEXT, text TEXT, db TEXT, cpuno TEXT, "
                     "cpuname TEXT, sheet INT, sheetlbl TEXT, extra TEXT)")
+        con.execute("CREATE TABLE tu(t TEXT, dm INT, ds INT)")
         con.execute("CREATE TABLE meta(key TEXT, val TEXT)")
         for p in _gon_duong(db_paths):
             try:
@@ -247,6 +291,8 @@ def build(db_paths, out_path=None):
         con.execute("CREATE INDEX ix_cnet_line ON cnet(systemline)")
         con.execute("CREATE INDEX ix_cnet_name ON cnet(name)")
         con.execute("CREATE INDEX ix_muc_text ON muc(text)")
+        _nap_tu(con)
+        con.execute("CREATE INDEX ix_tu_t ON tu(t)")
         con.execute("INSERT INTO meta VALUES('sig', ?)", (_sig(db_paths),))
         con.commit()
     finally:
@@ -282,6 +328,72 @@ def ensure(db_paths, out_path=None):
     return build(db_paths, out_path)
 
 
+def tan_suat(tu, out_path=None):
+    """{TU: (so ten trang/loop/Fx, so ten tin hieu)}. Tu khong co mat -> (0, 0)."""
+    tu = [t.upper() for t in tu if t]
+    if not tu:
+        return {}
+    con, ra = None, dict((t, (0, 0)) for t in tu)
+    try:
+        con = sqlite3.connect(out_path or index_path())
+        q = "SELECT t,dm,ds FROM tu WHERE t IN (%s)" % ",".join("?" * len(tu))
+        for t, dm, ds in con.execute(q, tu):
+            ra[t] = (dm, ds)
+    except Exception:
+        return ra
+    finally:
+        if con is not None:
+            con.close()
+    return ra
+
+
+def _cach(a, b):
+    """Khoang cach sua chuoi (Levenshtein). Viet tay cho khoi them thu vien ngoai."""
+    if a == b:
+        return 0
+    truoc = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        nay = [i]
+        for j, cb in enumerate(b, 1):
+            nay.append(min(truoc[j] + 1, nay[j - 1] + 1,
+                           truoc[j - 1] + (ca != cb)))
+        truoc = nay
+    return truoc[-1]
+
+
+def gan_giong(tu, toi_da=2, so=4, out_path=None):
+    """Cac tu CO THAT trong DB gan giong `tu` nhat. Chi de sua loi chinh ta/bien the:
+    "IGNITER" -> "IGNITOR" (lech 1 chu). Chan chat dau vao (cung chu cai dau, do dai
+    lech khong qua 2) vi noi long ra thi "COLD" hoa "COAL" va ket qua thanh vo nghia."""
+    tu = (tu or "").upper()
+    if len(tu) < 4:
+        return []
+    # Lech 2 ky tu tren tu NGAN la doi han tu: "HERE" cach "HTR" dung 2 buoc, va neu
+    # nhan thi cau vo nghia "xyzzy nothing here" lai ra 4 dong ve binh gia nhiet - dung
+    # cai bay nguy hiem nhat cua tra cuu. Tu dai thi 2 buoc van con la mot tu do.
+    toi_da = min(toi_da, 1 if len(tu) < 7 else 2)
+    con = None
+    try:
+        con = sqlite3.connect(out_path or index_path())
+        ung = con.execute(
+            "SELECT t,dm+ds FROM tu WHERE t LIKE ? AND LENGTH(t) BETWEEN ? AND ?",
+            (tu[0] + "%", len(tu) - 2, len(tu) + 2)).fetchall()
+    except Exception:
+        return []
+    finally:
+        if con is not None:
+            con.close()
+    ra = []
+    for t, n in ung:
+        if t == tu:
+            return []          # go dung roi, khong phai sua gi
+        d = _cach(tu, t)
+        if d <= toi_da:
+            ra.append((d, -n, t))
+    ra.sort()
+    return [t for _d, _n, t in ra[:so]]
+
+
 def find(query, limit=300, out_path=None):
     """Tim tin hieu theo ten (LIKE). Tra ve [(name, cpuname, cpuno, sheetlbl, db, sheet, signalid)]."""
     out_path = out_path or index_path()
@@ -301,7 +413,10 @@ def find(query, limit=300, out_path=None):
 
 # loop truoc (1.225 ban ghi - trung 1 loop la dinh huong duoc ca mang), roi den F(x)
 # (4.290 - chi tiet nhat), cuoi cung la ten trang (16.179 - nhieu nhat, nhieu nhat).
-_UU_TIEN = {"loop": 0, "fx": 1, "sheet": 2}
+# Nhan them vao diem chu KHONG xep truoc vo dieu kien: ten loop la duong vao tot nhat
+# (1 loop dinh huong ca mang), ten trang thi nhieu va chung chung nhat - nhung mot ten
+# trang khop that sat van phai thang mot ten loop khop ho.
+_HE_SO = {"loop": 1.15, "fx": 1.08, "sheet": 1.0}
 
 
 def _re_o(o):
@@ -341,36 +456,72 @@ def _toi_thieu(n):
     return 1 if n <= 2 else (n + 1) // 2
 
 
-def _quet(con, cot_sel, bang, cot, o, limit):
-    """Cham diem theo so O khop duoc, chi giu HANG DIEM CAO NHAT.
+def _quet(con, cot_sel, bang, cot, o, limit, chi_tiet=None):
+    """Cham diem tung dong theo do HIEM cua cac o khop duoc. Tra ve [(diem, dong)].
 
     Khong dung 'AND cac tu' trong SQL vi cau hoi day du se khong bao gio khop het:
     'luu luong nhien lieu khoi dong nguoi' ra 4 o (FLW|FLOW, FUEL, STRT|START,
     CLD|COLD) ma ten dich - 'FIRING RATE PROG FOR INIT COLD STRT-UP' - chi chua 2.
-    Cham diem thi cau hoi cang day du cang loc tot, thay vi cang de tay trang."""
+
+    Cung khong dem deu moi o 1 diem: 'may nghien A qua tai' co 3 o (MILL|PULV, A,
+    OVER|OVERLOAD); dem deu thi hang tram dong 'PULV A ...' cung dat 2/3 diem va hoa
+    nhau, ket qua la 8 dong dau khong dong nao dinh dang gi den QUA TAI. Can theo do
+    hiem: 'A' co trong hang nghin ten nen gan nhu khong dang ke, 'OVER' chi vai tram
+    nen dong nao co OVER phai len tren."""
     o = [x for x in o if x]
     if not o:
         return []
     res = _re_o(o)
+    if not res:
+        return []
     dk, ts = _loc_sql(o, cot)
     try:
         rows = con.execute("SELECT %s FROM %s%s" % (cot_sel, bang, dk), ts).fetchall()
+        tong = con.execute("SELECT COUNT(*) FROM %s" % bang).fetchone()[0] or 1
     except Exception:
         return []
     vt = [x.strip() for x in cot_sel.split(",")].index(cot)
-    tot, cham = 0, []
+    cham, df = [], [0] * len(res)
+    if chi_tiet is not None:
+        chi_tiet["df"] = df
     for r in rows:
-        d = sum(1 for rx in res if rx.search((r[vt] or "").upper()))
-        if d:
-            cham.append((d, r))
-            if d > tot:
-                tot = d
-    if tot < _toi_thieu(len(o)):
+        t = (r[vt] or "").upper()
+        kh = [i for i, rx in enumerate(res) if rx.search(t)]
+        if kh:
+            for i in kh:
+                df[i] += 1
+            cham.append((kh, r))
+    if not cham:
         return []
-    return [r for d, r in cham if d == tot][:limit * 4]
+    # df dem tren dong DA QUA LOC LIKE van dung bang dem tren ca bang: khop bien tu bao
+    # gio cung keo theo khop chuoi con, nen dong nao chua tu do chac chan da lot loc.
+    # Trong so VI TRI: o dung TRUOC nang hon. Cau hoi ky thuat luon dat danh tu chinh
+    # len dau ("furnace pressure low", "feedwater pump overload"), nen o 0 gan nhu luon
+    # la CHU NGU. Thieu he so nay thi khi hai dong cung khop 2 o, do hiem se chon dong
+    # co tu HIEM hon chu khong chon dong co CHU NGU: "furnace pressure low" tra ve
+    # "EMERGENCY OIL PRESS LOW SIM" (khop PRESS+LOW) trong khi "FURN PRS CTRL (A1..A12)"
+    # nam san trong DB. Do la mat dung cai nguoi ta hoi.
+    vi_tri = [1.0 / (1.0 + 0.6 * i) for i in range(len(res))]
+    w = [math.log(1.0 + float(tong) / (1 + d)) * vi_tri[i]
+         for i, d in enumerate(df)]
+    dinh = max(len(kh) for kh, _r in cham)
+    # Nguong tinh tren so o CON SONG (co it nhat 1 dong khop), khong phai tong so o.
+    # "ham nuoc tiet kiem" ra 3 o nhung ban ve chi co ECO - tinh tren tong thi doi khop
+    # 2/3, khong dong nao dat, tra ve RONG du ECO la dung y. Van chan duoc cau vo nghia
+    # vi tu ngu phap ("khong", "co") da bi tu_dien loc tu truoc, khong con thanh o nua.
+    song = sum(1 for d in df if d > 0)
+    if dinh < _toi_thieu(song):
+        return []
+    # SO O khop moi la chinh, do hiem chi de pha the hoa. Neu lay do hiem lam chinh thi
+    # 'may nghien A qua tai' dua 'BFPT A OVER SPEED' len dau - dung 'OVER' hiem hon
+    # 'PULV' - tuc la vut mat chinh cai CHU NGU nguoi ta hoi. Chi giu hang khop nhieu o
+    # nhat: cau hoi cang day du thi hang nay cang hep, dung y nghia loc dan.
+    ra = [(sum(w[i] for i in kh), r) for kh, r in cham if len(kh) == dinh]
+    ra.sort(key=lambda x: -x[0])
+    return ra[:limit * 4]
 
 
-def find_muc(o, limit=200, out_path=None):
+def find_muc(o, limit=200, out_path=None, chi_tiet=None):
     """Tra chi muc CHUC NANG. `o` la ket qua tu_dien.o_tra().
     Tra ve [(kind, text, db, cpuno, cpuname, sheet, sheetlbl, extra)]."""
     out_path = out_path or index_path()
@@ -378,18 +529,24 @@ def find_muc(o, limit=200, out_path=None):
     try:
         con = sqlite3.connect(out_path)
         ra = _quet(con, "kind,text,db,cpuno,cpuname,sheet,sheetlbl,extra",
-                   "muc", "text", o, limit)
+                   "muc", "text", o, limit, chi_tiet)
     except Exception:
         return []
     finally:
         if con is not None:
             con.close()
-    # ten NGAN hon = tu khoa chiem ty le lon hon trong ten = khop sat hon -> len truoc
-    ra = sorted(set(ra), key=lambda r: (_UU_TIEN.get(r[0], 9), len(r[1] or ""), r[1] or ""))
-    return ra[:limit]
+    # gop dong trung, giu diem cao nhat; ten NGAN hon = tu khoa chiem ty le lon hon
+    # trong ten = khop sat hon, dung lam tieu chi phu khi diem bang nhau
+    tot = {}
+    for d, r in ra:
+        d *= _HE_SO.get(r[0], 1.0)
+        if r not in tot or d > tot[r]:
+            tot[r] = d
+    kq = sorted(tot.items(), key=lambda x: (-x[1], len(x[0][1] or ""), x[0][1] or ""))
+    return [r for r, _d in kq[:limit]]
 
 
-def find_bo(o, limit=200, out_path=None):
+def find_bo(o, limit=200, out_path=None, chi_tiet=None):
     """Nhu find() nhung nhan cac O tu khoa tu tu dien thay vi 1 chuoi tho.
     Tra ve [(name, cpuname, cpuno, sheetlbl, db, sheet, signalid)] - dung thu tu cot
     ma UI dang dung cho find()."""
@@ -398,14 +555,30 @@ def find_bo(o, limit=200, out_path=None):
     try:
         con = sqlite3.connect(out_path)
         ra = _quet(con, "name,cpuname,cpuno,sheetlbl,db,sheet,signalid",
-                   "sig", "name", o, limit)
+                   "sig", "name", o, limit, chi_tiet)
     except Exception:
         return []
     finally:
         if con is not None:
             con.close()
-    ra = sorted(set(ra), key=lambda r: (len(r[0] or ""), r[0] or ""))
-    return ra[:limit]
+    tot = {}
+    for d, r in ra:
+        if r not in tot or d > tot[r]:
+            tot[r] = d
+    kq = sorted(tot.items(), key=lambda x: (-x[1], len(x[0][0] or ""), x[0][0] or ""))
+    return [r for r, _d in kq[:limit]]
+
+
+def o_hut(o, *chi_tiet):
+    """Cac o tu khoa KHONG khop duoc dong nao - tra ve danh sach chi so o.
+    Bao duoc dieu nay la de nguoi dung biet ngay vi sao ket qua lech: hoi 'may nghien
+    A qua tai' ma ca du an khong co ten trang nao noi den QUA TAI thi ket qua chi con
+    la 'may nghien A', khong phai chuong trinh tra sai."""
+    hut = []
+    for i in range(len(o)):
+        if all((ct or {}).get("df", [0] * len(o))[i] == 0 for ct in chi_tiet if ct):
+            hut.append(i)
+    return hut
 
 
 def locate(name, out_path=None):
