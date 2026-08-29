@@ -120,6 +120,35 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
             nd.update(extra)
         return nd
 
+    def maj_node(net, prod, s, blabel, dep, vis2, via):
+        """Bau da so k-trong-n (400E: 2 trong 3). Bung thanh OR CUA CAC NHOM AND -
+        moi nhom la 1 to hop k dau vao:  2oo3(A,B,C) = AB hoac AC hoac BC.
+
+        Lam vay thay vi them 1 kieu cong moi vi MOI thu doc cay nay (Ma tran C&E,
+        rut gon DNF, so do logic, evaluate/blockers) chi biet AND/OR/NOT/XOR/SR -
+        rieng evaluate() con coi op la nao khong biet la OR, tuc la them cong moi se
+        cho ket qua SAI mot cach lang le. Cung cach da dung cho cong tac o sel_node."""
+        from itertools import combinations
+        pins = [n for (n, _ns) in prod["ins"] if n]
+        k = int(s.get("k", 2))
+        if len(pins) <= k:
+            return None                     # thieu chan -> de nguoi goi tra ve leaf
+        node = {"id": nid(), "type": "gate", "op": "OR", "net": net, "label": label(net),
+                "block": blabel, "sheet": sheet, "cpu": cpu, "db": db, "sheetlbl": slbl,
+                "via": via, "neg": False, "children": []}
+        for bo in combinations(range(len(pins)), k):
+            nhom = {"id": nid(), "type": "gate", "op": "AND", "net": net,
+                    "label": label(net), "block": blabel, "sheet": sheet, "cpu": cpu,
+                    "db": db, "sheetlbl": slbl, "via": [], "neg": False, "children": []}
+            for i in bo:
+                innet, ns = prod["ins"][i]
+                sub = rec(innet, dep - 1, vis2, [])
+                if ns:
+                    sub["neg"] = not sub.get("neg", False)
+                nhom["children"].append(sub)
+            node["children"].append(nhom)
+        return node
+
     def sel_node(net, prod, s, blabel, dep, vis2, via):
         """Cong tac chuyen mach (1030/40D5): Y = X1 khi SW=1, Y = X2 khi SW=0.
         Dien giai thanh (SW VA X1) HOAC (KHONG SW VA X2) - dung nguyen nghia khoi,
@@ -197,6 +226,9 @@ def build(db, sheet, net, depth=40, cpu_paths=None, _ctr=None):
             if insn:
                 return rec(insn[0], dep - 1, vis2, nv)
             return leaf(net, "source", nv)
+        if op == "MAJ":
+            nd = maj_node(net, prod, s, blabel, dep, vis2, via)
+            return nd if nd is not None else leaf(net, "source", via)
         base = {"AND": "AND", "NAND": "AND", "OR": "OR", "NOR": "OR",
                 "NOT": "NOT", "XOR": "XOR", "SR": "SR"}[op]
         node = {"id": nid(), "type": "gate", "op": base, "net": net, "label": label(net),
@@ -470,6 +502,10 @@ def formula(db, sheet, net):
         return ("NOT( %s )" % (labels[0] if labels else ""), "NOT")
     if op == "XOR":
         return ("XOR( %s )" % ", ".join(labels), "XOR")
+    if op == "MAJ":
+        k = int(s.get("k", 2))
+        return ("%d trong %d: %s" % (k, len(labels), ", ".join(labels)),
+                "%d-trong-%d" % (k, len(labels)))
     if op == "SR":
         L = labels + ["?", "?"]
         return ("SR latch: SET=%s, RESET=%s" % (L[0], L[1]), "SR latch")

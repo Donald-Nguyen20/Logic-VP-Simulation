@@ -162,6 +162,13 @@
 "nout": 1,
 "name": "AND3"
 },
+"400E": {
+"op": "MAJ",
+"k": 2,
+"nin": 3,
+"nout": 1,
+"name": "2OUT3"
+},
 "400F": {
 "op": "XOR",
 "nin": 2,
