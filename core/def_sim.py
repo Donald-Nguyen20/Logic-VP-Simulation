@@ -14,8 +14,11 @@ Ngu nghia tap lenh (da kiem chung tren 820E):
   F+ F- F* F/ : phep toan so thuc, ket qua vao toan hang cuoi
   FUL x,h,y   : y = min(x,h)      FLL x,l,y : y = max(x,l)
   FITG x,en,TI,y : neu en=1 thi y += x * (dt / TI)   (TI thuong = chu ky quet -> y += x)
-  TON  T,w,q  : q=1 khi acc giu 1 lien tuc >= T giay
-  CFB/AR/LH/XOR/...: cac lenh phu tro (xu ly toi thieu, khong lam dut mach)
+  TON  T,w,q  : q=1 khi acc giu 1 lien tuc >= T giay; w = so giay da dem
+  TONL m,T,w1,w2,q : nhu TON nhung T tinh bang PHUT (w2=phut tron, w1=giay le)
+  CFB x,y / CBF x,y : doi qua lai giua o so nguyen va o so thuc (o day = chep)
+  LH   z      : chot tu giu - z = acc (than lenh goc tu viet vong hoi tiep)
+  AR/XOR/...  : cac lenh phu tro (xu ly toi thieu, khong lam dut mach)
 Toan hang:
   CNT_IN n(n)/CNT_OUT n(n) : chan vao/ra thu n     PRM_n : tham so (PARAMNO = n+1)
   OPS_IN/OPS_OUT/OS_*      : lenh & hien thi tu tram van hanh
@@ -57,8 +60,8 @@ def has_def(code):
 # tap lenh DA CAI DAT trong DefSim.step()
 SUPPORTED = {
     "A", "OR", "OUT", "FMV1", "MV1", "F+", "F-", "F*", "F/", "FABS", "FNEG",
-    "FUL", "FLL", "FITG", "TON", "XOR", "CFB", "AR", "SET", "CL",
-    "FCP+", "FCP-", "FDLM", "FDT",
+    "FUL", "FLL", "FITG", "TON", "TONL", "XOR", "CFB", "CBF", "AR", "SET", "CL",
+    "FCP+", "FCP-", "FDLM", "FDT", "LH",
 }
 
 
@@ -228,6 +231,12 @@ class DefSim:
             return self.dt * 1000.0
         if tok == "Bsec_fc":
             return 1.0
+        if tok == "Bmin_c":
+            # Than lenh goc dem theo VONG QUET: Bsec_fc = so vong/giay, Bmin_c = so
+            # vong/phut. Engine nay dem theo GIAY THAT nen Bsec_fc = 1; giu dung ty le
+            # thi Bmin_c = 60. Nho vay cong thuc doc nguoc cua hang
+            # (da_troi = Rw_phut*60 + Rw_le/Bsec_fc) van ra dung so giay.
+            return 60.0
         if tok.startswith("OPS_") or tok.startswith("OS_"):
             return float(self.ops.get(tok, 0.0))
         if tok in self.state:
@@ -245,6 +254,22 @@ class DefSim:
                 self.out[nm] = v
             return
         self.state[tok] = v
+
+    def _cho_ghi(self):
+        """Dieu kien dang tich luy co cho phep lenh SO HOC ghi ket qua khong.
+
+        Lenh so hoc chiu dieu kien y het FMV1, va chi AP CHO 1 LENH ngay sau chuoi A/OR
+        (sau do dieu kien bi xoa). Doc ra tu chinh than lenh cua hang:
+          - 8214 DUAL viet cap if/else vao CUNG mot o: 'A Dw003 / FUL Rf001,Rf002,Rf003'
+            roi 'A -Dw003 / FLL Rf001,Rf002,Rf003' (bit 1 cua PRM_6 chon lay tri lon hon
+            hay nho hon). Bo qua dieu kien thi lenh sau de len lenh truoc va ca 43 khoi
+            DUAL cua du an luon lay MAX - sai voi cai dat.
+          - 8226 SEQ-S viet thoi gian da troi bang 2 nhanh: 'A -Dw030 / F/ ...' (dong ho
+            ngan) va 'A Dw030 / F+ ...' (dong ho dai).
+        Va dieu kien KHONG duoc keo dai qua lenh thu hai: ngay sau cap if/else cua 8214 la
+        'F+ Rf001,Rf002,Rf004' (tong de tinh trung binh) va 'FMV1 Rf003,Rf005' (dau ra mac
+        dinh) - hai lenh do phai chay moi vong, khong phu thuoc Dw003."""
+        return self._acc is None or self._acc > 0.5
 
     def _clear(self):
         self._acc = None
@@ -285,22 +310,38 @@ class DefSim:
 
             elif op == "F/" and len(o) >= 3:
                 b = self._get(o[1])
-                self._put(o[2], self._get(o[0]) / b if b else 0.0); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], self._get(o[0]) / b if b else 0.0)
+                self._clear()
             elif op == "F*" and len(o) >= 3:
-                self._put(o[2], self._get(o[0]) * self._get(o[1])); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], self._get(o[0]) * self._get(o[1]))
+                self._clear()
             elif op == "F-" and len(o) >= 3:
-                self._put(o[2], self._get(o[0]) - self._get(o[1])); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], self._get(o[0]) - self._get(o[1]))
+                self._clear()
             elif op == "F+" and len(o) >= 3:
-                self._put(o[2], self._get(o[0]) + self._get(o[1])); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], self._get(o[0]) + self._get(o[1]))
+                self._clear()
             elif op == "FABS" and len(o) >= 2:
-                self._put(o[1], abs(self._get(o[0]))); self._clear()
+                if self._cho_ghi():
+                    self._put(o[1], abs(self._get(o[0])))
+                self._clear()
             elif op == "FNEG" and len(o) >= 2:
-                self._put(o[1], -self._get(o[0])); self._clear()
+                if self._cho_ghi():
+                    self._put(o[1], -self._get(o[0]))
+                self._clear()
 
             elif op == "FUL" and len(o) >= 3:
-                self._put(o[2], min(self._get(o[0]), self._get(o[1]))); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], min(self._get(o[0]), self._get(o[1])))
+                self._clear()
             elif op == "FLL" and len(o) >= 3:
-                self._put(o[2], max(self._get(o[0]), self._get(o[1]))); self._clear()
+                if self._cho_ghi():
+                    self._put(o[2], max(self._get(o[0]), self._get(o[1])))
+                self._clear()
 
             elif op == "FITG" and len(o) >= 4:
                 x = self._get(o[0]); en = self._get(o[1])
@@ -316,6 +357,12 @@ class DefSim:
                 on = bool(self._acc and self._acc > 0.5)
                 buoc = 0.0 if self.freeze_tmr else self.dt
                 self._tmr[key] = (self._tmr.get(key, 0.0) + buoc) if on else 0.0
+                # Ghi so giay DA DEM vao thanh ghi lam viec (toan hang 2): than lenh goc
+                # doc nguoc cho nguoi van hanh xem (vd 8226 SEQ-S: 'CBF Rw031,Rf013' roi
+                # 'F/ Rf013,Bsec_fc,Rf003' = da troi bao lau, 'F- PRM_3,Rf003,Rf005' =
+                # con lai bao lau). Khong ghi thi hai o do luon hien 0 - khong sai mach
+                # nhung mat het y nghia.
+                self._put(o[1], self._tmr[key])
                 self._put(key, 1.0 if (on and self._tmr[key] >= T) else 0.0)
                 self._clear()
 
@@ -324,8 +371,38 @@ class DefSim:
                 b = 1.0 if self._get(o[1]) > 0.5 else 0.0
                 self._put(o[2], 1.0 if a != b else 0.0); self._clear()
 
-            elif op == "CFB" and len(o) >= 2:
-                self._put(o[1], self._get(o[0])); self._clear()
+            elif op == "TONL" and len(o) >= 5:
+                # TON dai ngay: TONL Bmin_c, T_phut, w_le, w_phut, q
+                # Giong TON nhung nguong dat tinh bang PHUT, va so da dem duoc CHIA DOI
+                # ra hai thanh ghi (so phut tron + phan giay le) de khong tran o 16 bit.
+                # Cua hang tach nhu vay vi TON dem theo vong quet, tran o ~30000 vong -
+                # chinh la cho khoi 8226 SEQ-S chuyen sang TONL khi thoi gian dat qua dai.
+                mot_phut = self._get(o[0]) or 60.0
+                T = self._get(o[1]) * mot_phut
+                key = o[4]
+                on = bool(self._acc and self._acc > 0.5)
+                buoc = 0.0 if self.freeze_tmr else self.dt
+                self._tmr[key] = (self._tmr.get(key, 0.0) + buoc) if on else 0.0
+                da = self._tmr[key]
+                phut = float(int(da // mot_phut))
+                self._put(o[2], da - phut * mot_phut)     # phan giay le trong phut nay
+                self._put(o[3], phut)                     # so phut tron
+                self._put(key, 1.0 if (on and da >= T) else 0.0)
+                self._clear()
+
+            elif op in ("CFB", "CBF") and len(o) >= 2:
+                # CFB doi so thuc -> o so nguyen, CBF doi nguoc lai. Engine giu moi o la
+                # float nen ca hai chieu deu chi la chep gia tri.
+                if self._cho_ghi():
+                    self._put(o[1], self._get(o[0]))
+                self._clear()
+
+            elif op == "LH" and o:
+                # Chot tu giu (latch hold): o = ket qua dieu kien dang tich luy. Than lenh
+                # goc luon viet kem vong hoi tiep, vd 8216 SEL-2PB:
+                #   OR Dw003,Dw001 / A -Dw002 / LH Dw003  =  Dw003 = (Dw003|dat) & !xoa
+                # nen chi can ghi thang acc, chinh vong hoi tiep lo phan GIU.
+                self._put(o[0], self._acc or 0.0); self._clear()
 
             elif op == "AR" and len(o) >= 3:
                 # thu bit: work = a AND b (theo bit); acc = 1 neu khac 0
