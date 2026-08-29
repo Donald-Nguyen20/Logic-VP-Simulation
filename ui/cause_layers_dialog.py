@@ -25,6 +25,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 
 from core import ce_matrix as CE
+from core import io_point as IOP
 
 COL_TARGET = QColor("#1D4ED8")
 COL_AND = QColor("#B45309")
@@ -83,8 +84,8 @@ class CauseLayersDialog(QDialog):
         lay.addWidget(self.info)
 
         self.tree = QTreeWidget()
-        self.tree.setColumnCount(3)
-        self.tree.setHeaderLabels(["Nguyen nhan", "CPU / sheet", "Sau hon"])
+        self.tree.setColumnCount(4)
+        self.tree.setHeaderLabels(["Nguyen nhan", "CPU / sheet", "Sau hon", "KKS"])
         self.tree.setAlternatingRowColors(True)
         self.tree.itemExpanded.connect(self._on_expanded)
         self.tree.itemDoubleClicked.connect(self._on_jump)
@@ -95,6 +96,8 @@ class CauseLayersDialog(QDialog):
             "Khung 'AND' = phai du TAT CA dieu kien ben trong moi gay ra tin hieu cha.   "
             "Cot 'Sau hon': 'N nguyen nhan' = con mo duoc, 'goc' = da toi nguyen nhan goc.   "
             "Tim = tin hieu tu CPU/sheet khac,  cam = so sanh nguong.   "
+            "Cot 'KKS': ma diem do hien truong doc tu khoi dau cuoi I/O (di chuot "
+            "vao de xem dai do, kieu tin hieu, he thong dau kia).   "
             "Bam DUP 1 dong de nhay toi sheet.   "
             "Cau truc chinh xac cua chot SR va cong dac biet: xem 'So do logic'.")
         legend.setWordWrap(True)
@@ -217,6 +220,12 @@ class CauseLayersDialog(QDialog):
         parent.setData(0, ROLE_LOADED, True)    # _on_expanded co takeChildren() - phai chan
         parent.setExpanded(True)
 
+    def _io_dbs(self):
+        """DB dung de tra diem I/O hien truong: moi CPU cua du an + db cac ung vien."""
+        ds = [d for d in self.cpu_paths.values() if d]
+        ds += [c.get("db") for c in self.cands if c.get("db")]
+        return list(dict.fromkeys(ds))
+
     def _add_term(self, parent, node, chain, left):
         it = QTreeWidgetItem(parent)
         it.setText(0, CE.term_label(node))
@@ -225,7 +234,15 @@ class CauseLayersDialog(QDialog):
         it.setData(0, ROLE_CHAIN, chain)
         note = CE.cmp_note(node) if (node.get("type") == "cmp"
                                      or node.get("kind") == "cmp") else ""
-        it.setToolTip(0, note or CE.term_label(node))
+        # diem VAO/RA hien truong cua chinh nguyen nhan nay: ma KKS + dai do, de doc
+        # xong biet luon ra hien truong phai tim o dau, khong phai mo lai ban ve
+        pts = IOP.find(node.get("label") or node.get("net"), self._io_dbs(),
+                       uu_tien_db=node.get("db"))
+        if pts:
+            it.setText(3, IOP.ma_kks(pts))
+            it.setToolTip(3, IOP.chu_thich(pts))
+        it.setToolTip(0, "\n\n".join(x for x in [note or CE.term_label(node),
+                                                 IOP.chu_thich(pts)] if x))
         if node.get("kind") == "cross":
             it.setForeground(0, COL_CROSS)
         elif node.get("type") == "cmp" or node.get("kind") == "cmp":

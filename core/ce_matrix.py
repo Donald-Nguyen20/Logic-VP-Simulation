@@ -10,6 +10,7 @@ from __future__ import annotations
 from . import cond_tree as CT
 from . import signal_graph as SG
 from . import project_index as PI
+from . import io_point as IOP
 
 
 def resolve_target_candidates(name, db_paths=None):
@@ -682,7 +683,9 @@ def build_matrix(targets, cpu_paths=None):
     (Van chap nhan targets kieu cu {'db','sheet','net','disp'} - tu quy thanh 1 cand.)
 
     Tra ve (columns=[disp,...], rows=[{'label','db','sheet','net','kind','source',
-    'source_txt','marks':{disp:{'kind':'or'|'and','group':..}}}]).
+    'source_txt','io','marks':{disp:{'kind':'or'|'and','group':..}}}]).
+    'io' = cac diem VAO/RA hien truong cua nguyen nhan do (ma KKS, dai do, he thong
+    dau kia) - xem core/io_point.py; [] neu ten do khong ra thang mot diem I/O.
 
     Quy tac gop:
       - Khoa theo TEN nguyen nhan (khong theo db) -> nguyen nhan trung ten tu 2 CPU
@@ -701,6 +704,12 @@ def build_matrix(targets, cpu_paths=None):
     Voi moi ung vien: uu tien nguyen nhan tu CAD_TAG_FID trong chinh DB do (nhan ky su
     ghi san, sach hon); chi khi khong co gi moi suy luan tu wiring qua cond_tree."""
     cpu_paths = cpu_paths or {}
+    # DB de tra diem I/O hien truong: gop ca cpu_paths lan db cua cac ung vien, vi
+    # nguyen nhan hay nam o CPU khac CPU chua tin hieu dich (vd nhan MFT o BPS
+    # nhung diem I/O that lai o CPU SOE)
+    io_dbs = list(dict.fromkeys(
+        [d for d in cpu_paths.values() if d]
+        + [c.get("db") for t in targets for c in (t.get("cands") or [t]) if c.get("db")]))
     rows = {}
     columns = []
     for tg in targets:
@@ -750,6 +759,7 @@ def build_matrix(targets, cpu_paths=None):
         row["marks"] = marks
         row["source_txt"] = ", ".join(sorted(row.get("srcs") or [])[:4])
         row["raw_name"] = _is_raw_name((row.get("label") or "").split(" (")[0])
+        row["io"] = IOP.find(row.get("label"), io_dbs, uu_tien_db=row.get("db"))
         out_rows.append(row)
     # dong co ten mo ta len truoc, dong chi co ma net tho xuong cuoi
     out_rows.sort(key=lambda r: (1 if r.get("raw_name") else 0,

@@ -6,6 +6,13 @@ from __future__ import annotations
 import os
 import datetime
 
+from . import io_point as IOP
+
+# Cot co dinh dung TRUOC cac cot tin hieu dich. Cua so ma tran (ui/ce_matrix_dialog)
+# dung chung danh sach nay - de them/bot cot khong lam lech chi so o danh dau.
+COT_CO_DINH = ["Nguyen nhan goc", "KKS", "Diem vao/ra", "Nguon", "CPU"]
+NCD = len(COT_CO_DINH)
+
 
 def export_matrix(path, columns, rows, db_paths=None):
     import openpyxl
@@ -30,7 +37,7 @@ def export_matrix(path, columns, rows, db_paths=None):
     thin = Side(style="thin", color="CBD5E1")
     box = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    headers = ["Nguyen nhan goc", "Nguon", "CPU"] + list(columns)
+    headers = list(COT_CO_DINH) + list(columns)
     for ci, h in enumerate(headers, start=1):
         c = ws.cell(row=1, column=ci, value=h)
         c.fill = hdr_fill; c.font = hdr_font; c.alignment = center; c.border = box
@@ -44,15 +51,19 @@ def export_matrix(path, columns, rows, db_paths=None):
         c1.alignment = wrap
         if row.get("raw_name"):
             c1.font = raw_font
-        if row.get("note"):
-            # Nguong la 1 DUONG CONG F(x) chu khong phai 1 con so: dinh ca cum diem gay
-            # khuc vao o de nguoi doc tai lieu tra tai cho, khong phai mo lai ban ve.
-            c1.comment = Comment(row["note"], "T-Designer", width=460, height=170)
-        ws.cell(row=ri, column=2,
+        # Nguong la 1 DUONG CONG F(x) chu khong phai 1 con so: dinh ca cum diem gay
+        # khuc vao o de nguoi doc tai lieu tra tai cho, khong phai mo lai ban ve.
+        # Kem theo la ly lich diem do hien truong (tag I/O, dia chi, he thong dau kia).
+        ghi = [x for x in [row.get("note"), IOP.chu_thich(row.get("io"))] if x]
+        if ghi:
+            c1.comment = Comment("\n\n".join(ghi), "T-Designer", width=460, height=230)
+        ws.cell(row=ri, column=2, value=IOP.ma_kks(row.get("io")))
+        ws.cell(row=ri, column=3, value=IOP.mo_ta(row.get("io")))
+        ws.cell(row=ri, column=4,
                 value=("Tai lieu (TAG)" if row.get("source") == "tag" else "Suy luan tu day"))
-        ws.cell(row=ri, column=3, value=row.get("source_txt")
+        ws.cell(row=ri, column=5, value=row.get("source_txt")
                 or (row.get("sheetlbl") or row.get("sheet") or ""))
-        for ci, col in enumerate(columns, start=4):
+        for ci, col in enumerate(columns, start=NCD + 1):
             cell = ws.cell(row=ri, column=ci)
             cell.alignment = center
             cell.border = box
@@ -77,13 +88,12 @@ def export_matrix(path, columns, rows, db_paths=None):
                     ("Chi gay ra '%s' khi KET HOP du:\n  + %s" % (col, with_txt))
                     if with_txt else "Thuoc 1 nhom AND", "T-Designer")
                 n_and += 1
-        for ci in range(1, 4):
+        for ci in range(1, NCD + 1):
             ws.cell(row=ri, column=ci).border = box
 
-    ws.column_dimensions["A"].width = 52
-    ws.column_dimensions["B"].width = 16
-    ws.column_dimensions["C"].width = 30
-    for ci in range(4, 4 + len(columns)):
+    for ci, rong in zip(range(1, NCD + 1), (52, 20, 26, 16, 30)):
+        ws.column_dimensions[get_column_letter(ci)].width = rong
+    for ci in range(NCD + 1, NCD + 1 + len(columns)):
         ws.column_dimensions[get_column_letter(ci)].width = 15
 
     # ---- sheet phu: nguon du lieu, de nguoi doc biet bang nay tu dau ma co ----
@@ -101,7 +111,9 @@ def export_matrix(path, columns, rows, db_paths=None):
     _kv(r, "Ngay dung bang", datetime.datetime.now().strftime("%Y-%m-%d %H:%M")); r += 1
     _kv(r, "Tin hieu dich", ", ".join(columns)); r += 1
     _kv(r, "So nguyen nhan", str(len(rows))); r += 1
-    _kv(r, "So o OR / AND", "%d / %d" % (n_or, n_and)); r += 2
+    _kv(r, "So o OR / AND", "%d / %d" % (n_or, n_and)); r += 1
+    n_io = sum(1 for x in rows if x.get("io"))
+    _kv(r, "Tra ra diem hien truong", "%d / %d nguyen nhan" % (n_io, len(rows))); r += 2
     a = ws2.cell(row=r, column=1, value="File DB da dung"); a.font = bold; r += 1
     for p in (db_paths or []):
         ws2.cell(row=r, column=1, value=os.path.basename(p))
@@ -113,8 +125,12 @@ def export_matrix(path, columns, rows, db_paths=None):
              value="● = nguyen nhan doc lap, mot minh du gay hieu ung.  "
                    "▲Gxx = phai ket hop du ca nhom Gxx (xem chu thich trong o).  "
                    "Cot 'CPU': noi tim thay nguyen nhan.  Cot 'Nguon': 'Tai lieu (TAG)' = nhan do ky su ghi san trong CAD_TAG_FID; "
-                   "'Suy luan tu day' = app tu lan nguoc theo day va khoi logic.")
+                   "'Suy luan tu day' = app tu lan nguoc theo day va khoi logic.  "
+                   "Cot 'KKS' va 'Diem vao/ra': ma va ly lich diem do hien truong, "
+                   "doc tu khoi dau cuoi I/O trong DB (loai DI/AI/DO/AO, dai do, kieu "
+                   "tin hieu, he thong dau kia); de trong khi ten do khong ra thang 1 "
+                   "diem I/O nao.")
     ws2.cell(row=r, column=2).alignment = Alignment(wrap_text=True, vertical="top")
-    ws2.row_dimensions[r].height = 60
+    ws2.row_dimensions[r].height = 78
 
     wb.save(path)

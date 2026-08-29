@@ -78,6 +78,32 @@ Mọi bảng con dùng cột `ID` = mã sheet (vd 620). `IDLINE_ID` = ID*10000 +
 - `CAD_TABLE` (911): bảng dữ liệu nhúng trên sheet.
 - `CAD_TEXT` (46): chữ chú thích tự do (vd "(NOT USED)", "(U2: To JI446)").
 
+### B8. Điểm vào/ra hiện trường (KKS + dải đo) — khối đầu cuối I/O
+Đếm trên cả 24 file DB của dự án: `40E2` Digital Input 5.620, `40E4` Analog Input
+3.124, `40E3` Digital Output 1.604, `40E5` Analog Output 220 → **10.568 khối**, và
+**100% có mã KKS**.
+
+Bố cục tham số (`CAD_BLOCK_PARAM`) đồng nhất, không một khối nào lệch:
+
+| Param | Ý nghĩa | Ví dụ |
+|---|---|---|
+| 2 | tag I/O | `IOAI-1` |
+| 3 | **mã KKS** | `10CBP10EA001XQ00` |
+| 4 | mô tả | `GEN FREQ 1` |
+| 5 | hệ thống đầu kia | `GCP`, `BPS`, `LOCAL`, `FIELD` |
+| 6 | kiểu tín hiệu (chỉ analog) | `4-20mA` |
+| 7 | **dải đo** (chỉ analog) | `45-55Hz`, `0-940MW`, `0-400degC` |
+
+- Chân 1 = giá trị, chân 2 (chỉ `40E2`/`40E4`) = bit chất lượng (tên tận cùng `QB`).
+- **Tên tín hiệu của khối I/O nằm ở `CAD_SIGNAL`, tra theo `SYSTEMLINE`** (địa chỉ
+  phần cứng, vd `AI1004`) — *không* nằm trong `CAD_ID` như các khối khác; join qua
+  `CAD_ID` không ra gì. Toàn dự án: 10.149 tên phân giải được về điểm I/O; 252 tên
+  ứng với nhiều điểm và cả 252 đều mang KKS khác nhau (1 lệnh ra nhiều đích).
+- **Không** dùng `40E6`/`40E7` (BIF, 412 khối): tham số 3 của chúng là `BIF-1` chứ
+  không phải KKS — chúng là giao diện bus thiết bị.
+- App đọc qua `core/io_point.py`; ma trận nhân quả dùng nó cho 2 cột **KKS** và
+  **Điểm vào/ra**.
+
 ---
 
 ## C. Thuật toán dựng lại 1 sheet (đầy đủ)
@@ -111,3 +137,4 @@ Mọi bảng con dùng cột `ID` = mã sheet (vd 620). `IDLINE_ID` = ID*10000 +
 | **Mô tả chân theo instance** | CAD_TAG_FID ISTD/OSTD | ⬜ chưa |
 | Khung tên / rev | CAD_DATA/CAD_IBD_REV | ⬜ chưa |
 | Đồ thị / bảng / text | CAD_GRAPH/TABLE/TEXT | ⬜ chưa |
+| **Điểm I/O hiện trường (KKS, dải đo)** | 40E2/40E4/40E3/40E5 + CAD_SIGNAL | ✅ |

@@ -14,6 +14,8 @@ from PySide6.QtGui import QColor
 
 from core import ce_matrix as CE
 from core import project_index as PI
+from core import io_point as IOP
+from core.ce_export import COT_CO_DINH, NCD
 
 
 class CEMatrixDialog(QDialog):
@@ -302,25 +304,32 @@ class CEMatrixDialog(QDialog):
 
     def _render_table(self):
         rows = self.rows
-        cols = ["Nguyen nhan goc", "Nguon", "CPU"] + self.columns
+        cols = list(COT_CO_DINH) + self.columns
         self.table.setColumnCount(len(cols))
         self.table.setHorizontalHeaderLabels(cols)
         self.table.setRowCount(len(rows))
         for r, row in enumerate(rows):
             it = QTableWidgetItem(row["label"])
             it.setData(Qt.ItemDataRole.UserRole, row)
+            # nguong la duong cong F(x) - de nguyen cum diem gay khuc trong chu thich,
+            # kem ly lich diem do hien truong de tra tai cho khong phai mo ban ve
+            tip = [row.get("note"), IOP.chu_thich(row.get("io"))]
             if row.get("raw_name"):
                 it.setForeground(QColor("#78716C"))     # dong chua xac dinh duoc ten
-                it.setToolTip("Chua co ten mo ta - chi la ma net trong ban ve")
-            if row.get("note"):
-                # nguong la duong cong F(x) - de nguyen cum diem gay khuc trong chu thich
-                it.setToolTip(row["note"])
+                tip.insert(0, "Chua co ten mo ta - chi la ma net trong ban ve")
+            tip = [x for x in tip if x]
+            if tip:
+                it.setToolTip("\n\n".join(tip))
             self.table.setItem(r, 0, it)
+            kks = QTableWidgetItem(IOP.ma_kks(row.get("io")))
+            kks.setToolTip(IOP.chu_thich(row.get("io")))
+            self.table.setItem(r, 1, kks)
+            self.table.setItem(r, 2, QTableWidgetItem(IOP.mo_ta(row.get("io"))))
             src = "Tai lieu (TAG)" if row.get("source") == "tag" else "Suy luan tu day"
-            self.table.setItem(r, 1, QTableWidgetItem(src))
+            self.table.setItem(r, 3, QTableWidgetItem(src))
             sit = QTableWidgetItem(row.get("source_txt") or "")
             sit.setToolTip("\n".join(row.get("srcs") or []))
-            self.table.setItem(r, 2, sit)
+            self.table.setItem(r, 4, sit)
             for ci, col in enumerate(self.columns):
                 m = row["marks"].get(col)
                 cell = QTableWidgetItem("")
@@ -337,7 +346,7 @@ class CEMatrixDialog(QDialog):
                         cell.setToolTip(("Chi gay ra '%s' khi KET HOP du:\n  + %s" % (col, with_txt))
                                         if with_txt else "Thuoc 1 nhom AND")
                     f = cell.font(); f.setBold(True); cell.setFont(f)
-                self.table.setItem(r, ci + 3, cell)
+                self.table.setItem(r, ci + NCD, cell)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for ci in range(1, len(cols)):
             self.table.horizontalHeader().setSectionResizeMode(ci, QHeaderView.ResizeMode.ResizeToContents)
@@ -357,7 +366,7 @@ class CEMatrixDialog(QDialog):
             return tg, hl
         row = it.data(Qt.ItemDataRole.UserRole) or {}
         hl = row.get("label")
-        ci = c - 3
+        ci = c - NCD
         if 0 <= ci < len(self.columns):
             want = self.columns[ci]        # dang bam dung 1 o -> lay cot do
         else:
