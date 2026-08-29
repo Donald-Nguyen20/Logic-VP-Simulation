@@ -182,6 +182,12 @@ def _compute(net, prod, sem, val, thr=None, cst=None):
         return 1 - ins[0] if ins else 1
     if op == "XOR":
         return sum(ins) % 2
+    if op == "MAJ":
+        # 2-trong-3 (400E). Nguon chuan cua hang DEF/MCR/MacroDef.db: MACROABBR
+        # '2OUT3', ten '<|2 - Two Out of Three', 3 chan vao / 1 chan ra / 0 tham so.
+        # La mach bau da so cua he bao ve: Du k tren tong so dau vao len 1, khong
+        # phai DUNG k cai (3/3 ma khong tac dong thi con gi la bao ve nua).
+        return 1 if sum(ins) >= s.get("k", 2) else 0
     if op == "SELECT":
         # Cong tac chuyen mach tin hieu so: SW=1 -> Y=X1, SW=0 -> Y=X2.
         # Nguon: manual macro trang 117 muc "Transfer (Digital Switch) 40D5H" - bang
@@ -383,6 +389,13 @@ def _analog_producers(db, sheet):
         sel = None
         if op == "SELECT":
             sel = _resolve_transfer(ins, asem[code].get("name", ""), box)
+        if asem[code].get("sig") == "left":
+            # Loc tre F(t) va gioi han toc do RL o BAI TOAN TINH: on dinh roi thi ra = vao.
+            # Loc tre chi lam CHAM, khong doi tri so cuoi cung; gioi han toc do chi han
+            # TOC DO doi, thoi doi la no bam dung dau vao. Chay dong (sheet_dyn nhanh
+            # kind 'L'/'R') van dung mo hinh dong that: gia tri do vao simulate() bang
+            # duong ghi de analog, ma ghi de thang lop tinh nay nen khong bi de len.
+            ins = _chan_tin_hieu(ins)
         for oidx, onet in enumerate(outs):
             if not onet or onet in aprod:
                 continue
@@ -399,6 +412,21 @@ def _analog_producers(db, sheet):
             aprod[onet] = rec
     _APROD[key] = aprod
     return aprod
+
+
+def _chan_tin_hieu(ins):
+    """Chan mang DONG TIN HIEU CHINH cua khoi loc tre F(t) / gioi han toc do RL.
+
+    Hai ho khoi nay con chan khac: SW (cho phep hay bo qua tac dung) va chan nhan hang
+    so thoi gian T / toc do R tu ben ngoai. Lay nham chan thi ngo ra thanh mot tri so
+    vo nghia, nen chon y het cach bo giai DONG dang dung (core/sheet_dyn.py, nhanh
+    kind 'L' va 'R'): bo chan so (PIN_TYPE=1 la SW) va chan ten 'I' (toc do), con lai
+    lay chan TRAI NHAT. Do tren 1.134 khoi cua du an: sau khi loc khong khoi nao con
+    hai chan cung do trai, tuc quy tac luon chi ra dung mot chan."""
+    ana = [d for d in ins if d.get("ptype") != 1 and d.get("name") != "I"]
+    if not ana:
+        return ins
+    return [min(ana, key=lambda d: d.get("dx", 0.0))]
 
 
 def _resolve_transfer(ins, name, box):

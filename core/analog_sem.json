@@ -175,6 +175,36 @@
   "op": "FUNC",
   "name": "F(x) - Function Generator (Parameter)"
  },
+ "4036": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:para / SW:Upside)"
+ },
+ "4037": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:para / SW:Downside)"
+ },
+ "4038": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:input / SW:Upside)"
+ },
+ "4039": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:input / SW:Downside)"
+ },
+ "403A": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:para / without SW)"
+ },
+ "403B": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "F(t) - First Order LAG (T:input / without SW)"
+ },
  "4042": {
   "op": "MAX",
   "name": "> - High Value Selector (in:Left & Downside)"
@@ -242,6 +272,36 @@
  "4056": {
   "op": "PASS",
   "name": "<| - Low Limiter (LL:input)"
+ },
+ "4057": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:para / SW:Upside)"
+ },
+ "4058": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:para / SW:Downside)"
+ },
+ "4059": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:para / without SW)"
+ },
+ "405A": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:input / SW:Upside)"
+ },
+ "405B": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:input / SW:Downside)"
+ },
+ "405C": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "RL - Velocity Limiter (R:input / without SW)"
  },
  "405E": {
   "op": "PASS",
