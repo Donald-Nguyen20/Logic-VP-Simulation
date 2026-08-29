@@ -212,6 +212,30 @@ def _dbc(db):
     for (sid, sig), ln in idname.items():
         if ln:
             name2[ln.upper()].append((sid, sig))
+    # Chi muc nguoc TEN -> (sheet, net) phai phu ca ten lay tu CAD_SIGNAL chu khong
+    # rieng CAD_ID. _name_of() da lui ve sysname tu lau nen ten VAN hien dung, nhung
+    # name2 thi khong - ma day moi la cho cay dieu kien tra "tin hieu nay do sheet nao
+    # sinh ra". Thieu no thi la 'cross' khong duoc danh dau expandable, cay dung lai
+    # ngay tai cai ten va mat sach nguong so sanh phia sau (vd HPT EXH STM TEMP HI o
+    # 21 EHC MC sheet 022-77: thuc te la bau 2-trong-3 cua ba diem >= 480 degC tren
+    # sheet 021-50). Nang nhat la cac CPU gan nhu khong dat ten trong CAD_ID:
+    # 27 AVR MC A co 2 ten CAD_ID / 1294 ten CAD_SIGNAL, 21 EHC MC 1189 / 6990.
+    # Ca du an: 40.080 -> 53.927 ten tra duoc. Them SAU cac cap tu CAD_ID de giu
+    # nguyen lua chon san co cua expand() (no lay cai dau tien khop).
+    if sysname:
+        try:
+            for sid, sig in c.execute(
+                    "SELECT DISTINCT b.ID,p.SIGNALID FROM CAD_BLOCK_PIN p "
+                    "JOIN CAD_BLOCK b ON p.BLOCK_ID=b.BLOCK_ID"):
+                sig = D._clean(sig)
+                # dung dung thu tu uu tien cua _name_of: CAD_ID truoc, sysname sau
+                if not sig or idname.get((sid, sig)):
+                    continue
+                ln = sysname.get(sig)
+                if ln:
+                    name2[ln.upper()].append((sid, sig))
+        except Exception:
+            pass
     cpuno = None; cpuname = ""
     try:
         r = c.execute("SELECT CPUNO,CPUNAME FROM CAD_CPU").fetchone()
