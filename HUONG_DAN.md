@@ -250,17 +250,53 @@ nhánh phía sau cũng `None` — nhìn ra như sơ đồ ráp sai chứ không 
 Bảng luôn được **sắp theo X** và bỏ điểm trùng X trước khi dùng, đúng như
 `core/sheet_sim.func_points` xử lý bảng đọc từ DB.
 
+### Nối dây
+
+Hai cách, dùng cách nào cũng được:
+
+- **Kéo** — giữ chuột ở một chân, kéo sang chân kia rồi thả.
+- **Bấm – bấm** — bấm một chân, cuộn màn hình thoải mái, rồi bấm chân thứ hai. Dùng khi
+  hai khối ở xa nhau: kéo thì phải vừa giữ nút vừa cuộn. **Esc** hoặc bấm ra chỗ trống
+  để bỏ.
+
+Ba chỗ được nới cho dễ trúng:
+
+- **Thả vào thân khối cũng được** — không cần ngắm trúng chấm tròn 4px. Máy tự chọn
+  chân đúng chiều, ưu tiên chân **chưa có dây**, và trong số đó lấy chân gần con trỏ
+  nhất theo chiều dọc.
+- **Vùng bắt chân rộng hơn hình vẽ** — 22px khi bấm, 30px khi thả.
+- **Không nối được sai chiều** — ra–ra hay vào–vào bị chặn ngay, và dòng nhắc việc nói
+  rõ đang cần thả vào loại chân nào.
+
+Một **ngõ vào chỉ nhận một nguồn**: nối chồng lên thì dây cũ bị thay, và câu nhắc việc
+ghi rõ *"(thay dây cũ vào chân đó)"*. Trước đây hai dây cùng vào một chân thì dây nối
+sau im lặng không có tác dụng.
+
 ### Chạy thử
 
 1. **+ Node vào** / **+ Node ra** để tạo đầu vào, đầu ra (bản vẽ tự do không gắn với
    mã khối nào nên không có chân mặc định).
 2. Thêm khối tính, hoặc thả một F(x) từ thẻ giữa.
-3. Nối dây: kéo từ một chấm tròn sang một chấm tròn khác.
-4. **Nháy đúp node VÀO** để gõ giá trị, rồi bấm **Tính logic nội**. Có khối tích phân
-   thì bấm **Run (tích phân)** để chạy theo dt.
+3. Nối dây (xem trên).
+4. **Nháy đúp node VÀO** để gõ giá trị — **đầu ra hiện ra ngay**, không phải bấm nút
+   nào. Sơ đồ tự tính lại sau mỗi thay đổi: nối thêm dây, xóa khối, cài bảng F(x),
+   đổi TI của khối tích phân.
 
-Nút *"Tính giá trị (từ DB)"* luôn tắt ở đây — bản vẽ không gắn với một khối cụ thể
-nào trên trang nên không có giá trị thật để lấy; giá trị phải tự gõ vào.
+Nút *"Tính logic nội (chạy sơ đồ)"* đã bỏ vì không còn việc gì để làm.
+
+### Thanh công cụ — nút nào hiện lúc nào
+
+Thanh trên cùng chỉ giữ nút **có việc để làm trên bản vẽ đang mở**. Nút xám hoặc nút
+không bao giờ dùng vẫn chiếm chỗ, và còn làm người dùng tưởng mình thiếu bước nào đó
+khi bấm vào mà không thấy gì xảy ra.
+
+| Nút | Khi nào hiện |
+|---|---|
+| Xóa khối chọn (Del) · + Node vào · + Node ra · Xóa hết khối thêm · Nhập netlist… · Lưu | luôn |
+| Đặt lại node vào/ra | chỉ khi mã khối **có bảng chân mặc định** — bản vẽ tự do không có bảng đó, nút chỉ còn mỗi tác dụng xóa sạch node |
+| Tính giá trị (từ DB) | chỉ khi bản vẽ **gắn với một khối đang mở trên trang**; trước đây nút vẫn hiện nhưng luôn xám |
+| dt · bước · Run (tích phân) | chỉ khi trên bản vẽ **thật sự có khối tích phân** (`F_INL1_I`…`F_INL4_I`) |
+| Tính logic nội (chạy sơ đồ) | đã bỏ hẳn |
 
 ### Nơi lưu
 

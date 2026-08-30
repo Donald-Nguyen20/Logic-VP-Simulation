@@ -17,10 +17,14 @@ Hai che do, khac nhau o cho co gan voi mot ma khoi hay khong:
     core/internal_design/<code>.json vi no di kem ma nguon.
 
 Ca hai che do deu khong gan voi mot khoi cu the tren trang nao, nen khong co gia tri
-that de lay: nhay doi node VAO de tu go gia tri thu, roi bam "Tinh logic noi".
+that de lay: nhay doi node VAO de tu go gia tri thu - dau ra hien ra ngay, khong co
+nut "chay" nao phai bam (xem InternalDesignDialog._tinh_lai).
 
 Moi khoi co san cac DIEM NOI (port, cham tron): input ben trai, output ben phai. Noi
-day bang cach keo tu 1 cham tron tha vao 1 cham tron khac.
+day theo mot trong hai cach, ca hai deu bat duoc ca THAN khoi chu khong bat moi cham
+tron, va deu tu chan khong cho noi ra-ra hay vao-vao:
+    keo   - giu chuot o mot chan, keo sang chan kia roi tha
+    bam   - bam mot chan, cuon man hinh thoai mai, bam tiep chan kia (Esc de bo)
 
 Ban ve luu dang:
     {"pins":[{"id","name","side","x","y"}],
@@ -38,7 +42,7 @@ from PySide6.QtWidgets import (
     QFileDialog, QTabWidget,
 )
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPixmap, QIcon
-from PySide6.QtCore import Qt, QRectF, QPointF, QSize
+from PySide6.QtCore import Qt, QRectF, QPointF, QSize, QTimer
 
 SC = 6.0                       # ty le ve ky hieu (don vi symbol_shapes -> px)
 _COL_SYM = QColor("#3346B5")
@@ -46,6 +50,15 @@ _COL_WIRE = QColor("#6B7280")
 _COL_PORT = QColor("#0A8A9C")
 _COL_PORT_IN = QColor("#0EA5A5")
 _COL_PORT_OUT = QColor("#E8963B")
+# Ban kinh bat chan. Cham tron chi ve 4px nhung vung bam rong hon nhieu: ngam
+# trung 4px bang chuot la viec kho, ma noi nham chan thi phai xoa day lam lai.
+_R_BAM = 22.0                  # bam vao khoi -> tinh la bam vao chan nao
+_R_THA = 30.0                  # tha day -> tinh la tha vao chan nao
+_TEN_CHAN = {"in": "ngo VAO", "out": "ngo RA"}
+
+
+def _ten_item(it):
+    return getattr(it, "pname", None) or getattr(it, "sym", "") or it.bid
 _COL_PIN_IN = QColor("#EAF6FF")
 _COL_PIN_OUT = QColor("#FEF3C7")
 _PORT_R = 4.0
@@ -560,7 +573,7 @@ class _BaseItem(QGraphicsItemGroup):
                 bd, best = d, i
         return best
 
-    def nearest_port_within(self, local_pt, thresh=13.0):
+    def nearest_port_within(self, local_pt, thresh=_R_BAM):
         """(idx, khoang cach) cua port gan diem nhat neu trong nguong; nguoc lai None."""
         best, bd = None, None
         for i, (px, py, _s) in enumerate(self.ports):
@@ -575,6 +588,13 @@ class _BaseItem(QGraphicsItemGroup):
         return super().itemChange(change, value)
 
     def mousePressEvent(self, ev):
+        # Dang cho noi (da bam mot chan truoc do) -> bam phat nay la NOI XONG, ke ca khi
+        # bam vao than khoi. Nho vay noi hai khoi o xa nhau khong phai vua giu chuot vua
+        # cuon man hinh - bam mot cai, cuon den noi, bam cai nua.
+        if self._dialog._wire_from is not None:
+            self._dialog._end_wire(ev.scenePos())
+            ev.accept()
+            return
         # bam GAN 1 chan (port) -> keo de noi day; bam vao than khoi -> di chuyen binh thuong
         hit = self.nearest_port_within(ev.pos())
         if hit is not None:
@@ -595,7 +615,11 @@ class _BaseItem(QGraphicsItemGroup):
     def mouseReleaseEvent(self, ev):
         if getattr(self, "_wiring", False):
             self._wiring = False
-            self._dialog._end_wire(ev.scenePos())
+            d = ev.scenePos() - ev.buttonDownScenePos(Qt.MouseButton.LeftButton)
+            if d.x() * d.x() + d.y() * d.y() < 36.0:
+                self._dialog._giu_cho_noi()      # bam roi tha tai cho = cho bam chan dich
+            else:
+                self._dialog._end_wire(ev.scenePos())
             ev.accept()
             return
         super().mouseReleaseEvent(ev)
@@ -785,7 +809,7 @@ class _PinItem(_BaseItem):
     def mouseDoubleClickEvent(self, ev):
         """Nhay doi node VAO -> go gia tri thu. Mo tu danh muc thi khong gan voi khoi nao
         tren sheet nen khong co gia tri that de lay: khong nhap tay duoc thi so do chi
-        toan None va nut 'Tinh logic noi' khong noi len dieu gi."""
+        toan None, khong doc duoc gi o dau ra."""
         if self.side != "in":
             return super().mouseDoubleClickEvent(ev)
         cu = "" if self.value is None else ("%g" % self.value)
@@ -803,7 +827,7 @@ class _PinItem(_BaseItem):
             except ValueError:
                 self._dialog._hint.setText("'%s' khong phai la so - bo qua." % txt)
                 return
-        self._dialog._evaluate()          # doi dau vao -> thay ngay dau ra
+        self._dialog._tinh_lai()          # doi dau vao -> thay ngay dau ra
 
     def set_value(self, v):
         self.value = v
@@ -815,6 +839,34 @@ class _PinItem(_BaseItem):
             self._val_item.setPlainText("%.4g" % v)
         else:
             self._val_item.setPlainText(str(v))
+
+
+class _View(QGraphicsView):
+    """View co theo doi chuot, phuc vu kieu noi day bam - bam.
+
+    Khi da bam mot chan va dang cho chan thu hai thi khong con nut chuot nao duoc giu,
+    nen QGraphicsView mac dinh khong bao move ve nua - duong tam se dung im mot cho va
+    nguoi dung khong biet la may dang cho minh bam tiep."""
+
+    def __init__(self, scene, dialog):
+        super().__init__(scene)
+        self._dialog = dialog
+        self.setMouseTracking(True)
+
+    def mouseMoveEvent(self, ev):
+        if self._dialog._wire_from is not None:
+            self._dialog._update_wire(self.mapToScene(ev.position().toPoint()))
+        super().mouseMoveEvent(ev)
+
+    def mousePressEvent(self, ev):
+        # Bam ra cho trong khi dang cho noi = doi y. Khong bat cho nay thi duong tam
+        # treo mai theo chuot cho den khi bam trung mot khoi nao do.
+        if (self._dialog._wire_from is not None
+                and self.itemAt(ev.position().toPoint()) is None):
+            self._dialog._huy_noi("Da bo noi day.")
+            ev.accept()
+            return
+        super().mousePressEvent(ev)
 
 
 class InternalDesignDialog(QDialog):
@@ -847,6 +899,7 @@ class InternalDesignDialog(QDialog):
         self._wire_from = None     # (item, portidx) khi dang keo day
         self._wire_temp = None     # duong tam theo chuot
         self._drop_n = 0
+        self._hen = None           # QTimer gop nhieu thay doi thanh mot lan tinh
 
         lay = QVBoxLayout(self)
         self._hint = QLabel("")
@@ -854,8 +907,12 @@ class InternalDesignDialog(QDialog):
         lay.addWidget(self._hint)
         self._dat_tieu_de()
 
+        # Thanh cong cu chi giu lai nut CO VIEC DE LAM tren ban ve nay. Nut xam hoac
+        # nut khong bao gio dung van ton cho, va con lam nguoi dung tuong minh thieu
+        # buoc nao do khi bam vao ma khong thay gi xay ra.
         bar = QHBoxLayout()
-        b_del = QPushButton("Xoa khoi chon"); b_del.clicked.connect(self._delete_selected)
+        b_del = QPushButton("Xoa khoi chon (Del)")
+        b_del.clicked.connect(self._delete_selected)
         bar.addWidget(b_del)
         b_in = QPushButton("+ Node vao")
         b_in.setToolTip("Them mot dau vao de go gia tri thu vao so do")
@@ -865,31 +922,42 @@ class InternalDesignDialog(QDialog):
         b_out.setToolTip("Them mot dau ra de doc ket qua")
         b_out.clicked.connect(lambda: self._them_node("out"))
         bar.addWidget(b_out)
-        b_pins = QPushButton("Dat lai node vao/ra"); b_pins.clicked.connect(self._reset_pins)
-        bar.addWidget(b_pins)
-        b_clear = QPushButton("Xoa het khoi them"); b_clear.clicked.connect(self._clear_blocks)
+        # "Dat lai node vao/ra" chi dat lai duoc khi ma khoi co bang chan mac dinh.
+        # Ban ve tu do khong co bang do -> nut ay chi con moi tac dung xoa sach node.
+        if _macro_pins_by_code().get(self.code):
+            b_pins = QPushButton("Dat lai node vao/ra")
+            b_pins.clicked.connect(self._reset_pins)
+            bar.addWidget(b_pins)
+        b_clear = QPushButton("Xoa het khoi them")
+        b_clear.clicked.connect(self._clear_blocks)
         bar.addWidget(b_clear)
         bar.addSpacing(20)
-        self.b_val = QPushButton("Tinh gia tri (tu DB)")
-        self.b_val.clicked.connect(self._refresh_values)
-        self.b_val.setEnabled(bool(self.db_path and self.sheet_id is not None))
-        self.b_val.setToolTip(
-            "Lay gia tri that cua khoi nay tren mot trang dang mo."
-            if self.b_val.isEnabled() else
-            "Mo tu danh muc nen khong gan voi khoi cu the nao tren trang. "
-            "Nhay doi vao node VAO de tu go gia tri thu.")
-        bar.addWidget(self.b_val)
-        self.b_eval = QPushButton("Tinh logic noi (chay so do)")
-        self.b_eval.clicked.connect(self._evaluate)
-        bar.addWidget(self.b_eval)
-        bar.addWidget(QLabel("dt"))
+        # Nut lay gia tri that chi co nghia khi ban ve gan voi mot khoi dang mo tren
+        # trang. Mo tu thanh cong cu thi khong co, truoc day nut van hien nhung luon xam.
+        if self.db_path and self.sheet_id is not None:
+            self.b_val = QPushButton("Tinh gia tri (tu DB)")
+            self.b_val.clicked.connect(self._refresh_values)
+            self.b_val.setToolTip("Lay gia tri that cua khoi nay tren trang dang mo.")
+            bar.addWidget(self.b_val)
+        else:
+            self.b_val = None
+        # Da bo nut "Tinh logic noi (chay so do)": so do tu tinh lai sau moi thay doi
+        # (xem _tinh_lai), nen bam nut do khong con lam thay doi gi tren man hinh.
+        # dt / so buoc / Run chi phuc vu khoi TICH PHAN. Phan lon so do khong co khoi
+        # nao nhu the, nen ba o do an di cho den khi that su co - xem _dong_bo_thanh.
+        self.w_dyn = QWidget()
+        hd = QHBoxLayout(self.w_dyn)
+        hd.setContentsMargins(0, 0, 0, 0)
+        hd.addWidget(QLabel("dt"))
         self.sp_dt = QDoubleSpinBox(); self.sp_dt.setRange(0.001, 1e4); self.sp_dt.setDecimals(3)
-        self.sp_dt.setValue(1.0); self.sp_dt.setFixedWidth(70); bar.addWidget(self.sp_dt)
-        bar.addWidget(QLabel("buoc"))
+        self.sp_dt.setValue(1.0); self.sp_dt.setFixedWidth(70); hd.addWidget(self.sp_dt)
+        hd.addWidget(QLabel("buoc"))
         self.sp_n = QSpinBox(); self.sp_n.setRange(1, 100000); self.sp_n.setValue(100)
-        self.sp_n.setFixedWidth(70); bar.addWidget(self.sp_n)
+        self.sp_n.setFixedWidth(70); hd.addWidget(self.sp_n)
         self.b_run = QPushButton("Run (tich phan)"); self.b_run.clicked.connect(self._run_dynamic)
-        bar.addWidget(self.b_run)
+        hd.addWidget(self.b_run)
+        self.w_dyn.setVisible(False)
+        bar.addWidget(self.w_dyn)
         self.b_net = QPushButton("Nhap netlist...")
         self.b_net.clicked.connect(self._import_netlist_file)
         self.b_net.setToolTip("Dung so do tu file mo ta netlist van ban (ten:OP:dau_vao:tham_so)")
@@ -944,7 +1012,7 @@ class InternalDesignDialog(QDialog):
 
         self.scene = QGraphicsScene(self)
         self.scene.setSceneRect(-100, -100, 3000, 2000)
-        self.view = QGraphicsView(self.scene)
+        self.view = _View(self.scene, self)
         self.view.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.view.setBackgroundBrush(QBrush(QColor("#FBFCFE")))
         self.view.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
@@ -952,8 +1020,9 @@ class InternalDesignDialog(QDialog):
 
         self._load()
         # tu hien ngay gia tri ben ngoai (neu co) de khoi phai bam nut
-        if self.b_val.isEnabled():
+        if self.b_val is not None:
             self._refresh_values(quiet=True)
+        self._dong_bo_thanh()
 
     # ---------- tieu de / node tu them ----------
     def _dat_tieu_de(self):
@@ -962,15 +1031,17 @@ class InternalDesignDialog(QDialog):
             self._hint.setText(
                 "Ban ve TU DO: bam '+ Node vao' de tao dau vao, nhay doi ky hieu ben trai "
                 "de them khoi tinh, hoac sang the F(x) tha vao mot duong cong that. NOI DAY: "
-                "keo tu 1 cham tron sang 1 cham tron khac. Nhay doi node VAO de go gia tri, "
-                "roi bam 'Tinh logic noi'. Chon khoi + Delete de xoa. 'Luu' de ghi.")
+                "keo tu chan nay sang chan kia, hoac bam chan nay roi bam chan kia (bam vao "
+                "than khoi cung duoc). Noi xong, nhay doi node VAO de go gia tri - dau ra "
+                "hien ngay. Chon khoi + Delete de xoa. 'Luu' de ghi.")
         else:
             self.setWindowTitle("Ve logic noi (tu ve): %s (%s)" % (self.bname or "", self.code))
             self._hint.setText(
                 "Node vao (trai) / ra (phai) da co san theo chan that cua ma %s. Nhay doi ky "
                 "hieu ben trai de them khoi tinh toan, keo tha tu do (bam vao THAN khoi de di "
-                "chuyen). De NOI DAY: keo tu 1 cham tron (chan) tha vao 1 cham tron khac. Nhay "
-                "doi node VAO de go gia tri thu. Chon khoi + Delete de xoa. 'Luu' de ghi."
+                "chuyen). NOI DAY: keo tu chan nay sang chan kia, hoac bam chan nay roi bam "
+                "chan kia. Noi xong, nhay doi node VAO de go gia tri - dau ra hien ngay. "
+                "Chon khoi + Delete de xoa. 'Luu' de ghi."
                 % self.code)
 
     def _them_node(self, side):
@@ -1078,6 +1149,7 @@ class InternalDesignDialog(QDialog):
         item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.scene.addItem(item); item.setPos(x, y)
         self._items[bid] = item
+        self._tinh_lai()          # them khoi tich phan -> hien o dt/buoc; xem _tu_tinh
         return item
 
     def _add_pin(self, name, side, x, y, bid=None, pinno=""):
@@ -1268,9 +1340,9 @@ class InternalDesignDialog(QDialog):
         blk.fx_name = d.ten
         blk.update_label()
         xs = [a for a, _ in blk.fx_pts]
-        self._hint.setText("Da cai F(x) %s: %d diem, X tu %g den %g. Bam Tinh logic noi "
-                           "de xem ket qua." % (d.ten or "(chua dat ten)",
-                                                len(blk.fx_pts), xs[0], xs[-1]))
+        self._hint.setText("Da cai F(x) %s: %d diem, X tu %g den %g."
+                           % (d.ten or "(chua dat ten)", len(blk.fx_pts), xs[0], xs[-1]))
+        self._tinh_lai()
 
     def _canh_fx(self, static_blocks):
         """Khoi F(x) chua cai bang tra None cho moi dau vao, keo ca nhanh phia sau cung
@@ -1298,6 +1370,7 @@ class InternalDesignDialog(QDialog):
         blk.update_label()
         self._hint.setText("Khoi %s: TI=%.4g, init=%.4g. Bam 'Run (tich phan)' de chay." % (
             blk.sym, blk.ti, blk.init_val))
+        self._tinh_lai()
 
     # ---------- nhap tu netlist van ban ----------
     def _first_out(self, it):
@@ -1438,6 +1511,7 @@ class InternalDesignDialog(QDialog):
         if skipped:
             msg += " Bo qua (hang so/tham so hoac ten chua co): %s." % ", ".join(skipped[:8])
         self._hint.setText(msg)
+        self._dong_bo_thanh()
 
     def _reset_pins(self):
         if not _macro_pins_by_code().get(self.code):
@@ -1451,8 +1525,9 @@ class InternalDesignDialog(QDialog):
             self._remove_item(it)
         self._init_pins()
         self._redraw_wires()
+        self._tinh_lai()
 
-    # ---------- noi day (keo tu chan -> chan) ----------
+    # ---------- noi day (keo chan -> chan, hoac bam - bam) ----------
     def _begin_wire(self, item, idx, scene_pos):
         self._wire_from = (item, idx)
         p = item.port_scene_pos(idx)
@@ -1467,38 +1542,116 @@ class InternalDesignDialog(QDialog):
         p = self._wire_from[0].port_scene_pos(self._wire_from[1])
         self._wire_temp.setLine(p.x(), p.y(), scene_pos.x(), scene_pos.y())
 
-    def _port_at(self, scene_pos, exclude=None):
-        """Tim (item, port_idx) co cham tron gan diem tha nhat (trong nguong)."""
-        best = None
-        for it in self._items.values():
-            if it is exclude:
-                continue
-            hit = it.nearest_port_within(it.mapFromScene(scene_pos), thresh=15.0)
-            if hit is not None and (best is None or hit[1] < best[2]):
-                best = (it, hit[0], hit[1])
-        return (best[0], best[1]) if best else None
-
-    def _end_wire(self, scene_pos):
+    def _huy_noi(self, msg=""):
+        """Bo trang thai dang noi va xoa duong tam."""
         if self._wire_temp:
             self.scene.removeItem(self._wire_temp)
             self._wire_temp = None
-        frm = self._wire_from
         self._wire_from = None
+        if msg:
+            self._hint.setText(msg)
+
+    def _giu_cho_noi(self):
+        """Bam roi tha ngay tai cho = chon chan nguon, cho bam tiep chan dich.
+
+        Giu chuot keo tu chan nay sang chan kia chi de khi hai khoi cung nam trong man
+        hinh; xa hon thi phai vua giu nut vua cuon. Bam - bam thi cuon thoai mai giua
+        hai lan bam."""
+        if not self._wire_from:
+            return
+        it, idx = self._wire_from
+        s = it.ports[idx][2]
+        can = "in" if s == "out" else "out"
+        self._hint.setText("Dang noi tu %s cua '%s' - bam tiep vao mot %s (bam vao than "
+                           "khoi cung duoc, may tu chon chan). Esc de bo."
+                           % (_TEN_CHAN[s], _ten_item(it), _TEN_CHAN[can]))
+
+    def _khoi_tai(self, scene_pos, exclude=None):
+        """Khoi nam duoi diem nay, neu co."""
+        for it in self._items.values():
+            if it is exclude:
+                continue
+            if it.mapRectToScene(it.boundingRect()).contains(scene_pos):
+                return it
+        return None
+
+    def _chan_trong(self, it, can_side, scene_pos):
+        """Chon giup mot chan khi nguoi dung tha vao THAN khoi chu khong trung cham tron.
+
+        Uu tien chan chua co day: mot ngo vao chi nhan duoc mot nguon, tu dong chon vao
+        chan da co day thi lang le de len cai cu."""
+        dung = [i for i, (_x, _y, s) in enumerate(it.ports)
+                if (not can_side or s == can_side)]
+        if not dung:
+            return None
+        ban = set()
+        for (aid, ap), (bid, bp) in self._wires:
+            if aid == it.bid:
+                ban.add(ap)
+            if bid == it.bid:
+                ban.add(bp)
+        con = [i for i in dung if i not in ban] or dung
+        y = it.mapFromScene(scene_pos).y()
+        con.sort(key=lambda i: abs(it.ports[i][1] - y))
+        return (it, con[0])
+
+    def _port_at(self, scene_pos, bo=None, can_side=None):
+        """(item, port_idx) hop de tha day vao diem nay.
+
+        Uu tien cham tron gan nhat; khong co cham tron nao gan thi lay luon KHOI nam
+        duoi con tro va tu chon chan. can_side loc san theo chieu, nho vay tha vao than
+        mot khoi nhieu chan van ra dung chan can - va khong bao gio noi ra-ra hay vao-vao."""
+        best = None
+        for it in self._items.values():
+            hit = it.nearest_port_within(it.mapFromScene(scene_pos), thresh=_R_THA)
+            if hit is None:
+                continue
+            if bo is not None and it is bo[0] and hit[0] == bo[1]:
+                continue                        # chinh cai chan vua bam
+            if can_side and it.ports[hit[0]][2] != can_side:
+                continue
+            if best is None or hit[1] < best[2]:
+                best = (it, hit[0], hit[1])
+        if best:
+            return (best[0], best[1])
+        it = self._khoi_tai(scene_pos, exclude=(bo[0] if bo else None))
+        return self._chan_trong(it, can_side, scene_pos) if it is not None else None
+
+    def _end_wire(self, scene_pos):
+        frm = self._wire_from
+        self._huy_noi()
         if not frm:
             return
-        tgt = self._port_at(scene_pos)
-        if not tgt:
-            return
         a_item, a_idx = frm
-        b_item, b_idx = tgt
-        if a_item is b_item and a_idx == b_idx:
+        s = a_item.ports[a_idx][2]
+        can = "in" if s == "out" else "out"
+        tgt = self._port_at(scene_pos, bo=frm, can_side=can)
+        if not tgt:
+            lai = a_item.nearest_port_within(a_item.mapFromScene(scene_pos), thresh=_R_THA)
+            if lai is not None and lai[0] == a_idx:
+                self._hint.setText("Da bo noi day.")     # bam lai dung chan vua chon
+                return
+            self._hint.setText("Chua noi duoc: chan vua bam la %s nen phai tha vao mot "
+                               "%s. Tha vao than khoi cung duoc." % (_TEN_CHAN[s],
+                                                                     _TEN_CHAN[can]))
             return
-        # tranh noi trung y het
+        b_item, b_idx = tgt
         w = [[a_item.bid, a_idx], [b_item.bid, b_idx]]
         if w in self._wires or [w[1], w[0]] in self._wires:
+            self._hint.setText("Hai chan nay da noi voi nhau roi.")
             return
+        # Mot ngo VAO chi duoc mot nguon. Noi chong len nhau thi _build_src lay dai cuoi
+        # cung, tuc la day vua noi im lang khong co tac dung - thay han day cu di.
+        vao = [b_item.bid, b_idx] if can == "in" else [a_item.bid, a_idx]
+        cu = len(self._wires)
+        self._wires = [x for x in self._wires if vao not in (x[0], x[1])]
         self._wires.append(w)
         self._redraw_wires()
+        self._hint.setText("Da noi %s -> %s.%s"
+                           % (_ten_item(a_item), _ten_item(b_item),
+                              "  (thay day cu vao chan do)" if len(self._wires) <= cu
+                              else ""))
+        self._tinh_lai()
 
     def _redraw_wires(self):
         for ln in self._wire_items:
@@ -1515,10 +1668,36 @@ class InternalDesignDialog(QDialog):
             self._wire_items.append(ln)
 
     # ---------- sua ----------
+    def _tinh_lai(self):
+        """Hen tinh lai so do sau mot nhip ngan, thay cho nut "chay so do" da bo.
+
+        Vi sao phai hen chu khong tinh ngay: mot thao tac thuong keo theo vai lan thay
+        doi lien tiep (nap file la hang chuc khoi), ma _evaluate con doc lai gia tri tu
+        DB - tinh moi lan mot thi go so vao o dau vao se giat."""
+        if self._hen is None:
+            self._hen = QTimer(self)
+            self._hen.setSingleShot(True)
+            self._hen.timeout.connect(self._tu_tinh)
+        self._hen.start(60)
+
+    def _tu_tinh(self):
+        self._dong_bo_thanh()
+        # Chua noi day nao thi khong co gi de tinh: chay van duoc nhung chi de len dong
+        # nhac viec bang mot cau "0 khoi tinh" vo nghia.
+        if self._wires:
+            self._evaluate()
+
+    def _dong_bo_thanh(self):
+        """Chi hien dt / so buoc / Run khi tren ban ve THAT SU co khoi tich phan."""
+        co = any(getattr(i, "is_integ", False) for i in self._items.values())
+        if self.w_dyn.isVisible() != co:
+            self.w_dyn.setVisible(co)
+
     def _delete_selected(self):
         for it in [i for i in self.scene.selectedItems() if isinstance(i, _BaseItem)]:
             self._remove_item(it)
         self._redraw_wires()
+        self._tinh_lai()
 
     def _remove_item(self, it):
         bid = it.bid
@@ -1535,8 +1714,14 @@ class InternalDesignDialog(QDialog):
         for it in blocks:
             self._remove_item(it)
         self._redraw_wires()
+        self._tinh_lai()
 
     def keyPressEvent(self, ev):
+        if ev.key() == Qt.Key.Key_Escape and self._wire_from is not None:
+            # Esc tren QDialog la DONG cua so. Dang noi day thi phai uu tien bo noi,
+            # neu khong nguoi dung mat ca ban ve chi vi muon huy mot duong day.
+            self._huy_noi("Da bo noi day.")
+            ev.accept(); return
         if ev.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
             self._delete_selected(); ev.accept(); return
         super().keyPressEvent(ev)
@@ -1592,3 +1777,4 @@ class InternalDesignDialog(QDialog):
             self._init_pins()
         self._wires = [[list(a), list(b)] for a, b in data.get("wires", [])]
         self._redraw_wires()
+        self._tinh_lai()
