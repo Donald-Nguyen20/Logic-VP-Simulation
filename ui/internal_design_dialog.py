@@ -614,6 +614,9 @@ class _SymItem(_BaseItem):
         self.macrocode, sem = _sym_op(sym)
         self.op = sem.get("op", "")
         self.sem = sem
+        # Khoi F(x): op FUNC. Ca 4.290 khoi F(x) cua du an deu chung macrocode 4035 nen
+        # ky hieu khong noi len duong cong nao - bang gay khuc phai cai rieng tung khoi.
+        self.is_fx = (self.op == "FUNC")
         self.port_roles = []
         self._out_texts = {}     # port_idx -> QGraphicsTextItem (gia tri tinh duoc)
         # khoi tich phan (dong)
@@ -624,7 +627,7 @@ class _SymItem(_BaseItem):
         self.x_port_idx = None   # chan VAO chinh (X) de tich phan
         self.out_idx = None
         self._build()
-        if self.fx_pts:
+        if self.fx_pts or self.is_fx:
             self.update_label()
         if self.is_integ:
             self.op = self.op or "INTEG"
@@ -695,6 +698,18 @@ class _SymItem(_BaseItem):
             # Ten ma "4035"/"FNG_I" khong noi len gi vi 4.290 khoi F(x) deu chung ma do;
             # phai hien TEN va so diem thi moi biet dang cam dung duong cong nao.
             extra = "  %s (%d diem)" % (self.fx_name or "F(x)", len(self.fx_pts))
+            xs = [a for a, _ in self.fx_pts]
+            dong = ["F(x) %s" % (self.fx_name or "(chua dat ten)"),
+                    "X tu %g den %g, %d diem" % (xs[0], xs[-1], len(self.fx_pts)),
+                    "  ".join("%g/%g" % p for p in self.fx_pts[:12]),
+                    "Nhay dup de sua bang."]
+            self.setToolTip("<br>".join(dong))
+        elif getattr(self, "is_fx", False):
+            # Khoi F(x) rong tra None cho MOI dau vao, keo theo ca nhanh phia sau cung
+            # None. Phai noi ro la CHUA CAI, neu khong nguoi dung tuong so do rap sai.
+            extra = "  CHUA CAI BANG - nhay dup de cai"
+            self.setToolTip("Khoi F(x) chua co bang gay khuc nen chua tinh duoc. "
+                            "Nhay dup de cai bang.")
         elif self.is_integ:
             extra = "  TI=%.4g" % self.ti
         else:
@@ -702,6 +717,10 @@ class _SymItem(_BaseItem):
         self._lab.setPlainText("%s%s" % (self.sym, extra))
 
     def mouseDoubleClickEvent(self, ev):
+        if getattr(self, "is_fx", False):
+            self._dialog._edit_fx(self)
+            ev.accept()
+            return
         if self.is_integ:
             self._dialog._edit_integ(self)
             ev.accept()
@@ -1038,7 +1057,11 @@ class InternalDesignDialog(QDialog):
         if it is not None and it.text() and _symbol_shapes().get(it.text()):
             self._drop_n += 1
             off = (self._drop_n % 12) * 26
-            self._add_block(it.text(), 480 + off, 120 + off)
+            b = self._add_block(it.text(), 480 + off, 120 + off)
+            # Tu bang ky hieu thi khoi F(x) ra doi voi bang rong. Hoi ngay tai cho thay
+            # vi de nguoi dung phat hien luc chay ra None ma khong biet vi sao.
+            if getattr(b, "is_fx", False) and not b.fx_pts:
+                self._edit_fx(b, moi=True)
 
     # ---------- tao item ----------
     def _new_id(self):
@@ -1184,13 +1207,16 @@ class InternalDesignDialog(QDialog):
                 val[(b.bid, b.out_idx)] = b.state
         self._combinational(val, src, static_blocks)
         n = self._show_results(val, src, static_blocks, integ)
-        skipped = sorted({b.sym for b in static_blocks if b.op in ("FUNC", "CMP", "SELECT")})
+        # FUNC da tinh duoc khi khoi co bang gay khuc, nen khong con nam trong danh
+        # sach op chua ho tro; thieu bang thi bao rieng bang _canh_fx cho ro nguyen nhan.
+        skipped = sorted({b.sym for b in static_blocks if b.op in ("CMP", "SELECT")})
         msg = "Da tinh to hop: %d khoi tinh, %d khoi tich phan, %d ngo ra co gia tri." % (
             len(static_blocks), len(integ), n)
         if integ:
             msg += " Bam 'Run (tich phan)' de tien theo dt cho khoi tich phan."
         if skipped:
             msg += " Chua tinh op: %s." % ", ".join(skipped[:6])
+        msg += self._canh_fx(static_blocks)
         self._hint.setText(msg)
 
     def _run_dynamic(self):
@@ -1222,7 +1248,39 @@ class InternalDesignDialog(QDialog):
         self._combinational(final, src, static_blocks)
         n = self._show_results(final, src, static_blocks, integ)
         self._hint.setText("Da chay dong %d buoc (dt=%.3f): %d khoi tich phan cong don, "
-                           "%d ngo ra co gia tri." % (nsteps, dt, len(integ), n))
+                           "%d ngo ra co gia tri.%s"
+                           % (nsteps, dt, len(integ), n, self._canh_fx(static_blocks)))
+
+    def _edit_fx(self, blk, moi=False):
+        """Cai bang gay khuc cho mot khoi F(x) ngay tren ban ve.
+
+        Huy khi vua tha thi khoi van o lai nhung mang nhan CHUA CAI BANG: xoa han di
+        thi nguoi dung mat luon vi tri vua dat, con im lang thi den luc chay moi biet
+        la khoi khong tinh duoc."""
+        from ui.fx_setup import FxSetupDialog
+        d = FxSetupDialog(blk.fx_pts, blk.fx_name, self, main=self.main)
+        if d.exec() != QDialog.DialogCode.Accepted:
+            if moi:
+                self._hint.setText("Khoi F(x) chua co bang gay khuc nen chua tinh duoc. "
+                                   "Nhay dup vao khoi de cai.")
+            return
+        blk.fx_pts = [tuple(p) for p in d.pts]
+        blk.fx_name = d.ten
+        blk.update_label()
+        xs = [a for a, _ in blk.fx_pts]
+        self._hint.setText("Da cai F(x) %s: %d diem, X tu %g den %g. Bam Tinh logic noi "
+                           "de xem ket qua." % (d.ten or "(chua dat ten)",
+                                                len(blk.fx_pts), xs[0], xs[-1]))
+
+    def _canh_fx(self, static_blocks):
+        """Khoi F(x) chua cai bang tra None cho moi dau vao, keo ca nhanh phia sau cung
+        None - phai noi ra, neu khong nguoi dung se di tim loi o cho noi day."""
+        k = len([b for b in static_blocks
+                 if getattr(b, "is_fx", False) and not b.fx_pts])
+        if not k:
+            return ""
+        return (" CON %d KHOI F(x) CHUA CAI BANG gay khuc (nhay dup vao khoi de cai) - "
+                "cac khoi do va nhanh sau chung khong co gia tri." % k)
 
     def _edit_integ(self, blk):
         """Cai dat tham so khoi tich phan: TI (hang so thoi gian) + gia tri khoi tao."""

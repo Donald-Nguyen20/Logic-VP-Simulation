@@ -227,6 +227,28 @@ Bấm là **ra ngay bảng vẽ** để tự rắp sơ đồ và cho chạy th�
 > terminal, không phải khối tính), trong đó **132 mã / 28.206 khối chưa mô phỏng
 > được, và 31 mã / 9.742 khối đã có hình sơ đồ nội bộ trong manual để chép lại.**
 
+### Cài đặt khối F(x)
+
+Mỗi khối F(x) mang **bảng gãy khúc của riêng nó** — không suy ra được từ mã khối (cả
+4.290 khối đều là mã `4035`). Có ba cách cài:
+
+1. **Thả từ thẻ F(x)** — kéo nguyên bảng của khối thật trong DB về.
+2. **Nháy đúp vào khối** — mở bảng cài đặt: gõ tay, dán từ Excel (mỗi dòng một cặp
+   `x  y`), chọn một trong 7 đường cong dựng sẵn, hoặc bấm **Chép từ F(x) thật…** để
+   lấy nguyên bảng của bất kỳ khối nào trong dự án. Có xem trước đồ thị ngay bên dưới.
+3. **Thêm `FNG_I` từ thẻ Ký hiệu** — bảng cài đặt tự mở ngay lúc thả.
+
+Đường cong dựng sẵn: giữ nguyên `y = x`, đảo chiều, bình phương, căn bậc hai, bão hòa
+20–80, vùng chết quanh 0, chặn trên. Đây là **điểm xuất phát để sửa**, không phải để
+dùng nguyên — sửa vài ô trong bảng nhanh hơn gõ lại cả 8 cặp số.
+
+Khối F(x) **chưa cài bảng** mang nhãn *"CHƯA CÀI BẢNG"* và khi chạy sẽ được báo riêng.
+Không cho nó một đường cong mặc định là có chủ ý: khối rỗng trả `None`, kéo theo cả
+nhánh phía sau cũng `None` — nhìn ra như sơ đồ ráp sai chứ không như thiếu dữ liệu.
+
+Bảng luôn được **sắp theo X** và bỏ điểm trùng X trước khi dùng, đúng như
+`core/sheet_sim.func_points` xử lý bảng đọc từ DB.
+
 ### Chạy thử
 
 1. **+ Node vào** / **+ Node ra** để tạo đầu vào, đầu ra (bản vẽ tự do không gắn với
