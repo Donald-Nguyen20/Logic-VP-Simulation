@@ -233,14 +233,15 @@ Mỗi khối F(x) mang **bảng gãy khúc của riêng nó** — không suy ra 
 4.290 khối đều là mã `4035`). Có ba cách cài:
 
 1. **Thả từ thẻ F(x)** — kéo nguyên bảng của khối thật trong DB về.
-2. **Nháy đúp vào khối** — mở bảng cài đặt: gõ tay, dán từ Excel (mỗi dòng một cặp
-   `x  y`), chọn một trong 7 đường cong dựng sẵn, hoặc bấm **Chép từ F(x) thật…** để
-   lấy nguyên bảng của bất kỳ khối nào trong dự án. Có xem trước đồ thị ngay bên dưới.
+2. **Nháy đúp vào khối** — mở bảng cài đặt: bấm **"Lấy bảng từ một khối F(x) thật
+   trong dự án…"** để chép nguyên bảng của bất kỳ khối nào, hoặc gõ tay / dán từ Excel
+   (mỗi dòng một cặp `x  y`). Có xem trước đồ thị ngay bên dưới.
 3. **Thêm `FNG_I` từ thẻ Ký hiệu** — bảng cài đặt tự mở ngay lúc thả.
 
-Đường cong dựng sẵn: giữ nguyên `y = x`, đảo chiều, bình phương, căn bậc hai, bão hòa
-20–80, vùng chết quanh 0, chặn trên. Đây là **điểm xuất phát để sửa**, không phải để
-dùng nguyên — sửa vài ô trong bảng nhanh hơn gõ lại cả 8 cặp số.
+**Không có đường cong dựng sẵn** kiểu `y = x` hay căn bậc hai, và đó là chủ ý: một
+bảng bịa ra vẫn cho ra số và sơ đồ vẫn chạy trơn tru, nên không còn dấu hiệu nào để
+biết là đang mô phỏng nhầm đường cong. Bảng phải là bảng **thật** — chép từ một khối
+F(x) của dự án, hoặc gõ/dán từ tài liệu.
 
 Khối F(x) **chưa cài bảng** mang nhãn *"CHƯA CÀI BẢNG"* và khi chạy sẽ được báo riêng.
 Không cho nó một đường cong mặc định là có chủ ý: khối rỗng trả `None`, kéo theo cả

@@ -10,38 +10,19 @@ nhu so do sai chu khong nhu thieu du lieu, nen phai cho cai bang ngay tai cho.
 Bang o day duoc SAP THEO X truoc khi dung, dung nhu core/sheet_sim.func_points sap
 bang doc tu DB - noi suy tuyen tinh gia dinh x tang dan, khong sap thi mot diem lac
 cho keo lech ca doan.
+
+Co tinh KHONG co duong cong dung san kieu y=x hay can bac hai: bang bia ra van cho ra
+so, va so do chay tron tru, nen khong con dau hieu nao de biet la dang mo phong nham
+duong cong. Bang phai la bang THAT - chep tu mot khoi F(x) cua du an, hoac go/dan tu
+tai lieu.
 """
 import math
 
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
-from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QHBoxLayout,
-                               QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
-                               QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget)
-
-
-def _thang(x0, y0, x1, y1, n=2):
-    return [(x0 + (x1 - x0) * i / (n - 1.0), y0 + (y1 - y0) * i / (n - 1.0))
-            for i in range(n)]
-
-
-def _cong(f, x0, x1, n=11):
-    return [(x0 + (x1 - x0) * i / (n - 1.0), f(x0 + (x1 - x0) * i / (n - 1.0)))
-            for i in range(n)]
-
-
-# Duong cong dung san. Khong phai de dung y nguyen ma de co diem xuat phat: sua vai o
-# trong bang nhanh hon go lai ca 8 cap so.
-MAU_SAN = [
-    ("Giu nguyen  y = x  (0-100)", _thang(0, 0, 100, 100)),
-    ("Dao chieu  0-100 thanh 100-0", _thang(0, 100, 100, 0)),
-    ("Binh phuong  y = x*x/100", _cong(lambda x: x * x / 100.0, 0, 100)),
-    ("Can bac hai  y = 10*sqrt(x)", _cong(lambda x: 10.0 * math.sqrt(max(x, 0.0)), 0, 100)),
-    ("Bao hoa: phang duoi 20 va tren 80", [(0, 0), (20, 0), (80, 100), (100, 100)]),
-    ("Vung chet quanh 0 (rong 10)", [(-100, -95), (-5, 0), (5, 0), (100, 95)]),
-    ("Chan tren o 100 (qua nguong giu nguyen)", [(0, 0), (100, 100), (200, 100)]),
-]
+from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QHBoxLayout, QLabel,
+                               QLineEdit, QMessageBox, QPlainTextEdit, QPushButton,
+                               QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 
 def chuan_hoa(pts):
@@ -145,20 +126,10 @@ class FxSetupDialog(QDialog):
         h.addWidget(self.ed_ten, 1)
         v.addLayout(h)
 
-        h2 = QHBoxLayout()
-        self.cb = QComboBox()
-        self.cb.addItem("-- duong cong dung san --")
-        for nm, _ in MAU_SAN:
-            self.cb.addItem(nm)
-        h2.addWidget(self.cb, 1)
-        b1 = QPushButton("Dat")
-        b1.clicked.connect(self._dat_mau)
-        h2.addWidget(b1)
-        b2 = QPushButton("Chep tu F(x) that...")
-        b2.setToolTip("Lay nguyen bang cua mot trong 4.290 khoi F(x) co that trong du an")
+        b2 = QPushButton("Lay bang tu mot khoi F(x) that trong du an...")
+        b2.setToolTip("Chep nguyen bang gay khuc cua mot trong 4.290 khoi F(x) co that")
         b2.clicked.connect(self._chep_that)
-        h2.addWidget(b2)
-        v.addLayout(h2)
+        v.addWidget(b2)
 
         self.tb = QTableWidget(0, 2)
         self.tb.setHorizontalHeaderLabels(["X (vao)", "Y (ra)"])
@@ -247,15 +218,6 @@ class FxSetupDialog(QDialog):
 
     def _sap(self):
         self._nap_bang(sorted(self._doc_bang()))
-
-    def _dat_mau(self):
-        i = self.cb.currentIndex() - 1
-        if i < 0:
-            return
-        nm, pts = MAU_SAN[i]
-        self._nap_bang(pts)
-        if not self.ed_ten.text().strip():
-            self.ed_ten.setText(nm.split("  ")[0].strip())
 
     def _nap_dan(self):
         pts = []
