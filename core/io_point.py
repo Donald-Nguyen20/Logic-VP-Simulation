@@ -91,8 +91,10 @@ def points(path):
     try:
         idx = _quet(path)
     except sqlite3.Error:
-        # co file DB rong hoan toan trong du an ('03 BPS_A.db', 0 bang) - khong phai
-        # loi doc ma la file chua co noi dung; cac loi khac van nem len tren.
+        # File .db rong hoac hong (0 bang) thi coi nhu khong co diem I/O chu dung de
+        # vo ca lan quet - mot file loi ma mat het chu thich cua 20 file con lai. Truong
+        # hop nay xay ra that: sqlite3.connect() tao ngay mot file 0 byte khi mo nham
+        # duong dan, va file do nam lai trong thu muc DB.
         idx = {}
     _CACHE[path] = (mt, idx)
     return idx
