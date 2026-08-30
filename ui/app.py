@@ -16,7 +16,6 @@ from PySide6.QtCore import Qt
 
 from core.model import (Circuit, BLOCK_SPECS,
                         PRIMITIVE_ORDER, CATALOG_BY_CAT, CATALOG_COUNT)
-from core.importer import def_to_circuit, read_pdf
 from core import dbreader
 from ui.canvas import LogicScene
 from ui.graphwindow import SignalGraphPanel
@@ -771,7 +770,6 @@ class MainWindow(QMainWindow):
         act("Import folder", self.import_folder,
             "Import all .db in a folder (grouped by Project/CPU)", grp="import")
         act("< Back", self.nav_back, "Go back to previous sheet", grp="nav")
-        act("Import PDF", self.import_pdf, "Read logic from exported PDF", grp="import")
         tb.addSeparator()
         act("Zoom +", self.view.zoom_in, "Zoom in (or scroll up)", grp="view")
         act("Zoom -", self.view.zoom_out, "Zoom out (or scroll down)", grp="view")
@@ -1066,42 +1064,6 @@ class MainWindow(QMainWindow):
                 self._open_sheet(sid)
             else:
                 self._open_sheet(prev)
-
-
-    def import_pdf(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Import PDF", "", "PDF (*.pdf)")
-        if not p:
-            return
-        try:
-            res = read_pdf(p)
-        except Exception as e:
-            QMessageBox.warning(self, "PDF read error", str(e))
-            return
-        if res["macros"]:
-            self._show_macros(res["macros"], p)
-        else:
-            self.output.setPlainText("--- TEXT trich tu PDF ---\n\n" + res["text"])
-            self.status("PDF has no IL. Showing extracted text.")
-
-    def _show_macros(self, macros, path):
-        if not macros:
-            self.output.setPlainText("No .DEF blocks found in file.")
-            return
-        lines = ["# Read from: %s" % os.path.basename(path), "# So macro: %d" % len(macros), ""]
-        for m in macros[:200]:
-            lines.append(".DEF %s   (%d lenh)" % (m["name"], len(m["stmts"])))
-            for op, args in m["stmts"]:
-                lines.append("    %-6s %s" % (op, args))
-            lines.append(".DEFEND\n")
-        self.output.setPlainText("\n".join(lines))
-        names = [m["name"] for m in macros]
-        pick, ok = QInputDialog.getItem(self, "View diagram",
-                                        "Select a macro to rebuild the diagram (block level):", names, 0, False)
-        if ok and pick:
-            m = next(mm for mm in macros if mm["name"] == pick)
-            self.circuit = def_to_circuit(m)
-            self._reset_scene()
-        self.status("Read %d macros from %s" % (len(macros), os.path.basename(path)))
 
 
     def _load_manual(self):

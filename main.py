@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # --- Bo mau giao dien chinh: sang, hien dai. Moi nhom nut toolbar 1 mau rieng ---
 #   panel  (FB Library, DB Files)      -> cam hoi (mo/dong bang)
-#   import (Import DB/folder/PDF)      -> xanh ngoc (du lieu di vao)
+#   import (Import DB / Import folder) -> xanh ngoc (du lieu di vao)
 #   nav    (< Back)                    -> xam trung tinh (dieu huong)
 #   view   (Zoom +/-, Fit, 100%)       -> tim (thao tac xem)
 #   sim    (Simulate on sheet, toggle) -> xanh la khi BAT (dang mo phong)

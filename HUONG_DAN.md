@@ -2,7 +2,7 @@
 
 Bản mô phỏng thu nhỏ nguyên lý của T-Designer: vẽ logic điều khiển bằng
 **function block**, nối dây, gán tag, **sinh mã `.DEF`**, **mô phỏng** chạy thử,
-và **đọc lại logic** từ file `.DEF` hoặc PDF đã xuất.
+và **đọc lại logic** từ các file `.db` của dự án.
 
 > Công cụ minh họa/giáo dục. KHÔNG nạp chương trình xuống PLC/CPU thật
 > và KHÔNG thay thế phần mềm T-Designer gốc.
@@ -15,12 +15,6 @@ Cần **Python 3.8+**. Mở CMD/PowerShell trong thư mục này rồi chạy:
 
 ```
 pip install PySide6
-```
-
-Muốn dùng **Import PDF**, cài thêm (khuyên PyMuPDF):
-
-```
-pip install PyMuPDF
 ```
 
 ## 2. Chạy
@@ -57,9 +51,12 @@ Tra cứu ngoài app: mở file **`DanhMuc_986_Khoi.csv`** (mở bằng Excel).
 
 ## 5. Đọc lại logic
 
-- **Import .DEF** → chọn `DEF/SR21E/TYPE_A_CPUW01/TAG_MCR.DEF` (đọc được 125 macro).
-- **Import PDF** → nếu PDF chứa IL dạng text, tự nhận diện; nếu không, trích text.
-- **Nap SVG…** → trỏ tới `DEF/SR21E/SVG` để dùng ký hiệu SVG cho khối.
+- **Import DB** → chọn 1 file `.db` của dự án, dựng lại sheet đúng như bản vẽ gốc.
+- **Import folder** → nạp cả thư mục `.db`, gom theo Project/CPU.
+
+> Nút **Import PDF** đã bỏ: bản đóng gói không kèm thư viện đọc PDF nên nút luôn
+> báo lỗi, và trên bản vẽ thật nó chỉ trích ra text phẳng đã mất hết toạ độ khối.
+> Đọc từ `.db` cho ra sơ đồ dùng được, nên đó là đường duy nhất còn lại.
 
 ## 6. Mức độ mô phỏng & sinh mã
 
@@ -85,7 +82,6 @@ T_Designer_Lite/
 ├─ DanhMuc_986_Khoi.csv        # danh mục toàn bộ khối (mo bang Excel)
 ├─ core/
 │  ├─ model.py                 # Block/Circuit + Simulator + DefGenerator
-│  ├─ importer.py              # đọc .DEF và PDF
 │  └─ macro_catalog.json       # 986 khối trích từ dự án gốc
 └─ ui/
    ├─ canvas.py                # BlockItem/WireItem/LogicScene (kéo-thả)
