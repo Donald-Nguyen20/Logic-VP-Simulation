@@ -519,7 +519,10 @@ class MainWindow(QMainWindow):
         self.sheets_by_path = {}  # path -> danh sach sheet (de dung lai cay khi doi che do)
 
     def _recent_file(self):
-        return os.path.join(os.path.expanduser("~"), ".tdesigner_lite_recent.json")
+        """Danh sach DB da import, de mo lai app la co ngay. Nam canh app chu khong o
+        thu muc nha: chep ca thu muc app sang may khac la giu nguyen phien lam viec."""
+        from core import duong_dan as DD
+        return DD.duong_json("recent.json", ".tdesigner_lite_recent.json")
 
     def _save_recent(self):
         try:

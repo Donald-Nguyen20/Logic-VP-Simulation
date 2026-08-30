@@ -3,11 +3,18 @@
 
 KHAC ban mau o 2 diem, deu vi ly do that:
 
-1) File cau hinh nam trong THU MUC NHA (~/.tdesigner_llm.json), khong nam canh app.
-   App nay la mot kho git; de file chua API key trong do thi chi can mot lan `git add -A`
-   la key bi day len GitHub. Cach nay cung dong bo voi cho da luu token Claude san
-   (~/.tdesigner_claude_token - xem ai_client.py). Ban .exe dong goi thi doc them file
-   canh exe neu co, de mang di may khac van dung duoc.
+1) File cau hinh nam CANH APP, trong thu muc `data` (xem duong_dan.py). De o thu muc
+   nha thi nguoi dung khong bao gio thay no, mang app sang may khac la mat cau hinh,
+   va sao luu app khong keo theo API key da nhap.
+
+   Doi lai, file chua API key gio nam TRONG kho git - va do la mot moi nguy that: mot
+   lan `git add -A` la key len GitHub. Thu chan duy nhat la dong `data/` trong
+   .gitignore (chan ca thu muc, khong chan tung ten file). Da kiem chung bang
+   `git check-ignore` va `git add -A --dry-run`. AI DOI CHO FILE NAY THI PHAI KIEM
+   LAI DUNG HAI LENH DO.
+
+   Ban .exe da dong goi tu truoc con doc file canh exe neu no da co san, de nguoi dang
+   dung ban xach tay khong mat cau hinh sau khi cap nhat.
 
 2) Ten model MAC DINH de RONG, khong ghi cung. Do that ngay hom nay: ca hai ten trong
    ban mau deu da bi khai tu - 'gemini-2.0-flash' khong con, va
@@ -57,13 +64,16 @@ def _exe_dir_path() -> str:
 
 
 def get_config_path() -> str:
-    """File cau hinh dang dung. Uu tien ban canh .exe neu da co san (app xach tay),
-    con lai luon la thu muc nha - de API key khong bao gio roi vao kho git."""
+    """File cau hinh dang dung: <thu muc app>/data/llm_config.json.
+
+    Ban canh .exe duoc uu tien neu DA co san - do la cau hinh cua nguoi dung ban xach
+    tay tu truoc, doi cho ho ma khong hoi la lam ho mat API key dang chay duoc."""
     if getattr(sys, "frozen", False):
         p = _exe_dir_path()
         if os.path.exists(p):
             return p
-    return str(Path(os.path.expanduser("~")) / HOME_NAME)
+    from . import duong_dan as DD
+    return DD.duong_json(CONFIG_NAME, HOME_NAME)
 
 
 def _atomic_write_json(path: str, data: Dict[str, Any]) -> None:

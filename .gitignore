@@ -46,6 +46,11 @@ _v*.png
 *.db
 *.tdl
 
+# --- Du lieu app tu sinh: cau hinh AI, danh sach DB da mo, cache tu khoa ---
+# CHUA API KEY. Chan CA THU MUC chu khong chan tung ten file: file moi them vao sau
+# nay se duoc bao ve san, khong phai nho sua tiep cho nay. DUNG BO DONG DUOI DAY.
+data/
+
 # --- API key / cau hinh AI (KHONG BAO GIO commit) ---
 llm_config.json
 .tdesigner_llm.json

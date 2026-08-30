@@ -13,7 +13,7 @@ AI khong bao gio duoc noi CPU nao / loop nao / trang nao. Vi tri luon do chi muc
 ra tu dong that, nen du AI co bia ra tu gi thi cung khong the day ket qua di lac: tu
 nao khong co trong bang `tu` la bi loai truoc khi tim.
 
-Ket qua da nhan duoc luu lai (~/.tdesigner_tukhoa.json), nen hoi lan hai la offline
+Ket qua da nhan duoc luu lai (data/tukhoa.json canh app), nen hoi lan hai la offline
 va mien phi. Khong co mang cung khong sao - ben goi van chay duoc voi tu dien tinh.
 """
 import json
@@ -52,9 +52,10 @@ _NHAC = (
 
 
 def duong_cache():
-    """File nho tu khoa da duoc duyet. RIENG han file cau hinh AI - cai do la cua
-    nguoi dung, module nay khong duoc dong vao."""
-    return os.path.join(os.path.expanduser("~"), ".tdesigner_tukhoa.json")
+    """File nho tu khoa da duoc duyet, nam canh app (xem duong_dan.py). RIENG han file
+    cau hinh AI - cai do la cua nguoi dung, module nay khong duoc dong vao."""
+    from . import duong_dan as DD
+    return DD.duong_json("tukhoa.json", ".tdesigner_tukhoa.json")
 
 
 def _doc_cache():
