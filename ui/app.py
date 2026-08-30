@@ -795,6 +795,9 @@ class MainWindow(QMainWindow):
         tb.addAction(self.sim_run_act)
         mark(self.sim_run_act, "sim")
         tb.addSeparator()
+        act("Internal logic", self.open_internal_catalog,
+            "Danh muc TOAN BO khoi chuc nang cua cac DB + danh sach 4.290 khoi F(x): "
+            "xem ma nao da co mo hinh mo phong, ma nao chua, va ve logic noi cho ma con thieu")
         act("Cause && Effect Matrix", self.open_ce_matrix,
             "Tim nguyen nhan goc cho nhieu tin hieu dich (vd MFT, ETS...) va gom thanh 1 bang")
         act("AI Setting", self.open_ai_settings,
@@ -1115,6 +1118,16 @@ class MainWindow(QMainWindow):
         ImageViewer(path, title, self).exec()
 
 
+    def open_internal_catalog(self):
+        """Danh muc logic noi. Truoc kia phai chuot phai dung mot khoi tren sheet moi vao
+        duoc - tuc la phai biet truoc ma do nam o trang nao. Vao tu day thi nguoc lai:
+        nhin ca du an, loc ra ma nao con thieu mo hinh roi ve."""
+        from ui.internal_catalog_dialog import InternalCatalogDialog
+        # Giu tham chieu: hop thoai khong modal (co nut nhay sang trang chua F(x)), de
+        # bien cuc bo thi Python thu gom ngay khi ham ket thuc va cua so bien mat.
+        self._cat_dlg = InternalCatalogDialog(self)
+        self._cat_dlg.show()
+
     def open_block_sim(self):
         code = self._last_block_code
         if not code:
@@ -1132,10 +1145,8 @@ class MainWindow(QMainWindow):
         m = QMenu(self)
         a_graph = m.addAction("View signal node diagram")
         a_view = m.addAction("View function (internal logic)")
-        a_live = m.addAction("Draw internal logic (design)")
         a_sim = m.addAction("Block parameters (edit for simulation)")
         a_view.setEnabled(code in self.internal_map)
-        a_live.setEnabled(bool(code))
         has_db = (getattr(self, "db_path", None) is not None
                   and getattr(self, "cur_sheet", None) is not None)
         a_sim.setEnabled(has_db and bid is not None)
@@ -1147,15 +1158,6 @@ class MainWindow(QMainWindow):
             self._open_node_tab(net, name)
         elif act == a_view:
             self.show_internal_logic(code, name)
-        elif act == a_live:
-            from ui.internal_design_dialog import InternalDesignDialog
-            InternalDesignDialog(code, name, self,
-                                 db_path=getattr(self, "db_path", None),
-                                 sheet_id=getattr(self, "cur_sheet", None),
-                                 bid=bid,
-                                 sim_values=getattr(self, "sim_values", None),
-                                 dig_env=getattr(self, "sim_env", None),
-                                 ana_env=getattr(self, "sim_analog", None)).exec()
         elif act == a_sim:
             self._last_block_code = code
             from ui.block_param_dialog import BlockParamDialog

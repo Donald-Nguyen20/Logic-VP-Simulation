@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """Trinh VE LOGIC NOI cho 1 khoi chuc nang: khung tu ve.
 
+Vao tu thanh cong cu > "Internal logic" > tab "Khoi chuc nang" (xem
+ui/internal_catalog_dialog.py). Day la che do THU VIEN: mo hinh ve ra dung chung cho MOI
+thuc the cua ma do trong ca du an, khong gan voi mot khoi cu the tren trang nao. Vi vay
+khong co gia tri that de lay - nhay doi vao node VAO de tu go gia tri thu.
+
 - Khi mo, cac NODE VAO/RA cua khoi da duoc dat san (input o cot trai, output o cot
   phai) - lay theo chan that cua khoi tu core/macro_pins.json. Nguoi dung chi viec
   THEM cac khoi tinh toan o giua (chon ky hieu that tu core/symbol_shapes.json).
@@ -697,6 +702,29 @@ class _PinItem(_BaseItem):
         self._ext_item.setPlainText(txt)
         self.setToolTip("%s%s" % (self.pname, ("  <-  %s %s" % (net, label)) if net else ""))
 
+    def mouseDoubleClickEvent(self, ev):
+        """Nhay doi node VAO -> go gia tri thu. Mo tu danh muc thi khong gan voi khoi nao
+        tren sheet nen khong co gia tri that de lay: khong nhap tay duoc thi so do chi
+        toan None va nut 'Tinh logic noi' khong noi len dieu gi."""
+        if self.side != "in":
+            return super().mouseDoubleClickEvent(ev)
+        cu = "" if self.value is None else ("%g" % self.value)
+        txt, ok = QInputDialog.getText(
+            self._dialog, "Gia tri thu cho chan %s" % self.pname,
+            "Nhap so (digital go 0 hoac 1). De TRONG = chua biet:", text=cu)
+        if not ok:
+            return
+        txt = (txt or "").strip()
+        if not txt:
+            self.set_value(None)
+        else:
+            try:
+                self.set_value(float(txt))
+            except ValueError:
+                self._dialog._hint.setText("'%s' khong phai la so - bo qua." % txt)
+                return
+        self._dialog._evaluate()          # doi dau vao -> thay ngay dau ra
+
     def set_value(self, v):
         self.value = v
         if v is None:
@@ -756,6 +784,11 @@ class InternalDesignDialog(QDialog):
         self.b_val = QPushButton("Tinh gia tri (tu DB)")
         self.b_val.clicked.connect(self._refresh_values)
         self.b_val.setEnabled(bool(self.db_path and self.sheet_id is not None))
+        self.b_val.setToolTip(
+            "Lay gia tri that cua khoi nay tren mot trang dang mo."
+            if self.b_val.isEnabled() else
+            "Mo tu danh muc nen khong gan voi khoi cu the nao tren trang. "
+            "Nhay doi vao node VAO de tu go gia tri thu.")
         bar.addWidget(self.b_val)
         self.b_eval = QPushButton("Tinh logic noi (chay so do)")
         self.b_eval.clicked.connect(self._evaluate)

@@ -206,3 +206,27 @@ chưa đủ chân thì vẽ theo ĐÚNG số chân thật trong DB (không tên)
 theo DB. Tên chân chỉ hiện khi manual khớp chính xác tổng số chân (38 mã: SV, MV,
 MOV, DDL, ADL…); khối logic/toán (AND/OR/MUL/DIF/timer) vẽ đúng số chân, không
 gán tên (giống ký hiệu nhỏ trong PDF) để tránh tên sai.
+
+## 16. Danh mục logic nội — nút **Internal logic** trên thanh công cụ
+
+Trước đây muốn vẽ/xem logic nội của một khối thì phải chuột phải đúng khối đó trên
+sheet — tức là phải **biết trước** mã đó nằm ở trang nào. Nay vào từ thanh công cụ,
+nhìn ngược lại từ toàn dự án:
+
+**Tab "Khối chức năng"** — liệt kê toàn bộ mã khối của các DB đang mở (rỗng thì lùi
+về danh sách trong chỉ mục), kèm số khối, có sẵn hình manual chưa, đã mô phỏng được
+chưa, đã có bản vẽ chưa. Lọc theo tên/mã, hoặc tick *"chỉ mã chưa mô phỏng"* +
+*"chỉ mã có hình manual"* để ra đúng phần việc còn thiếu. Quét 21 DB mất ~0,3 s nên
+không có cache — số liệu luôn khớp DB thật.
+
+> Đo thực tế trên 21 DB thư viện: 299 mã / 192.389 khối chức năng (đã trừ `E0B1` là
+> terminal, không phải khối tính), trong đó **132 mã / 28.206 khối chưa mô phỏng
+> được, và 31 mã / 9.742 khối đã có hình sơ đồ nội bộ trong manual để chép lại.**
+
+**Tab "F(x)"** — 4.290 khối hàm F(x) của cả dự án, kèm tên mô tả, CPU, trang, tag.
+Nhấp đúp để nhảy thẳng tới trang chứa nó.
+
+Mở trình vẽ từ đây là **chế độ thư viện**: mô hình vẽ ra dùng chung cho mọi thực thể
+của mã đó, không gắn với một khối cụ thể nào trên trang. Vì vậy nút *"Tính giá trị
+(từ DB)"* tự tắt — không có khối cụ thể thì không có giá trị thật để lấy. Muốn thử
+vào/ra thì **nhấp đúp vào node VÀO để gõ giá trị**, sơ đồ tính lại ngay.
