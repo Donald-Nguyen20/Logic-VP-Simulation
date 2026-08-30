@@ -207,26 +207,44 @@ theo DB. Tên chân chỉ hiện khi manual khớp chính xác tổng số chân
 MOV, DDL, ADL…); khối logic/toán (AND/OR/MUL/DIF/timer) vẽ đúng số chân, không
 gán tên (giống ký hiệu nhỏ trong PDF) để tránh tên sai.
 
-## 16. Danh mục logic nội — nút **Internal logic** trên thanh công cụ
 
-Trước đây muốn vẽ/xem logic nội của một khối thì phải chuột phải đúng khối đó trên
-sheet — tức là phải **biết trước** mã đó nằm ở trang nào. Nay vào từ thanh công cụ,
-nhìn ngược lại từ toàn dự án:
+## 16. Ban ve mo phong — nut **Internal logic** trên thanh công cụ
 
-**Tab "Khối chức năng"** — liệt kê toàn bộ mã khối của các DB đang mở (rỗng thì lùi
-về danh sách trong chỉ mục), kèm số khối, có sẵn hình manual chưa, đã mô phỏng được
-chưa, đã có bản vẽ chưa. Lọc theo tên/mã, hoặc tick *"chỉ mã chưa mô phỏng"* +
-*"chỉ mã có hình manual"* để ra đúng phần việc còn thiếu. Quét 21 DB mất ~0,3 s nên
-không có cache — số liệu luôn khớp DB thật.
+Bấm là **ra ngay bảng vẽ** để tự rắp sơ đồ và cho chạy thử. Bên trái có ba thẻ:
+
+- **Ký hiệu** — 931 hình khối trong thư viện, nháy đúp để thêm. Mặc định lọc theo
+  những ký hiệu thực sự có dùng trong DB dự án; bỏ tick để xem hết.
+- **F(x)** — toàn bộ **4.290 khối hàm thật** của dự án, kèm tên mô tả, CPU, trang.
+  Thả vào bản vẽ là **kèm đúng bảng gãy khúc của riêng khối đó**. Chỗ này quan trọng:
+  4.290 khối F(x) đều chung mã `4035`, nên tên mã không nói lên được gì — phải kéo
+  đúng bảng của đúng khối thì mô phỏng mới ra đúng số.
+- **Khối chức năng** — 299 mã khối của các DB, kèm số khối / có hình manual chưa /
+  đã mô phỏng được chưa / đã có bản vẽ chưa. Chọn một mã là chuyển sang bản vẽ nội bộ
+  của mã đó. Tick *"chỉ mã CHƯA có mô hình"* + *"chỉ mã có hình manual"* để lọc ra
+  đúng phần việc còn thiếu.
 
 > Đo thực tế trên 21 DB thư viện: 299 mã / 192.389 khối chức năng (đã trừ `E0B1` là
 > terminal, không phải khối tính), trong đó **132 mã / 28.206 khối chưa mô phỏng
 > được, và 31 mã / 9.742 khối đã có hình sơ đồ nội bộ trong manual để chép lại.**
 
-**Tab "F(x)"** — 4.290 khối hàm F(x) của cả dự án, kèm tên mô tả, CPU, trang, tag.
-Nhấp đúp để nhảy thẳng tới trang chứa nó.
+### Chạy thử
 
-Mở trình vẽ từ đây là **chế độ thư viện**: mô hình vẽ ra dùng chung cho mọi thực thể
-của mã đó, không gắn với một khối cụ thể nào trên trang. Vì vậy nút *"Tính giá trị
-(từ DB)"* tự tắt — không có khối cụ thể thì không có giá trị thật để lấy. Muốn thử
-vào/ra thì **nhấp đúp vào node VÀO để gõ giá trị**, sơ đồ tính lại ngay.
+1. **+ Node vào** / **+ Node ra** để tạo đầu vào, đầu ra (bản vẽ tự do không gắn với
+   mã khối nào nên không có chân mặc định).
+2. Thêm khối tính, hoặc thả một F(x) từ thẻ giữa.
+3. Nối dây: kéo từ một chấm tròn sang một chấm tròn khác.
+4. **Nháy đúp node VÀO** để gõ giá trị, rồi bấm **Tính logic nội**. Có khối tích phân
+   thì bấm **Run (tích phân)** để chạy theo dt.
+
+Nút *"Tính giá trị (từ DB)"* luôn tắt ở đây — bản vẽ không gắn với một khối cụ thể
+nào trên trang nên không có giá trị thật để lấy; giá trị phải tự gõ vào.
+
+### Nơi lưu
+
+| Loại bản vẽ | Lưu ở |
+|---|---|
+| Tự do (không thuộc mã nào) | `data/design/so_do_tu_do.json` — cạnh app, không bị bản cập nhật đè |
+| Theo mã khối | `core/internal_design/<mã>.json` — đi kèm mã nguồn, dùng chung mọi dự án |
+
+Khối F(x) được **chép hẳn bảng gãy khúc vào bản vẽ**, không lưu tham chiếu tới file
+DB, nên bản vẽ mở lại được cả khi máy không còn file DB đó.

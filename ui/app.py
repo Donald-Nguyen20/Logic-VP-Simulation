@@ -795,9 +795,10 @@ class MainWindow(QMainWindow):
         tb.addAction(self.sim_run_act)
         mark(self.sim_run_act, "sim")
         tb.addSeparator()
-        act("Internal logic", self.open_internal_catalog,
-            "Danh muc TOAN BO khoi chuc nang cua cac DB + danh sach 4.290 khoi F(x): "
-            "xem ma nao da co mo hinh mo phong, ma nao chua, va ve logic noi cho ma con thieu")
+        act("Internal logic", self.open_internal_design,
+            "Mo ngay ban ve de tu rap so do mo phong. Ben trai co san thu vien ky hieu, "
+            "toan bo 4.290 khoi F(x) that cua du an (tha vao la co dung duong cong cua no) "
+            "va danh sach khoi chuc nang cua cac DB")
         act("Cause && Effect Matrix", self.open_ce_matrix,
             "Tim nguyen nhan goc cho nhieu tin hieu dich (vd MFT, ETS...) va gom thanh 1 bang")
         act("AI Setting", self.open_ai_settings,
@@ -1118,15 +1119,19 @@ class MainWindow(QMainWindow):
         ImageViewer(path, title, self).exec()
 
 
-    def open_internal_catalog(self):
-        """Danh muc logic noi. Truoc kia phai chuot phai dung mot khoi tren sheet moi vao
-        duoc - tuc la phai biet truoc ma do nam o trang nao. Vao tu day thi nguoc lai:
-        nhin ca du an, loc ra ma nao con thieu mo hinh roi ve."""
-        from ui.internal_catalog_dialog import InternalCatalogDialog
+    def open_internal_design(self):
+        """Mo thang BAN VE de tu thiet ke mo phong. Khong qua mot bang danh muc trung
+        gian nua: bam nut nay la de VE, con viec chon khoi/F(x) da nam san thanh cac the
+        ben trai ngay trong ban ve."""
+        from ui.internal_design_dialog import InternalDesignDialog
+        from ui.internal_panels import db_dang_dung
+        # db_path o day KHONG gan ban ve voi trang nao (khong co sheet_id/bid) - no chi
+        # dung de loc bang ky hieu theo thu muc DB, khong loc thi do ra ca 931 ky hieu.
+        ds, _ = db_dang_dung(self)
         # Giu tham chieu: hop thoai khong modal (co nut nhay sang trang chua F(x)), de
         # bien cuc bo thi Python thu gom ngay khi ham ket thuc va cua so bien mat.
-        self._cat_dlg = InternalCatalogDialog(self)
-        self._cat_dlg.show()
+        self._design_dlg = InternalDesignDialog("", "", self, db_path=(ds[0] if ds else None))
+        self._design_dlg.show()
 
     def open_block_sim(self):
         code = self._last_block_code

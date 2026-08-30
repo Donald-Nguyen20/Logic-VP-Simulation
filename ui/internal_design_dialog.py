@@ -1,20 +1,30 @@
 # -*- coding: utf-8 -*-
-"""Trinh VE LOGIC NOI cho 1 khoi chuc nang: khung tu ve.
+"""BAN VE MO PHONG: khung tu rap so do roi cho chay thu.
 
-Vao tu thanh cong cu > "Internal logic" > tab "Khoi chuc nang" (xem
-ui/internal_catalog_dialog.py). Day la che do THU VIEN: mo hinh ve ra dung chung cho MOI
-thuc the cua ma do trong ca du an, khong gan voi mot khoi cu the tren trang nao. Vi vay
-khong co gia tri that de lay - nhay doi vao node VAO de tu go gia tri thu.
+Vao thang tu thanh cong cu > "Internal logic" - bam la ra ban ve luon, khong qua bang
+danh muc trung gian nao. Ben trai co ba the (xem ui/internal_panels.py):
+  Ky hieu       - 931 hinh khoi trong thu vien, nhay doi de them
+  F(x)          - 4.290 khoi ham THAT cua du an; tha vao la kem dung bang gay khuc
+                  cua rieng khoi do (4.290 khoi deu chung ma 4035 nen ten ma khong
+                  du de biet dang dung duong cong nao)
+  Khoi chuc nang- 299 ma khoi cua cac DB; chon mot ma la chuyen sang ban ve cua ma do
 
-- Khi mo, cac NODE VAO/RA cua khoi da duoc dat san (input o cot trai, output o cot
-  phai) - lay theo chan that cua khoi tu core/macro_pins.json. Nguoi dung chi viec
-  THEM cac khoi tinh toan o giua (chon ky hieu that tu core/symbol_shapes.json).
-- Moi khoi co san cac DIEM NOI (port, cham tron): input ben trai, output ben phai,
-  giup noi day de dang: keo tu 1 cham tron (chan) tha vao 1 cham tron khac.
+Hai che do, khac nhau o cho co gan voi mot ma khoi hay khong:
+  TU DO (code rong) - ban thu cua rieng nguoi dung. Khong co chan mac dinh nen phai
+    bam "+ Node vao / + Node ra" de tu tao dau vao/ra. Ghi vao data/design/ canh app.
+  THEO MA KHOI      - mo hinh noi bo cua ma do, dung chung cho MOI thuc the cua ma
+    trong ca du an. Node vao/ra dat san theo chan that (core/macro_pins.json). Ghi vao
+    core/internal_design/<code>.json vi no di kem ma nguon.
 
-Ban ve luu theo tung ma khoi vao core/internal_design/<code>.json:
+Ca hai che do deu khong gan voi mot khoi cu the tren trang nao, nen khong co gia tri
+that de lay: nhay doi node VAO de tu go gia tri thu, roi bam "Tinh logic noi".
+
+Moi khoi co san cac DIEM NOI (port, cham tron): input ben trai, output ben phai. Noi
+day bang cach keo tu 1 cham tron tha vao 1 cham tron khac.
+
+Ban ve luu dang:
     {"pins":[{"id","name","side","x","y"}],
-     "blocks":[{"id","sym","x","y"}],
+     "blocks":[{"id","sym","x","y", "fx":{"ten","pts"} neu la F(x)}],
      "wires":[[[idA,portA],[idB,portB]], ...]}
 """
 from __future__ import annotations
@@ -25,7 +35,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton, QLineEdit,
     QListWidget, QListWidgetItem, QGraphicsScene, QGraphicsView, QGraphicsItemGroup,
     QGraphicsItem, QMessageBox, QCheckBox, QInputDialog, QSpinBox, QDoubleSpinBox,
-    QFileDialog,
+    QFileDialog, QTabWidget,
 )
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPixmap, QIcon
 from PySide6.QtCore import Qt, QRectF, QPointF, QSize
@@ -197,11 +207,35 @@ def _num(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool)
 
 
-def _compute_op(op, ins, roles, sem):
+def _noi_suy(pts, x):
+    """Noi suy tuyen tinh tren bang gay khuc F(x).
+
+    Phai tra DUNG NHU core/sheet_sim._func_interp: ngoai khoang thi giu muc dau/cuoi,
+    khong ngoai suy. Lech o day thi cung mot khoi F(x) se cho hai so khac nhau giua so
+    do noi va trang - va nguoi dung khong biet tin cai nao."""
+    if len(pts) < 2 or not _num(x):
+        return None
+    if x <= pts[0][0]:
+        return pts[0][1]
+    if x >= pts[-1][0]:
+        return pts[-1][1]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if x0 <= x <= x1:
+            return y0 if x1 == x0 else (y0 + (y1 - y0) * (x - x0) / (x1 - x0))
+    return None
+
+
+def _compute_op(op, ins, roles, sem, blk=None):
     """Tinh 1 khoi. ins/roles song song theo tung chan VAO (value hoac None; role la
     nhan chu gan chan: '+','-','A','B','S','R'...). Tra ve gia tri ngo ra (hoac None
-    neu thieu du lieu / op chua ho tro)."""
+    neu thieu du lieu / op chua ho tro).
+
+    blk chi can cho FUNC: bang gay khuc la cua RIENG tung khoi F(x) (4.290 khoi deu
+    chung ma 4035), khong suy ra duoc tu op hay sem."""
     vals = [v for v in ins if _num(v)]
+    if op == "FUNC":
+        pts = list(getattr(blk, "fx_pts", None) or [])
+        return _noi_suy(pts, vals[0]) if (pts and vals) else None
 
     def byrole(*names):
         for nm in names:
@@ -472,7 +506,22 @@ def _sym_icon(sym):
     return ic
 
 
+# Ky hieu khoi F(x) trong thu vien (macrocode 4035). Kiem lai neu doi symbol_shapes.
+_SYM_FX = "FNG_I"
+
+
 def _design_path(code):
+    """Noi ghi ban ve.
+
+    Ban ve theo MA khoi nam trong core/internal_design: no la mo hinh cua khoi, dung
+    chung cho moi du an, di kem ma nguon. Ban ve TU DO thi khong thuoc ma nao va la
+    cua rieng nguoi dung, nen ghi vao data/ canh app - cho do khong bi ban cap nhat
+    app de len (xem core/duong_dan.py)."""
+    if not code:
+        from core import duong_dan as DD
+        d = os.path.join(DD.thu_muc_du_lieu(), "design")
+        os.makedirs(d, exist_ok=True)
+        return os.path.join(d, "so_do_tu_do.json")
     d = os.path.join(os.path.dirname(os.path.dirname(__file__)), "core", "internal_design")
     os.makedirs(d, exist_ok=True)
     return os.path.join(d, "%s.json" % code)
@@ -555,10 +604,13 @@ class _BaseItem(QGraphicsItemGroup):
 class _SymItem(_BaseItem):
     """1 ky hieu tinh toan tren canvas - ve tu geometry symbol_shapes + cac port."""
 
-    def __init__(self, bid, sym, dialog):
+    def __init__(self, bid, sym, dialog, fx=None):
         super().__init__(bid, dialog)
         self.sym = sym
         self.kind = "block"
+        # Bang gay khuc RIENG cua mot khoi F(x) that trong DB. Rong = khoi thuong.
+        self.fx_pts = [tuple(p) for p in (fx or {}).get("pts") or []]
+        self.fx_name = ((fx or {}).get("ten") or "").strip()
         self.macrocode, sem = _sym_op(sym)
         self.op = sem.get("op", "")
         self.sem = sem
@@ -572,6 +624,8 @@ class _SymItem(_BaseItem):
         self.x_port_idx = None   # chan VAO chinh (X) de tich phan
         self.out_idx = None
         self._build()
+        if self.fx_pts:
+            self.update_label()
         if self.is_integ:
             self.op = self.op or "INTEG"
             ins = [i for i, p in enumerate(self.ports) if p[2] == "in"]
@@ -637,7 +691,14 @@ class _SymItem(_BaseItem):
     def update_label(self):
         if getattr(self, "_lab", None) is None:
             return
-        extra = ("  TI=%.4g" % self.ti) if self.is_integ else (("  [%s]" % self.op) if self.op else "")
+        if self.fx_pts:
+            # Ten ma "4035"/"FNG_I" khong noi len gi vi 4.290 khoi F(x) deu chung ma do;
+            # phai hien TEN va so diem thi moi biet dang cam dung duong cong nao.
+            extra = "  %s (%d diem)" % (self.fx_name or "F(x)", len(self.fx_pts))
+        elif self.is_integ:
+            extra = "  TI=%.4g" % self.ti
+        else:
+            extra = ("  [%s]" % self.op) if self.op else ""
         self._lab.setPlainText("%s%s" % (self.sym, extra))
 
     def mouseDoubleClickEvent(self, ev):
@@ -744,7 +805,11 @@ class InternalDesignDialog(QDialog):
     def __init__(self, code, name="", parent=None, db_path=None, sheet_id=None, bid=None,
                  sim_values=None, dig_env=None, ana_env=None):
         super().__init__(parent)
+        self.main = parent
         self.code = (code or "").upper()
+        # Khong co ma khoi = BAN VE TU DO: mot ban thu de tu rap so do va cho chay,
+        # khong phai mo hinh noi bo cua khoi nao ca.
+        self.tu_do = not self.code
         self.bname = name
         self.db_path = db_path
         self.sheet_id = sheet_id
@@ -754,7 +819,6 @@ class InternalDesignDialog(QDialog):
         self._dig_env = dict(dig_env) if dig_env else {}
         self._ana_env = dict(ana_env) if ana_env else {}
         self._pin_sig = _resolve_pin_signals(db_path, bid)   # pinno -> (net, label)
-        self.setWindowTitle("Ve logic noi (tu ve): %s (%s)" % (name or "", self.code))
         self.resize(1200, 760)
         self.setWindowState(Qt.WindowState.WindowMaximized)
         self._items = {}          # bid -> _BaseItem
@@ -766,16 +830,22 @@ class InternalDesignDialog(QDialog):
         self._drop_n = 0
 
         lay = QVBoxLayout(self)
-        self._hint = QLabel(
-            "Node vao (trai) / ra (phai) da co san. Nhay doi ky hieu ben trai de them khoi "
-            "tinh toan, keo tha tu do (bam vao THAN khoi de di chuyen). De NOI DAY: keo tu 1 "
-            "cham tron (chan) tha vao 1 cham tron khac. Chon khoi + Delete de xoa. 'Luu' de ghi.")
+        self._hint = QLabel("")
         self._hint.setWordWrap(True)
         lay.addWidget(self._hint)
+        self._dat_tieu_de()
 
         bar = QHBoxLayout()
         b_del = QPushButton("Xoa khoi chon"); b_del.clicked.connect(self._delete_selected)
         bar.addWidget(b_del)
+        b_in = QPushButton("+ Node vao")
+        b_in.setToolTip("Them mot dau vao de go gia tri thu vao so do")
+        b_in.clicked.connect(lambda: self._them_node("in"))
+        bar.addWidget(b_in)
+        b_out = QPushButton("+ Node ra")
+        b_out.setToolTip("Them mot dau ra de doc ket qua")
+        b_out.clicked.connect(lambda: self._them_node("out"))
+        bar.addWidget(b_out)
         b_pins = QPushButton("Dat lai node vao/ra"); b_pins.clicked.connect(self._reset_pins)
         bar.addWidget(b_pins)
         b_clear = QPushButton("Xoa het khoi them"); b_clear.clicked.connect(self._clear_blocks)
@@ -835,8 +905,20 @@ class InternalDesignDialog(QDialog):
         self.plist.setSpacing(4)
         self.plist.itemDoubleClicked.connect(self._add_item)
         pv.addWidget(self.plist, 1)
-        pal.setFixedWidth(330)
-        body.addWidget(pal)
+        # Ba the, vi ba nguon khoi khac han nhau: ky hieu la HINH (ve gi cung duoc),
+        # F(x) la mot BANG SO cua rieng tung khoi that, con khoi chuc nang la mot BAN VE
+        # da luu. De chung mot danh sach thi khong loc noi cai nao ra cai nao.
+        from ui import internal_panels as _P
+        self.pal_tabs = QTabWidget()
+        self.pal_tabs.addTab(pal, "Ky hieu")
+        self.p_fx = _P.FxPanel(self.main)
+        self.p_fx.chon.connect(self._add_fx)
+        self.pal_tabs.addTab(self.p_fx, "F(x)")
+        self.p_khoi = _P.KhoiPanel(self.main)
+        self.p_khoi.chon.connect(self._mo_ma)
+        self.pal_tabs.addTab(self.p_khoi, "Khoi chuc nang")
+        self.pal_tabs.setFixedWidth(360)
+        body.addWidget(self.pal_tabs)
 
         self._refresh_scope()
         self._filter("")
@@ -853,6 +935,78 @@ class InternalDesignDialog(QDialog):
         # tu hien ngay gia tri ben ngoai (neu co) de khoi phai bam nut
         if self.b_val.isEnabled():
             self._refresh_values(quiet=True)
+
+    # ---------- tieu de / node tu them ----------
+    def _dat_tieu_de(self):
+        if self.tu_do:
+            self.setWindowTitle("Ban ve mo phong (tu thiet ke)")
+            self._hint.setText(
+                "Ban ve TU DO: bam '+ Node vao' de tao dau vao, nhay doi ky hieu ben trai "
+                "de them khoi tinh, hoac sang the F(x) tha vao mot duong cong that. NOI DAY: "
+                "keo tu 1 cham tron sang 1 cham tron khac. Nhay doi node VAO de go gia tri, "
+                "roi bam 'Tinh logic noi'. Chon khoi + Delete de xoa. 'Luu' de ghi.")
+        else:
+            self.setWindowTitle("Ve logic noi (tu ve): %s (%s)" % (self.bname or "", self.code))
+            self._hint.setText(
+                "Node vao (trai) / ra (phai) da co san theo chan that cua ma %s. Nhay doi ky "
+                "hieu ben trai de them khoi tinh toan, keo tha tu do (bam vao THAN khoi de di "
+                "chuyen). De NOI DAY: keo tu 1 cham tron (chan) tha vao 1 cham tron khac. Nhay "
+                "doi node VAO de go gia tri thu. Chon khoi + Delete de xoa. 'Luu' de ghi."
+                % self.code)
+
+    def _them_node(self, side):
+        """Them mot node vao/ra do nguoi dung tu dat ten. Ban ve tu do khong co ma khoi
+        nen khong co chan mac dinh nao - khong co nut nay thi khong the dat dau vao."""
+        cu = [i for i in self._items.values()
+              if getattr(i, "kind", "") == "pin" and i.side == side]
+        goi = "%s%d" % ("IN" if side == "in" else "OUT", len(cu) + 1)
+        ten, ok = QInputDialog.getText(
+            self, "Them node %s" % ("VAO" if side == "in" else "RA"), "Ten node:", text=goi)
+        if not ok or not (ten or "").strip():
+            return
+        x = 40 if side == "in" else 1180
+        it = self._add_pin(ten.strip(), side, x, 60 + len(cu) * 58)
+        self.view.centerOn(it)
+
+    # ---------- F(x) that tu DB / doi ma khoi ----------
+    def _add_fx(self, info):
+        """Tha mot khoi F(x) CO THAT vao so do, kem dung bang gay khuc cua no.
+
+        Khong lay duoc bang thi khong them: mot khoi F(x) rong luon tra None, keo theo
+        ca nhanh phia sau cung None - nhin nhu so do sai chu khong nhu thieu du lieu."""
+        from ui import internal_panels as _P
+        pts, ten, ghi = _P.diem_fx(info["db"], info["sheet"], info["tag"])
+        if not pts:
+            self._hint.setText("Khong tha duoc F(x) '%s': %s" % (info["ten"], ghi))
+            return
+        self._drop_n += 1
+        off = (self._drop_n % 12) * 26
+        it = self._add_block(_SYM_FX, 480 + off, 120 + off,
+                             fx={"pts": pts, "ten": ten or info["ten"]})
+        self.view.centerOn(it)
+        self._hint.setText("Da tha F(x) '%s' - %d diem, x tu %g den %g.%s"
+                           % (ten or info["ten"], len(pts), pts[0][0], pts[-1][0],
+                              ("  [%s]" % ghi) if ghi else ""))
+
+    def _mo_ma(self, code, ten):
+        """Chuyen ca so do sang ban ve cua mot ma khoi khac (the 'Khoi chuc nang')."""
+        code = (code or "").upper()
+        if code == self.code:
+            self._hint.setText("Dang o ban ve cua ma %s roi." % code)
+            return
+        if self._items and QMessageBox.question(
+                self, "Doi ban ve",
+                "Chuyen sang ban ve cua ma %s? Phan chua luu tren so do hien tai se mat."
+                % code) != QMessageBox.StandardButton.Yes:
+            return
+        for it in list(self._items.values()):
+            self._remove_item(it)
+        self._wires = []
+        self._redraw_wires()
+        self.code, self.bname, self.tu_do = code, ten, False
+        self._next_id, self._drop_n = 1, 0
+        self._dat_tieu_de()
+        self._load()
 
     # ---------- palette ----------
     def _refresh_scope(self):
@@ -891,13 +1045,13 @@ class InternalDesignDialog(QDialog):
         i = str(self._next_id); self._next_id += 1
         return i
 
-    def _add_block(self, sym, x, y, bid=None):
+    def _add_block(self, sym, x, y, bid=None, fx=None):
         if bid is None:
             bid = self._new_id()
         else:
             if str(bid).isdigit():
                 self._next_id = max(self._next_id, int(bid) + 1)
-        item = _SymItem(bid, sym, self)
+        item = _SymItem(bid, sym, self, fx=fx)
         item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.scene.addItem(item); item.setPos(x, y)
         self._items[bid] = item
@@ -905,7 +1059,11 @@ class InternalDesignDialog(QDialog):
 
     def _add_pin(self, name, side, x, y, bid=None, pinno=""):
         if bid is None:
-            bid = "pin%d" % (len([i for i in self._items.values() if getattr(i, "kind", "") == "pin"]) + 1)
+            k = len([i for i in self._items.values()
+                     if getattr(i, "kind", "") == "pin"]) + 1
+            while ("pin%d" % k) in self._items:
+                k += 1        # xoa node giua chung roi them lai thi so dem se trung id
+            bid = "pin%d" % k
         item = _PinItem(bid, name, side, self, pinno=pinno)
         item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.scene.addItem(item); item.setPos(x, y)
@@ -981,7 +1139,7 @@ class InternalDesignDialog(QDialog):
                         continue
                     ins.append(self._in_val(blk, i, val, src))
                     roles.append(blk.port_roles[i] if i < len(blk.port_roles) else "")
-                out = _compute_op(blk.op, ins, roles, blk.sem)
+                out = _compute_op(blk.op, ins, roles, blk.sem, blk)
                 for i, (px, py, side) in enumerate(blk.ports):
                     if side == "out":
                         val[(blk.bid, i)] = out
@@ -1224,6 +1382,13 @@ class InternalDesignDialog(QDialog):
         self._hint.setText(msg)
 
     def _reset_pins(self):
+        if not _macro_pins_by_code().get(self.code):
+            # Khong co bang chan thi nut nay chi con tac dung XOA SACH node, khong "dat
+            # lai" duoc gi - bam vao la mat het dau vao ma khong hieu vi sao.
+            self._hint.setText(
+                "Ma '%s' khong co bang chan mac dinh de dat lai. Dung '+ Node vao' / "
+                "'+ Node ra' de tu them." % (self.code or "(tu do)"))
+            return
         for it in [i for i in self._items.values() if getattr(i, "kind", "") == "pin"]:
             self._remove_item(it)
         self._init_pins()
@@ -1330,13 +1495,20 @@ class InternalDesignDialog(QDialog):
                      "x": round(it.pos().x(), 1), "y": round(it.pos().y(), 1)}
                 if it.is_integ:
                     b["ti"] = it.ti; b["init"] = it.init_val
+                if it.fx_pts:
+                    # Chep han bang gay khuc vao ban ve chu khong luu (db, trang, tag):
+                    # so do phai mo lai duoc ca khi khong con file DB do trong may.
+                    b["fx"] = {"ten": it.fx_name,
+                               "pts": [[float(a), float(c)] for a, c in it.fx_pts]}
                 blocks.append(b)
         data = {"pins": pins, "blocks": blocks, "wires": self._wires}
-        json.dump(data, open(_design_path(self.code), "w", encoding="utf-8"),
-                  ensure_ascii=False, indent=1)
+        p = _design_path(self.code)
+        json.dump(data, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         QMessageBox.information(self, "Da luu",
-            "Da luu ban ve (%d node vao/ra, %d khoi, %d day) vao core/internal_design/%s.json."
-            % (len(pins), len(blocks), len(self._wires), self.code))
+            "Da luu ban ve (%d node vao/ra, %d khoi, %d day) vao: %s"
+            % (len(pins), len(blocks), len(self._wires), p))
+        if getattr(self, "p_khoi", None) is not None and not self.tu_do:
+            self.p_khoi.nap()          # cot "Ban ve" ben trai phai doi ngay
 
     def _load(self):
         p = _design_path(self.code)
@@ -1351,7 +1523,8 @@ class InternalDesignDialog(QDialog):
             self._add_pin(pin["name"], pin.get("side", "in"), pin.get("x", 0), pin.get("y", 0),
                           bid=str(pin["id"]), pinno=pin.get("pinno", ""))
         for b in data.get("blocks", []):
-            it = self._add_block(b["sym"], b.get("x", 0), b.get("y", 0), bid=str(b["id"]))
+            it = self._add_block(b["sym"], b.get("x", 0), b.get("y", 0), bid=str(b["id"]),
+                                 fx=b.get("fx"))
             if it.is_integ:
                 it.ti = b.get("ti", 1.0)
                 it.init_val = b.get("init", 0.0)
