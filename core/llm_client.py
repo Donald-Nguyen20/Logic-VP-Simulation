@@ -381,7 +381,7 @@ def _han_muc_ngay(body: str) -> str:
     return ("het han muc SO LUOT MOI NGAY cua tai khoan%s. Day khong phai het token "
             "va cho cung khong giup - han nay sang ngay moi mo lai (Google tinh theo "
             "gio My, khoang 14-15h chieu gio Viet Nam). Muon dung tiep ngay bay gio "
-            "thi doi sang model khac trong 'Cai dat AI' - moi model mot han muc rieng "
+            "thi doi sang model khac trong 'AI Setting' - moi model mot han muc rieng "
             "- hoac bat thanh toan cho tai khoan" % muc)
 
 
@@ -404,7 +404,7 @@ def _raise_http(r, who: str) -> None:
         502: "duong truyen toi may chu nha cung cap dang nghen - thu lai sau vai phut",
         503: "may chu cua nha cung cap dang QUA TAI - khong phai loi cua ban va khong "
              "phai loi cau hoi. App da tu cho va hoi lai %d lan van chua duoc. Thu lai "
-             "sau vai phut, hoac doi model khac trong 'Cai dat AI'" % _RETRY_LAN,
+             "sau vai phut, hoac doi model khac trong 'AI Setting'" % _RETRY_LAN,
         504: "may chu nha cung cap tra loi qua cham - thu lai sau vai phut",
     }.get(code, "may chu bao loi" if code >= 500 else "loi khong ro")
     # NVIDIA bao 404 bang mot cau rieng ("Function ... Not found for account")
@@ -575,7 +575,7 @@ class OpenAICompatibleClient(BaseLLMClient):
         if not key:
             raise ValueError("Chua co API key.")
         if not model:
-            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong Cai dat AI.")
+            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong AI Setting.")
         self.key = key
         self.base_url = base_url.rstrip("/")
         self.model = model
@@ -734,7 +734,7 @@ class LLMClientGemini(BaseLLMClient):
         if not key:
             raise ValueError("Chua co API key.")
         if not model:
-            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong Cai dat AI.")
+            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong AI Setting.")
         self.key = key
         self.model = model
         self.timeout = timeout
@@ -811,7 +811,7 @@ class LLMClientOllama(BaseLLMClient):
 
     def __init__(self, model: str, host: str, timeout: int = 280):
         if not model:
-            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong Cai dat AI.")
+            raise ValueError("Chua chon model - bam 'Tai danh sach model' trong AI Setting.")
         self.model = model
         self.url = "%s/api/chat" % (host or "http://localhost:11434").rstrip("/")
         self.timeout = timeout

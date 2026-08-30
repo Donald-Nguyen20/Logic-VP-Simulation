@@ -192,7 +192,7 @@ def goi_y(q, provider="", out_path=None, on_event=None, dung_cache=True):
         return {}, "Da hoi AI cho cau nay truoc do, khong them duoc tu nao."
     txt, loi = _hoi(provider, "Question: %s" % q, on_event=on_event)
     if loi:
-        return {}, ("Khong goi duoc AI - %s. Mo 'Cai dat AI' tren thanh cong cu de "
+        return {}, ("Khong goi duoc AI - %s. Mo 'AI Setting' tren thanh cong cu de "
                     "chon nha cung cap va kiem tra API key." % loi)
     tho = _tach_json(txt)
     if tho is None:

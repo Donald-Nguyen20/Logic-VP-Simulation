@@ -797,7 +797,7 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
         act("Cause && Effect Matrix", self.open_ce_matrix,
             "Tim nguyen nhan goc cho nhieu tin hieu dich (vd MFT, ETS...) va gom thanh 1 bang")
-        act("Cai dat AI", self.open_ai_settings,
+        act("AI Setting", self.open_ai_settings,
             "Chon nha cung cap AI cho Explain: 6 nha (Claude, Groq, Gemini, "
             "Ollama, NVIDIA...) - TAT CA deu dung duoc mien phi. "
             "Co nut lay API key va chon model ngay trong hop thoai")
@@ -820,7 +820,7 @@ class MainWindow(QMainWindow):
         self._dyn_steps = 300
 
     def open_ai_settings(self):
-        """Cai dat AI cho tinh nang Explain: nha cung cap, API key, ten model.
+        """Hop thoai AI Setting cho tinh nang Explain: nha cung cap, API key, ten model.
 
         De o thanh cong cu chinh chu khong chi trong hop thoai Explain: nguoi dung di
         TIM cho lay API key truoc khi biet Explain nam o dau."""

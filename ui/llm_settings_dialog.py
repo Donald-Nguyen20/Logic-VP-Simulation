@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Hop thoai 'Cai dat AI': chon nha cung cap, lay API key, chon model.
+"""Hop thoai 'AI Setting': chon nha cung cap, lay API key, chon model.
 
 Ba nut lam nen cong dung cua hop thoai nay:
   - Lay API key       : mo dung trang cap key cua nha cung cap dang chon
@@ -44,7 +44,7 @@ class _Net(QThread):
 class LLMSettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Cai dat AI - nha cung cap va model")
+        self.setWindowTitle("AI Setting - nha cung cap va model")
         self.resize(560, 300)
         self.cfg = LC.load_llm_config()
         self._job = None

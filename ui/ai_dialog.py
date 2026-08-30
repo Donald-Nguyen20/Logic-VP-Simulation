@@ -59,13 +59,13 @@ class _Worker(QThread):
                     self.done.emit(
                         "> _Model nay khong tu tra cuu duoc, cau tra loi duoi day chi dua"
                         " tren du lieu gui kem. Muon AI tu tra cuu: chon model khac trong"
-                        " 'Cai dat AI'._\n\n" + txt)
+                        " 'AI Setting'._\n\n" + txt)
                     return
                 except Exception as e2:
                     e = e2
             # Loi mang/key/model phai NOI RA, khong duoc de cua so im lang - nguoi dung
             # khong co cach nao khac de biet vi sao khong co cau tra loi.
-            self.done.emit("Khong goi duoc %s.\n\n%s: %s\n\nMo 'Cai dat AI' tren "
+            self.done.emit("Khong goi duoc %s.\n\n%s: %s\n\nMo 'AI Setting' tren "
                            "thanh cong cu de kiem tra API key va ten model."
                            % (self.provider, type(e).__name__, e))
 
@@ -209,7 +209,7 @@ class AIExplainDialog(QDialog):
             thieu = ("API key" if need_key and not key else "ten model")
             self.answer.setText(
                 "Chua dung duoc %s: con thieu %s.\n\n"
-                "Tren thanh cong cu cua so chinh, bam 'Cai dat AI' -> nut xanh "
+                "Tren thanh cong cu cua so chinh, bam 'AI Setting' -> nut xanh "
                 "'Lay API key' de tao key, roi 'Tai danh sach model'." % (name, thieu))
 
     def _login(self):
