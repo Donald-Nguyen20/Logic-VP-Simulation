@@ -541,8 +541,42 @@ def drill(node, cpu_paths=None):
     # Bung ra chinh no = khong tien them buoc nao (vd tin hieu cross tro toi 1 diem
     # phat lai chu khong phai noi co logic) -> coi nhu da toi goc, tranh vong lap.
     out = [p for p in out if not (len(p) == 1 and _same_sig(p[0], node))]
+    if not out:
+        out = _cross_theo_ten_goc(node, cpu_paths)
     _DRILL_CACHE[key] = out
     return out
+
+
+def _cross_theo_ten_goc(node, cpu_paths=None):
+    """Cuu vot ngo cut o BIEN GIOI TU: tin hieu dau vao dau day cung duoc dat ten kem
+    ten tu gui - 'MFT(EHC CTLR A)', 'MFT (BMS CTLR A)' - nen khong khop ten voi ban goc
+    'MFT' o CPU sinh ra no, va _cross_cpu() (khop ten CHINH XAC) khong bat duoc.
+
+    Truoc 46766ab, cac net nay chua co ten (CAD_ID cua 21 EHC MC chi dat 1.189/6.990
+    ten) nen cay di thang qua chung roi nhay C-NET bang ten 'MFT'. Sau khi chi muc phu
+    them ten tu CAD_SIGNAL, chung co ten -> cay dung lai tai day va mat toan bo logic
+    BPS phia sau. Day la duong noi lai, CHI chay khi da that su het duong trong DB hien
+    tai (goi tu drill() khi out rong) nen khong dong toi cac node bung duoc binh thuong."""
+    goc = SG.base_name(node.get("label"))
+    if not goc or not cpu_paths:
+        return []
+    db = node.get("db")
+    try:
+        cpu = SG._dbc(db)["cpuno"]
+    except Exception:
+        return []
+    for (pdb, ps, pnet, _nhan) in SG._cross_cpu(goc, db, cpu, cpu_paths):
+        try:
+            sub = CT.build(pdb, ps, pnet, depth=40, cpu_paths=cpu_paths or {})
+        except Exception:
+            continue
+        prods = _layer_from(sub, cpu_paths, hops=4)
+        prods = [p for p in prods
+                 if not (len(p) == 1 and (_same_sig(p[0], node)
+                                          or (p[0].get("label") or "").strip().upper() == goc.upper()))]
+        if prods:
+            return prods
+    return []
 
 
 def first_layer(cand, cpu_paths=None):

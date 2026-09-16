@@ -353,6 +353,24 @@ def _addr_sheet(db, addr):
         return None
 
 
+# Ban sao duoc dat ten kem ten tu nhan no: 'MFT (BMS CTLR A)', 'MFT (BSQ CTLR A)',
+# 'MFT(EHC CTLR A)', 'HLO (TSQ B)'... Day la diem dau vao dau day cung tai tu, KHONG
+# co logic phia truoc trong DB cua chinh tu do - logic that nam o CPU sinh ra ten goc
+# (MFT that o BPS A/B). Toan du an Unit 1 co 3.749 ten dang nay, 481 ten co ten goc
+# nam o CPU khac.
+_DUOI_TU = re.compile(r"^(.*?)\s*\([^()]*\)\s*$")
+
+
+def base_name(name):
+    """Ten goc cua mot ban sao dat ten kieu 'MFT (BMS CTLR A)' -> 'MFT'.
+    Tra "" neu khong phai dang do (hoac phan goc qua ngan de tra cho dang tin)."""
+    m = _DUOI_TU.match((name or "").strip())
+    if not m:
+        return ""
+    goc = m.group(1).strip()
+    return goc if len(goc) >= 3 else ""
+
+
 def _cross_cpu(name, cur_db, cur_cpu, cpu_paths):
     """[(pdb, psheet, paddr, nhan)] o CPU khac cho tin hieu cung ten (C-NET)."""
     if not name or not cpu_paths:
