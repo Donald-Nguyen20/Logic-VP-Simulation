@@ -10,6 +10,7 @@ import time
 
 from core import ai_explain as AE
 from core import ai_client as AC
+from core import ai_cache as CACHE
 from core import llm_config as LC
 from core import llm_client as LClient
 
@@ -18,6 +19,25 @@ from core import llm_client as LClient
 # ban day du vao system la ton ~1.700 token va lap chi dan hai lan.
 _SYS_ANCHOR = ("You are a controls engineer assistant for a Toshiba DCS power plant. "
                "Follow the instructions in the user message exactly.")
+
+
+def luu_duoc(out, loi):
+    """Cau tra loi nay co dang luu khong.
+
+    Loi duong day, huong dan cai dat, hay ban bi cat giua chung ma luu lai thi lan sau
+    mo ra van la no - nguoi dung khong con duong nao hoi lai cho ra cau tu te. Cau that
+    luon co tieu de theo dung khuon prompt bat, nen lay do lam dau."""
+    if loi or not out:
+        return False
+    if "bi cat giua chung" in out or out.startswith("Khong goi duoc"):
+        return False
+    return len(out) > 400 and ("\n## " in out or out.lstrip().startswith("#"))
+
+
+def _cua(cu):
+    """Model nao viet cau nay. Doc lai cau cu ma khong biet cua ai thi kho ma tin."""
+    m = (cu.get("model") or cu.get("provider") or "").strip()
+    return " (%s)" % m if m else ""
 
 
 class _Worker(QThread):
@@ -31,6 +51,7 @@ class _Worker(QThread):
         self.prompt_no_tools = prompt_no_tools
         self.provider = provider or "claude"
         self.use_tools = use_tools
+        self.loi = False          # luot nay ket thuc bang loi -> khong duoc luu
 
     def run(self):
         # step.emit tu luong nen sang luong giao dien la an toan (Qt tu xep hang doi)
@@ -65,6 +86,7 @@ class _Worker(QThread):
                     e = e2
             # Loi mang/key/model phai NOI RA, khong duoc de cua so im lang - nguoi dung
             # khong co cach nao khac de biet vi sao khong co cau tra loi.
+            self.loi = True
             self.done.emit("Khong goi duoc %s.\n\n%s: %s\n\nMo 'AI Setting' tren "
                            "thanh cong cu de kiem tra API key va ten model."
                            % (self.provider, type(e).__name__, e))
@@ -97,6 +119,7 @@ class AIExplainDialog(QDialog):
             name, ctx = (("Loop %s" % loopno) if loopno is not None else net,
                          "(context error: %s)" % e)
         self._name = name; self._ctx = ctx
+        self._db = db; self._cpu = cpu_paths or []   # de to mau ten tin hieu that
         self.setWindowTitle("Explain (AI): %s" % name)
         lay = QVBoxLayout(self)
         hdr = QLabel(name); hdr.setStyleSheet("font-size:15px;font-weight:600;")
@@ -138,12 +161,17 @@ class AIExplainDialog(QDialog):
         self.btn_ping.clicked.connect(self._ping)
         self.btn_lang = QPushButton("Tiếng Việt"); self.btn_lang.clicked.connect(self._toggle_lang)
         self.btn_lang.setToolTip("Chuyen ngon ngu tra loi (English / Tieng Viet)")
-        self.btn_ask = QPushButton("Ask Claude"); self.btn_ask.clicked.connect(self._run)
+        self.btn_again = QPushButton("Hoi lai")
+        self.btn_again.setToolTip("Bo qua cau da luu, hoi AI mot cau moi")
+        self.btn_again.clicked.connect(lambda: self._run(force=True))
+        self.btn_ask = QPushButton("Ask Claude")
+        self.btn_ask.clicked.connect(lambda: self._run())
         bar.addWidget(self.btn_login); bar.addWidget(self.btn_ping); bar.addStretch(1)
-        bar.addWidget(self.btn_lang); bar.addWidget(self.btn_ask)
+        bar.addWidget(self.btn_lang); bar.addWidget(self.btn_again); bar.addWidget(self.btn_ask)
         lay.addLayout(bar)
 
         self._refresh()
+        self._mo_kho()      # co san cau cu thi hien ngay, khong bat nguoi dung cho
 
     def _provider(self):
         return self.cb_prov.currentData() or "claude"
@@ -184,7 +212,7 @@ class AIExplainDialog(QDialog):
             self.status_bar.refresh()
         except Exception:
             pass
-        self.btn_ask.setEnabled(sdk)
+        self._bat_nut(sdk)
         if sdk:
             self.answer.setPlaceholderText("Bam 'Ask Claude'. Neu chua dang nhap, bam 'Login to Claude' truoc.")
         else:
@@ -202,7 +230,7 @@ class AIExplainDialog(QDialog):
             bits.append("Key: %s" % LC.mask(key))
         bits.append("Model: %s" % (model or "(chua chon)"))
         self.status_lbl.setText("%s   |   %s" % (name, "   |   ".join(bits)))
-        self.btn_ask.setEnabled(ok)
+        self._bat_nut(ok)
         if ok:
             self.answer.setPlaceholderText("Bam 'Ask %s'." % name)
         else:
@@ -264,6 +292,45 @@ class AIExplainDialog(QDialog):
                                         self.btn_ping.setEnabled(True)))
         self._p.start()
 
+    def _bat_nut(self, on):
+        self.btn_ask.setEnabled(on)
+        self.btn_again.setEnabled(on)
+
+    def _model(self):
+        """Ten model dang dung. No nam trong khoa cache, de cau cua model nay khong bi
+        dem tra ve cho model khac."""
+        return (LC.load_llm_config().get("%s_model" % self._provider()) or "").strip()
+
+    def _prompt(self, use_tools=True):
+        return (AE.build_loop_prompt(self._name, self._ctx, lang=self._lang)
+                if self._loop is not None
+                else AE.build_prompt(self._name, self._ctx, lang=self._lang,
+                                     use_tools=use_tools))
+
+    def _mo_kho(self):
+        """Trong kho da co cau tra loi cho dung tin hieu, dung ngon ngu, dung model nay
+        thi hien luon luc mo cua so: khong goi model, khong ton gi, khong phai cho."""
+        try:
+            k = CACHE.khoa(self._prompt(), self._lang, self._provider(), self._model())
+            cu = CACHE.tim(self._db, k)
+        except Exception:
+            return
+        if not cu:
+            return
+        on = self.btn_ask.isEnabled()   # _show bat nut len; chua cau hinh xong thi khong duoc
+        self._khoa = k
+        self._t0 = time.time(); self._ntool = 0; self._live = ""
+        self._show(cu["answer"], cu)
+        self._bat_nut(on)
+
+    def _luu(self, out):
+        """Luu cau vua nhan duoc. Tra ve mau chu ngan de ghep vao dong trang thai."""
+        if not luu_duoc(out, getattr(self._w, "loi", False)):
+            return ""
+        cho = CACHE.luu(self._db, self._khoa, out, name=self._name, lang=self._lang,
+                        provider=self._provider(), model=self._model())
+        return "  Da luu: lan sau mo lai khong ton token." if cho else ""
+
     def _toggle_lang(self):
         self._lang = "vi" if self._lang == "en" else "en"
         self.btn_lang.setText("English" if self._lang == "vi" else "Tiếng Việt")
@@ -271,27 +338,27 @@ class AIExplainDialog(QDialog):
         if self.btn_ask.isEnabled():
             self._run()
 
-    def _run(self):
+    def _run(self, force=False):
         # _toggle_lang goi thang vao day, ke ca khi luot truoc chua xong -> phai dep
         # dong ho cu, khong thi moi lan doi ngon ngu lai them 1 cai chay song song
         try:
             self._tick.stop()
         except Exception:
             pass
-        self.btn_ask.setEnabled(False)
+        self._bat_nut(False)
         self._t0 = time.time(); self._ntool = 0; self._live = ""
         self._last = self._t0
         self._reset_answer()
         p = self._provider(); name = LClient.short(p)
         self.answer.setPlaceholderText("Dang hoi %s, chu se hien dan ra day..." % name)
-        if self._loop is not None:
-            prompt = AE.build_loop_prompt(self._name, self._ctx, lang=self._lang)
-            prompt_nt = prompt
-        else:
-            prompt = AE.build_prompt(self._name, self._ctx, lang=self._lang)
-            # ban du phong: neu phai chay lai khong co tool thi noi ro cho AI biet
-            prompt_nt = AE.build_prompt(self._name, self._ctx, lang=self._lang,
-                                        use_tools=False)
+        prompt = self._prompt()
+        # ban du phong: neu phai chay lai khong co tool thi noi ro cho AI biet
+        prompt_nt = prompt if self._loop is not None else self._prompt(use_tools=False)
+        self._khoa = CACHE.khoa(prompt, self._lang, p, self._model())
+        cu = None if force else CACHE.tim(self._db, self._khoa)
+        if cu:
+            self._show(cu["answer"], cu)   # co san: khong goi model, khong ton gi
+            return
         use_tools = (p == "claude") or bool(LC.load_llm_config().get("use_tools", True))
         self._w = _Worker(prompt, prompt_no_tools=prompt_nt, provider=p, use_tools=use_tools)
         self._w.step.connect(self._step)
@@ -386,7 +453,7 @@ class AIExplainDialog(QDialog):
         cur.movePosition(QTextCursor.Start)
         self.answer.setTextCursor(cur)
 
-    def _show(self, text):
+    def _show(self, text, cu=None):
         try:
             self._tick.stop()
         except Exception:
@@ -396,7 +463,7 @@ class AIExplainDialog(QDialog):
             self.answer.setPlainText(
                 "%s khong tra ve chu nao. Bam 'Kiem tra ket noi' de xem loi nam o "
                 "duong day hay o ngu canh." % LClient.short(self._provider()))
-            self.btn_ask.setEnabled(True)
+            self._bat_nut(True)
             return
         out = self._trim(out)
         # trong luc chay thi hien chu tho cho nhanh; xong moi dung Markdown that (tieu de,
@@ -410,6 +477,17 @@ class AIExplainDialog(QDialog):
                 self._polish()          # chi la gian dong, hong thi van giu ban markdown
             except Exception:
                 pass
-        self.status_lbl.setText("Xong sau %ds, da tra cuu %d lan."
-                                % (int(time.time() - self._t0), self._ntool))
-        self.btn_ask.setEnabled(True)
+        try:
+            from ui.answer_marks import to_mau
+            to_mau(self.answer, self._db, self._cpu)   # sau _polish: khong bi de len
+        except Exception:
+            pass
+        if cu:
+            self.status_lbl.setText(
+                "Cau tra loi da luu luc %s%s - lay tu kho, khong ton token. Bam "
+                "'Hoi lai' neu muon cau moi." % (cu.get("at", "?"), _cua(cu)))
+        else:
+            self.status_lbl.setText("Xong sau %ds, da tra cuu %d lan.%s"
+                                    % (int(time.time() - self._t0), self._ntool,
+                                       self._luu(out)))
+        self._bat_nut(True)

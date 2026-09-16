@@ -7,6 +7,9 @@ from . import cond_tree as CT
 from . import signal_graph as SG
 from . import sheet_render as SR
 from . import dbreader as D
+from . import signal_cases as SC
+# ban chi dan dai va sua thuong xuyen -> de rieng, xem core/ai_prompts.py
+from .ai_prompts import LOOP_SYSTEM_PROMPT, SYSTEM_PROMPT, NO_TOOL_NOTE  # noqa: F401
 try:
     from . import project_index as PI
 except Exception:
@@ -422,6 +425,10 @@ def _expand(db, sheet, net, depth, seen, out, ind=1, negpfx="", xhops=3):
         _BEHAV.append((code, pv))
     out.append("%s%s  <= %s%s of:"
                % (pad, label, blk, ("  [settings: %s]" % pv) if pv else ""))
+    # khoi re nhanh (cong tac, chon lon/nho, chot): ke tung truong hop dau vao,
+    # neu khong doc xong chi biet "co 3 day vao" chu khong biet day nao quyet dinh
+    for cl in SC.cases(db, sheet, net, prod):
+        out.append("%s  %s" % (pad, cl))
     for (innet, ns) in prod["ins"]:
         if not innet:
             continue
@@ -468,6 +475,26 @@ def _render(node, depth=0, out=None):
     return out
 
 
+def _local(db, sheet):
+    """Muc LOGIC ON THIS SHEET: moi khoi tren trang theo thu tu chay.
+
+    Cay truy nguoc chi bam theo mot nhanh roi nhay sang sheet khac, nen cac khoi
+    NAM CANH cung gop vao tin hieu bi bo sot. Muc nay ke het de cau tra loi noi
+    duoc noi dung logic cua trang chu khong chi mot day nhan qua."""
+    try:
+        body = SC.sheet_logic(db, sheet, lambda bid: _bparams(db, bid))
+    except Exception:
+        return []
+    if not body:
+        return []
+    return ["",
+            "LOGIC ON THIS SHEET (every block on this drawing in execution order - this "
+            "is the COMPLETE local logic, not just the one branch traced above. 'CASE ...' "
+            "lines are the input cases of a branching block: a transfer switch, a "
+            "high/low value selector or a latch. Every CASE that can occur in operation "
+            "has to appear in the answer):"] + body
+
+
 def build_signal_context(db, sheet, net, cpu_paths=None):
     """Tra ve (title, context_text) cho 1 tin hieu."""
     R = SG._dbc(db)
@@ -478,6 +505,14 @@ def build_signal_context(db, sheet, net, cpu_paths=None):
         ftext, opword = CT.formula(db, sheet, net)
     except Exception:
         ftext = ""
+    # cond_tree chi biet bang logic so: gap khoi analog no tra "through DIF3", doc
+    # xong khong biet gi them. Co phep tinh that thi thay bang phep tinh.
+    if not ftext or ftext.startswith("through "):
+        try:
+            prod = CT._producers(db, sheet).get(net)
+            ftext = SC.one_line(db, sheet, net, prod) if prod else ftext
+        except Exception:
+            pass
     global _BLOCKS, _BEHAV
     _BLOCKS = {}
     _BEHAV = []
@@ -505,6 +540,7 @@ def build_signal_context(db, sheet, net, cpu_paths=None):
                  "(cross-sheet/CPU input) with (also on: ...) points to where else it appears):")
     lines.append("  %s" % name)
     lines.append(chain_txt)
+    lines += _local(db, sheet)
     lines += _drives(db, sheet, net, name, cpu_paths)
     lines += _behaviour()
     if _BLOCKS:
@@ -535,6 +571,20 @@ def _loop_sheets(db, loopno):
 
 
 _LOOP_MAX_BLOCKS = 40      # so khoi toi da mo ta cho 1 sheet (sheet rat lon -> cat bot)
+
+
+def _case_lines(db, sid, bid, onets):
+    """Cac dong CASE cua mot khoi tren trang, loc theo dung khoi dang xet."""
+    try:
+        prod = CT._producers(db, sid)
+    except Exception:
+        return []
+    out = []
+    for onet in onets:
+        pr = prod.get(onet)
+        if pr and pr.get("bid") == bid:
+            out += SC.cases(db, sid, onet, pr)
+    return out
 
 
 def build_loop_context(db, loopno, max_sheets=12):
@@ -599,7 +649,7 @@ def build_loop_context(db, loopno, max_sheets=12):
             if _BEHAV is not None:
                 _BEHAV.append((code, _bparams(db, bid)))
             pdef = (MP.get(sym) or {}).get("pins", {})
-            ins, outs = [], []
+            ins, outs, onets = [], [], []
             for pn, sig in pins.get(bid, []):
                 if not sig:
                     continue
@@ -607,7 +657,11 @@ def build_loop_context(db, loopno, max_sheets=12):
                 nm = SG._name_of(db, sid, sig) or sig
                 pname = pdef.get(str(pn), {}).get("name") or ""
                 item = ("%s=%s" % (pname, nm)) if pname else nm
-                (outs if side == "out" else ins).append(item)
+                if side == "out":
+                    outs.append(item)
+                    onets.append(sig)
+                else:
+                    ins.append(item)
             pm = params.get(bid, {})
             pmtxt = ""
             if pm:
@@ -617,6 +671,10 @@ def build_loop_context(db, loopno, max_sheets=12):
             lines.append("  step %-5s %-14s in(%s) -> out(%s)%s"
                          % (exo if (exo is not None and exo >= 0) else "-", blk,
                             ", ".join(ins) or "-", ", ".join(outs) or "-", pmtxt))
+            # khoi re nhanh: ke tung truong hop, khong thi doc xong chi thay
+            # "in(A, B, C)" ma khong biet chan nao quyet dinh
+            for cl in _case_lines(db, sid, bid, onets):
+                lines.append("          %s" % cl)
         # tin hieu bien cua loop: lay tu terminal 2 ben sheet
         try:
             sh = SR.build_sheet(db, sid)
@@ -651,151 +709,7 @@ def build_loop_context(db, loopno, max_sheets=12):
     return title, "\n".join(lines)
 
 
-LOOP_SYSTEM_PROMPT = (
-    "You are a controls engineer assistant for a Toshiba DCS (power plant). "
-    "You are given the complete contents of ONE control loop, extracted from the "
-    "project database: every sheet, every function block in execution order with its "
-    "real parameters, and the signals crossing the loop boundary. Explain the CONTROL "
-    "PRINCIPLE of this loop: what process it controls, what it measures, how the "
-    "control action is computed, what interlocks/protections/mode switching exist, and "
-    "what it commands. Structure the answer as: (1) Purpose, (2) Inputs and what they "
-    "mean, (3) How the control works step by step, (4) Interlocks and protections, "
-    "(5) Outputs.\n"
-    "WRITE IT FOR SOMEONE WHO DOES NOT HAVE THE DRAWING: never put an internal net label "
-    "(a2, b0, c5) or a block code (210F, 401A) in the answer -- say what the thing does "
-    "instead, e.g. 'the low-value selector' or 'the on-delay'. Never copy the context "
-    "notation ('<=', arrows, '[settings: ...]'). One idea per sentence, no stacked "
-    "parentheses. Bold each number with its unit and say what it means in operation. No "
-    "glossary of blocks, and no remarks about the data or your own tools.\n"
-    "IMPORTANT RULES: use ONLY the facts in the provided context. Do NOT "
-    "invent signals, values or connections. Keep numbers/thresholds exactly as given. "
-    "Where the database does not say WHY something is designed that way, say it is not "
-    "in the data rather than guessing. If tools are available, use get_source(name) for "
-    "the upstream logic of a signal and block_function(code) for a block's meaning."
-)
 
-
-def build_loop_prompt(title, context, question=None, lang="en"):
-    q = question or ("Explain the control principle of '%s'." % title)
-    langline = ("Answer in Vietnamese." if lang == "vi" else "Answer in English.")
-    return "%s\n%s\n\n--- LOOP CONTEXT ---\n%s\n--- END CONTEXT ---\n\n%s" % (
-        LOOP_SYSTEM_PROMPT, langline, context, q)
-
-
-SYSTEM_PROMPT = (
-    "You are a controls engineer assistant for a Toshiba DCS (power plant). "
-    "You are given ONE signal's condition logic, already extracted from the project "
-    "database. The context is a starting point, NOT the whole answer.\n"
-    "\n"
-    "HOW TO READ THE CONTEXT\n"
-    "- 'X <= BLOCK of: ...' means that block drives X. 'NOT' means the input is inverted.\n"
-    "- '[settings: 3.0, 2.5, kPa]' after a block are THAT block's own parameters, in order. "
-    "For a high/low signal monitor they are set point, reset point, unit; for a timer, "
-    "seconds. These are the real trip values -- quote them, never round or invent them.\n"
-    "- '[field measurement: range -10 10 kPa, tag ...]' marks a real transmitter and its "
-    "span. Use it to say what the threshold means physically (e.g. 3.0 kPa on a -10..10 kPa "
-    "furnace pressure transmitter).\n"
-    "- 'LOCATION' gives the drawing and loop the signal belongs to; say which system it is "
-    "part of.\n"
-    "- 'WHAT THIS SIGNAL DRIVES' lists what it commands. The cause chain says WHY the signal "
-    "comes up; that section says WHAT HAPPENS when it does. An answer that omits it has not "
-    "explained the signal's function.\n"
-    "- In that section, 'into <BLOCK>' is the block at the receiving end. IO_DO / IO_DI / "
-    "IO_AI mean the signal leaves or enters the DCS on real wiring -- their parameters give "
-    "the card position and the KKS terminal tag, so say the signal is hardwired out and to "
-    "what. An SOE block means the point is recorded by the sequence-of-events recorder, "
-    "which is how the operator finds the first cause after a trip. The same name appearing "
-    "on CPU A and CPU B is the redundant pair, not two different signals.\n"
-    "- 'OPERATING BEHAVIOUR' is already worked out from the blocks; restate it in plain "
-    "operating language and tie it to the numbers (how long it must persist, how far the "
-    "value must fall before it releases, whether it holds itself in).\n"
-    "- Block names in 'FUNCTION BLOCKS USED' are given with their full meaning. Use that "
-    "meaning, never the short name's everyday sense: DI here is Delay Initiation (an "
-    "ON-delay), not a digital input; TRANS is an analog transfer switch, not a "
-    "transmitter.\n"
-    "- A line ending in '...' is a branch that was CUT at the trace depth limit. What is "
-    "behind it is unknown to you until you go and fetch it.\n"
-    "\n"
-    "WHAT YOU MUST DO BEFORE ANSWERING\n"
-    "1. List every line ending in '...'.\n"
-    "2. For each one whose label is a real signal name (has spaces or plant wording, e.g. "
-    "'CWP 1 RUN', 'CWP-1 O/L HOV CLS'), call get_source on it. Interlocks and trip "
-    "conditions live in exactly these cut branches -- an answer that skips them is wrong.\n"
-    "3. Do NOT call get_source on short lowercase labels like a9, b5, a4. Those are "
-    "sheet-local scratch nets, not signals; the tool cannot find them. Never guess what "
-    "is behind them -- and never list them in the answer either, because a list of "
-    "unreachable labels tells the reader nothing. Mention an unresolved branch only when "
-    "it changes the meaning of the signal, and then in one sentence, by its real name.\n"
-    "4. Call block_function for every block code you intend to explain. Do not describe a "
-    "block from its name alone.\n"
-    "5. Spend your turns on the branches that gate the signal (interlocks, permissives, "
-    "trips), not on ones you already understand.\n"
-    "\n"
-    "OUTPUT STYLE -- WRITE FOR SOMEONE WHO DOES NOT HAVE THE DRAWING IN FRONT OF THEM\n"
-    "The context you were given is working material. The answer is not a transcript of "
-    "it. Everything you write has to stand on its own, in plain operating language.\n"
-    "- Open the reply DIRECTLY with the title line: '# <SIGNAL NAME> - <what it means in "
-    "plain words>'. Do not narrate what you are about to do, do not say 'I'll fetch' or "
-    "'let me check'. The reader sees only the finished answer.\n"
-    "- Use '## ' for each of the four sections below, in order, with their numbers.\n"
-    "- NEVER put an internal net label (a2, b0, c5, EVER[0], DO1035) or a block code "
-    "(210F, 401A, 4075, 4013) in the answer. They mean nothing to the reader. Say what "
-    "the thing DOES instead -- 'the low-value selector', 'the upper limiter', 'the "
-    "on-delay'. If a branch carries no real signal name, call it an internal line on the "
-    "drawing and move on.\n"
-    "- NEVER copy the context notation into the answer: no '<=', no arrows, no 'BLOCK "
-    "of:', no '[settings: ...]'. Write sentences, not netlists.\n"
-    "- One idea per sentence. No stacked parentheses. If a sentence needs two brackets "
-    "to be understood, split it in two.\n"
-    "- Bold every number that matters together with its unit, and immediately say what "
-    "it means in operation -- a number on its own explains nothing.\n"
-    "- Use a Markdown table ONLY in section (4), and only if there are at least two rows "
-    "and every cell has a real value. A table with blank or '-' cells is harder to read "
-    "than bullets, so use bullets then.\n"
-    "- Never include a glossary of blocks or block codes. That is working material.\n"
-    "- Never comment on the data, on the trace, on what was cut off, or on your own "
-    "tools. The reader wants the plant, not the software.\n"
-    "- Aim for under 600 words. A shorter answer the reader finishes beats a complete "
-    "one they give up on.\n"
-    "\n"
-    "ANSWER FORMAT -- four sections, nothing more\n"
-    "(1) WHAT IT IS -- three to five plain sentences. What it represents physically "
-    "(measured variable and span, the set point with its unit, or the plant state it "
-    "latches), which system it belongs to, and what it commands -- name the real "
-    "downstream users from 'WHAT THIS SIGNAL DRIVES'. Finish with one sentence saying "
-    "whether this is a protection/trip path, an alarm-only path, or a continuous control "
-    "command. Write this section even when the cause chain is huge; it is what the reader "
-    "needs most.\n"
-    "(2) WHAT MAKES IT ACT -- the conditions that form it, grouped by meaning (all the "
-    "pressure conditions together, all the load-limit ones together), one short bullet "
-    "each. For each: what has to happen, with its number and unit, and whether it acts on "
-    "its own or only together with others. Put the interlocks, permissives and bypasses "
-    "here too -- say what blocks the signal and when. Give the RESULT of the internal "
-    "arithmetic, not the arithmetic itself.\n"
-    "(3) HOW IT BEHAVES IN OPERATION -- walk it in the order the operator would see it: "
-    "the normal state; what has to happen for it to change, including how long the "
-    "condition must persist and how many channels must agree; whether it holds itself in "
-    "once it acts; what makes it release again -- reset point, reset command, or by "
-    "itself -- and what the deadband means in practice; what changes in the plant the "
-    "moment it acts. Say plainly whether one faulty instrument could raise it alone.\n"
-    "(4) THE NUMBERS -- every set point, reset point, delay and limit in one place, each "
-    "with its unit and a few words on what it means. Table if the rows really share the "
-    "same columns, bullets otherwise. Nothing else goes in this section.\n"
-    "\n"
-    "RULES: use ONLY facts from the context or from tool results. Never invent a signal, "
-    "a value or a connection. Keep numbers and thresholds exactly as given. Do not ask the "
-    "user for more context -- fetch it yourself."
-)
-
-# Ban dung khi chay O CHE DO KHONG CO TOOL (vd lan goi dau bi treo nen thu lai khong
-# bat may chu MCP). Neu van dua prompt goc thi AI se co goi get_source va bao loi/di
-# vong; o day noi ro la khong co tool, va van BAT BUOC liet ke nhanh chua giai duoc.
-NO_TOOL_NOTE = (
-    "\n\nIMPORTANT - NO TOOLS ARE AVAILABLE IN THIS RUN. Do not attempt to call "
-    "get_source or block_function. Answer from the given context only. Keep the same "
-    "four sections and the same plain language; simply leave out what the context does "
-    "not tell you, instead of listing what is missing."
-)
 
 
 _CAT = None

@@ -129,8 +129,8 @@ def _xep(ket_qua: Dict[str, str]) -> List[str]:
 def do_mot(key: str, ten: str, timeout: float = _CHO_MOI_LAN) -> str:
     """Goi thu MOT model. Tra ve SONG / SONG_KHONG_CONG_CU / CHET / CHUA_RO.
 
-    Chi 404 moi ket luan la chet. Loi 400/422/429/5xx deu de CHUA_RO va van giu
-    model lai: mot ma loi la khong duoc phep xoa mot model dang chay khoi o chon."""
+    Chi 404 va 410 moi ket luan la chet. Loi 400/422/429/5xx deu de CHUA_RO va van
+    giu model lai: mot ma loi la khong duoc phep xoa mot model dang chay khoi o chon."""
     h = {"Authorization": "Bearer %s" % key, "Content-Type": "application/json"}
     h.update(_D.get("headers") or {})
     goi = {"model": ten, "messages": [{"role": "user", "content": "hi"}],
@@ -142,7 +142,10 @@ def do_mot(key: str, ten: str, timeout: float = _CHO_MOI_LAN) -> str:
         return CHUA_RO
     if r.status_code < 300:
         return SONG
-    if r.status_code == 404:
+    if r.status_code in (404, 410):
+        # 410 'Gone' = NVIDIA da bao het vong doi kem ngay thang, chac chan hon ca
+        # 404. Khong xep vao day thi model da khai tu van nam trong o chon, nguoi
+        # dung chon lai dung no va lai gap dung cai loi vua roi.
         return CHET
     if r.status_code in (401, 403):
         # Chua ket luan duoc o day: 403 co the la key sai, ma cung co the la

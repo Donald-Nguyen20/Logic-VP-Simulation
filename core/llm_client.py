@@ -38,6 +38,12 @@ from .llm_config import api_key as _cfg_key, load_llm_config
 
 _MAX_TOKENS_CHAT = 4000
 _MAX_TOKENS_TRACUU = 1200   # luot tra cuu chi can du cho mot loi goi cong cu
+# ...tru khi model VUA SUY NGHI VUA TRA LOI (nemotron-3, deepseek-r1, o-series).
+# Phan suy nghi cung an vao cho nay, ma no dai hon loi goi cong cu rat nhieu:
+# do that tren nemotron-3-super, cho 1200 token het sach truoc khi model kip
+# goi get_source. Nhu han muc Gemini ben duoi: tran cao khong tieu thi khong
+# tinh tien, nen de rong.
+_MAX_TOKENS_SUY_NGHI = 16384
 # Dong Gemini 3 SUY NGHI truoc khi tra loi, va phan suy nghi cung tru vao han muc
 # nay. Do that tren tai khoan that: hoi dung 1 chu ma model suy nghi het 45-141
 # token. Cau tra loi Explain dai hon nhieu nen phan suy nghi cung dai theo. Han muc
@@ -385,6 +391,26 @@ def _han_muc_ngay(body: str) -> str:
             "- hoac bat thanh toan cho tai khoan" % muc)
 
 
+def _co_suy_nghi(msg: dict) -> bool:
+    """Luot nay model co suy nghi truoc khi tra loi khong."""
+    return bool((msg.get("reasoning_content") or "").strip())
+
+
+def _chu_that(msg: dict) -> str:
+    """Chu TRA LOI trong mot luot. Phan suy nghi khong phai cau tra loi.
+
+    Model biet suy nghi de phan nhap nhap rieng o 'reasoning_content'. Nhung khi het
+    cho giua chung (finish_reason='length'), NVIDIA do luon phan suy nghi dang do
+    sang 'content' - do that: content 626 ky tu y het reasoning 626 ky tu, mo dau
+    'We need to parse the context...'. Dua doan do ra man hinh thi nguoi dung doc
+    duoc dung dan bai tieng Anh cua model chu khong phai cau tra loi."""
+    c = (msg.get("content") or "").strip()
+    nghi = (msg.get("reasoning_content") or "").strip()
+    if c and nghi and (c == nghi or nghi.startswith(c)):
+        return ""
+    return c
+
+
 def _raise_http(r, who: str) -> None:
     """Ma loi HTTP -> cau noi ro phai lam gi. Van kem nguyen van loi cua nha cung cap
     o cuoi, vi ho hay noi chinh xac hon ta doan (vd 'model nay da ngung')."""
@@ -585,6 +611,9 @@ class OpenAICompatibleClient(BaseLLMClient):
         # bi tu choi mot lan. Hoc duoc roi thi cac luot sau tu giu duoi nguong, khoi
         # phai dam dau vao tuong them lan nua.
         self._han_biet = 0
+        # Model co suy nghi truoc khi tra loi khong. Chi biet sau luot dau; biet roi
+        # thi cac luot sau tu noi cho ra, khong phai hong mot luot moi hoc duoc.
+        self._suy_nghi = False
 
     def _post(self, messages, tools, on_event=None, max_tokens=0):
         h = {"Authorization": "Bearer %s" % self.key, "Content-Type": "application/json"}
@@ -641,8 +670,8 @@ class OpenAICompatibleClient(BaseLLMClient):
             # Luot con duoc phep tra cuu: dat truoc it cho o tra loi. Nha cung cap
             # tinh ca phan dat truoc vao han muc theo phut, ma luot tra cuu thuc te
             # chi dai vai chuc token.
-            data = self._post(msgs, tools, on_event,
-                              _MAX_TOKENS_TRACUU if tools else 0)
+            cho = (_MAX_TOKENS_SUY_NGHI if self._suy_nghi else _MAX_TOKENS_TRACUU)
+            data = self._post(msgs, tools, on_event, cho if tools else 0)
             # Da tung bi tu choi vi qua han thi cac luot sau tu giu duoi nguong luon.
             # Khong lam the thi moi luot lai phinh len roi lai bi tu choi, moi lan deu
             # ton them mot vong gui - lau va van ton han muc.
@@ -654,13 +683,23 @@ class OpenAICompatibleClient(BaseLLMClient):
             ch = (data.get("choices") or [{}])[0]
             msg = ch.get("message") or {}
             tc = msg.get("tool_calls") or []
-            if not tc:
+            self._suy_nghi = self._suy_nghi or _co_suy_nghi(msg)
+            if not tc and tools and ch.get("finish_reason") == "length":
                 # Model tra loi luon o luot nay - neu bi cat giua chung vi cho hep
                 # thi hoi lai dung luot do voi cho rong day du.
-                if tools and ch.get("finish_reason") == "length":
-                    data = self._post(msgs, None, on_event)
-                    msg = ((data.get("choices") or [{}])[0].get("message") or {})
-                txt = (msg.get("content") or "").strip()
+                #
+                # Model biet suy nghi thi VAN PHAI GIU CONG CU o lan hoi lai: no chua
+                # noi gi khong phai vi dang viet cau tra loi dai, ma vi het cho giua
+                # chung khi dang nghi. Bo cong cu di la no het duong tra cuu, danh
+                # ngoi ke lai cac buoc dinh lam ("we cannot actually call tool; we
+                # must simulate?") - nguoi dung nhan duoc mot dan bai, khong phai cau
+                # tra loi.
+                data = self._post(msgs, tools if self._suy_nghi else None, on_event)
+                ch = (data.get("choices") or [{}])[0]
+                msg = ch.get("message") or {}
+                tc = msg.get("tool_calls") or []
+            if not tc:
+                txt = _chu_that(msg)
                 self._say(on_event, "text", txt)
                 return txt
             msgs.append({"role": "assistant", "content": msg.get("content") or "",
@@ -677,8 +716,7 @@ class OpenAICompatibleClient(BaseLLMClient):
         msgs.append({"role": "user",
                      "content": "Da du du lieu. Tra loi ngay bay gio, khong tra cuu them."})
         data = self._post(msgs, None, on_event)
-        return (((data.get("choices") or [{}])[0].get("message") or {})
-                .get("content") or "").strip()
+        return _chu_that((data.get("choices") or [{}])[0].get("message") or {})
 
 
 def make_openai_client(provider: str, key: str, model: str) -> OpenAICompatibleClient:
