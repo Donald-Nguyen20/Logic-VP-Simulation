@@ -29,25 +29,54 @@ import re
 
 from core import macro_def as MD
 
-_BODIES = None
 _CACHE = {}
+_CACHE_GEN = -1          # the he cua macro_def luc dung cache nay
+
+# Cho phep lay than lenh tu TODEN.DEF khi TAG_MCR.DEF khong co ten do.
+# MAC DINH TAT: bat len la doi hanh vi cua ~152.000 khoi (79% du an) dang chay mo hinh
+# chep tay sang chay than lenh goc. Bo doi chieu (tang B) bat co no de do do lech
+# truoc khi quyet dinh lat cong tac nay thanh mac dinh.
+USE_TODEN = False
+
+# Noi day ca chan hang de trong ten hoac TRUNG ten, bang khoa "#<so chan>"
+# (xem macro_def.pin_wire_keys).
+# Tach rieng khoi USE_TODEN de do duoc anh huong cua tung thay doi mot, nhung tren
+# thuc te hai co phai bat cung nhau: than lenh TODEN tro toi chan bang so, ma phan lon
+# chan VAO cua ho khoi do khong co ten trong macro_pins.json.
+PIN_BY_NO = False
+
+# Toan hang kieu TODEN.DEF: <kieu><4 chu so>, kem duoi chu thich tuy y (' F', '-12').
+# Chi khop dung 1 chu cai + 4 chu so, nen KHONG dinh toi thanh ghi noi Dw001/Rw001/
+# Rf001/Rs001 (2 chu cai + 3 chu so). Da kiem: 145 than lenh trong TAG_MCR.DEF khong
+# co lay mot token dang nay, nen bo giai ma khong the lam sai duong chay hien tai.
+_TOK_TODEN = re.compile(r"^([DXR])(\d{4})(?:[\s-].*)?$")
+_HEX = re.compile(r"^[0-9A-F]+H$")
 
 
 def _bodies():
-    global _BODIES
-    if _BODIES is None:
-        tag, _toden = MD.find_def_files()
-        _BODIES = MD.read_bodies(tag) if tag else {}
-    return _BODIES
+    """{symbol: [dong lenh]} - than lenh goc, gop tu CA 6 thu muc TYPE_*.
+
+    Truoc day chi doc thu muc khop dau tien (TYPE_A_CPUW01) nen 2.120 khoi cua du an
+    khong co than lenh goc: 82FD DDL1 (1.898 khoi) va 82FE DALM1 (222) chi nam trong
+    TYPE_B_CPUX01. Chung phai rot xuong mo hinh chep tay, hoac bi bo han khoi mo phong
+    dong neu khong co mo hinh nao."""
+    return MD.merged_tag_bodies()
 
 
 def instrs_for(code):
     """[(lenh,[toan hang])] cua 1 macrocode, hoac None neu khong co than logic."""
+    global _CACHE_GEN
     code = (code or "").upper()
+    # Doi loai CPU -> than lenh co the khac -> cache cu khong con dung.
+    if _CACHE_GEN != (MD._GEN, USE_TODEN):
+        _CACHE.clear()
+        _CACHE_GEN = (MD._GEN, USE_TODEN)
     if code in _CACHE:
         return _CACHE[code]
     sym = MD.symbol_of(code)
-    body = _bodies().get(sym) if sym else None
+    body = MD.body_of(sym) if sym else None
+    if body is None and USE_TODEN and sym:
+        body = MD.body_of(sym, toden=True)
     out = MD.parse_body(body) if body else None
     _CACHE[code] = out
     return out
@@ -87,7 +116,10 @@ class DefSim:
         self.code = (code or "").upper()
         self.instrs = instrs_for(self.code) or []
         self.dt = float(dt)
-        self.pins = MD.pins_of(self.code)          # {'in':{n:ten}, 'out':{n:ten}}
+        # khoa=True: chan khong ten / trung ten van noi day duoc (xem pin_wire_keys)
+        self.pins = MD.pins_of(self.code, khoa=PIN_BY_NO)
+        # So chan cua khoi - ranh gioi giua SO CHAN va SO THAM SO trong he TODEN.
+        self._npin = max([int(n) for d in self.pins.values() for n in d] or [0])
         self._name2in = {nm: n for n, nm in self.pins.get("in", {}).items() if nm}
         self._name2out = {nm: n for n, nm in self.pins.get("out", {}).items() if nm}
         self.inputs = {}          # {ten_chan: gia tri}
@@ -208,6 +240,32 @@ class DefSim:
         return {nm: {} for nm in self._name2in}
 
     # ---------- doc/ghi toan hang ----------
+    def _chan(self, tok):
+        """Toan hang TODEN -> ('in'|'out', ten_chan) hoac ('prm', so_tham_so). None = khong phai.
+
+        Quy tac giai ma: chu cai = kieu du lieu, SO = so chan neu <= so chan cua khoi,
+        nguoc lai la tham so thu (so - so chan).
+
+        Do tren 236 ma TODEN co that trong 21 file .db cua du an, 2.808 toan hang:
+        794 lan doc chan VAO, 267 lan ghi chan RA, 91 lan doc lai chan ra (hoi tiep noi
+        bo), 254 lan tham so - va 0 lan ghi nham vao chan vao, 0 lan tro toi so chan
+        khong ton tai. Doi chieu tiep voi tham so THAT trong CAD_BLOCK_PARAM:
+          4013 DI_I  (2 chan): 'TONR D0001,X0004,...'      -> X0004 = PARAMNO 2 = 90 giay
+          406C INL1_I(4 chan): 'ITG X0002,-D0001,X0006,..' -> X0006 = PARAMNO 2 = 600 giay
+                               'UL ..,X0007' / 'LL ..,X0008' -> PARAMNO 3/4 = +100/-100
+        Ca ba deu ra dung y nghia cua khoi."""
+        m = _TOK_TODEN.match(tok)
+        if not m:
+            return None
+        n = int(m.group(2))
+        if n > self._npin:
+            return ("prm", n - self._npin)
+        for ben in ("in", "out"):
+            nm = self.pins.get(ben, {}).get(n)
+            if nm:
+                return (ben, nm)
+        return None
+
     def _get(self, tok):
         neg = tok.startswith("-")
         if neg:
@@ -237,10 +295,26 @@ class DefSim:
             # thi Bmin_c = 60. Nho vay cong thuc doc nguoc cua hang
             # (da_troi = Rw_phut*60 + Rw_le/Bsec_fc) van ra dung so giay.
             return 60.0
+        if tok == "Fsec_fc":
+            # So vong quet/giay dang SO THUC. Cac tram SV, SV-BIAS, MV-POS, MV-FF-POS
+            # doi han toc do (don vi/giay) ra buoc moi vong: 'F/ PRM_RL,Fsec_fc,Rf'
+            # roi dua Rf vao FDLM/FUL. Tra 0 thi F/ chia 0 ra 0 -> SV dung yen mai.
+            # Bsec_fc = 1 la de dem TON theo giay, con day phai la 1/dt that.
+            return 1.0 / self.dt if self.dt > 0 else 1.0
         if tok.startswith("OPS_") or tok.startswith("OS_"):
             return float(self.ops.get(tok, 0.0))
+        ch = self._chan(tok)
+        if ch:
+            if ch[0] == "prm":
+                return float(self._prm.get(ch[1], 0.0))
+            kho = self.inputs if ch[0] == "in" else self.out
+            return float(kho.get(ch[1], 0.0))
         if tok in self.state:
             return float(self.state[tok])
+        if _HEX.match(tok):
+            # hang so hex kieu hang: '0001H' = bit 0, '0002H' = bit 1 (76 cho, lenh AR/XOR
+            # cua ho AI/CA/CDA/DIA). float() khong doc duoc -> truoc day ra 0, thu bit hong.
+            return float(int(tok[:-1], 16))
         try:
             return float(tok)
         except ValueError:
@@ -252,6 +326,15 @@ class DefSim:
             nm = self.pins.get("out", {}).get(int(m.group(1)))
             if nm:
                 self.out[nm] = v
+            return
+        ch = self._chan(tok)
+        if ch and ch[0] == "out":
+            self.out[ch[1]] = v
+            return
+        if ch and ch[0] == "in":
+            # Do duoc 0 truong hop tren 236 ma; giu lai de neu co thi khong am tham
+            # de len chan vao that (se lam sai gia tri nguoi dung bom vao).
+            self.state[tok] = v
             return
         self.state[tok] = v
 
@@ -367,9 +450,16 @@ class DefSim:
                 self._clear()
 
             elif op == "XOR" and len(o) >= 3:
-                a = 1.0 if self._get(o[0]) > 0.5 else 0.0
-                b = 1.0 if self._get(o[1]) > 0.5 else 0.0
-                self._put(o[2], 1.0 if a != b else 0.0); self._clear()
+                # XOR THEO WORD giong AR: work = a ^ b; acc = 1 neu KHAC 0 (tuc a != b).
+                # Ca 148 cho dung trong TAG_MCR.DEF deu la 'XOR a,b,Rw / OUT Dw' de SO
+                # KHAC: 'XOR OS_CAT,PRM_n' = nhom bao dong khong khop -> phai tu xac nhan,
+                # 'XOR PRM_3,0' = tham so khac 0, 'XOR PRM_2,1' = che do khac 1.
+                # Ban cu xoa acc nen OUT luon ghi 0: bao dong coi nhu da xac nhan san va
+                # nhanh 'A x,-Dw' luon chay.
+                r = int(self._get(o[0])) ^ int(self._get(o[1]))
+                self._put(o[2], float(r))
+                self._acc = 1.0 if r else 0.0
+                self._rung = False
 
             elif op == "TONL" and len(o) >= 5:
                 # TON dai ngay: TONL Bmin_c, T_phut, w_le, w_phut, q

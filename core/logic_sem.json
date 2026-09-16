@@ -1,4 +1,20 @@
 {
+"40B4": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "1SH1",
+"nin": 1,
+"nout": 1,
+"name": "1SS(ON)"
+},
+"40B5": {
+"op": "PULSE",
+"note": "timer/pulse",
+"tmr": "1SH2",
+"nin": 1,
+"nout": 1,
+"name": "1SS(OFF)"
+},
 "4003": {
 "op": "AND",
 "nin": 5,
@@ -15,7 +31,7 @@
 "4080": {
 "op": "PASS",
 "note": "timer/pulse",
-"tmr": "DI",
+"tmr": "DIL",
 "tpar": "2",
 "tunit": "min",
 "nin": 1,
@@ -184,6 +200,69 @@
 "nout": 1,
 "name": "FLIP1"
 },
+"003E": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "reset",
+"nin": 2,
+"nout": 1,
+"name": "FF"
+},
+"1023": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "set",
+"nin": 2,
+"nout": 1,
+"name": "FFS"
+},
+"1025": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "reset",
+"nin": 2,
+"nout": 1,
+"name": "FF1"
+},
+"20F9": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "set",
+"nin": 2,
+"nout": 1,
+"name": "FFS(H)"
+},
+"502F": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "reset",
+"nin": 2,
+"nout": 1,
+"name": "FF(R)"
+},
+"5030": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "set",
+"nin": 2,
+"nout": 1,
+"name": "FF/S"
+},
+"5031": {
+"op": "SR",
+"set": 0,
+"reset": 1,
+"priority": "reset",
+"nin": 2,
+"nout": 1,
+"name": "FF1"
+},
 "4016": {
 "op": "PULSE",
 "note": "timer/pulse",
@@ -348,7 +427,7 @@
 "4014": {
 "op": "PASS",
 "note": "timer/pulse",
-"tmr": "DI",
+"tmr": "DIL",
 "tpar": "2",
 "tunit": "min",
 "nin": 1,
@@ -644,7 +723,7 @@
 "407F": {
 "op": "PASS",
 "note": "timer/pulse",
-"tmr": "DI",
+"tmr": "DIL",
 "tunit": "min",
 "nin": 2,
 "nout": 1,
@@ -653,7 +732,7 @@
 "4081": {
 "op": "PASS",
 "note": "timer/pulse",
-"tmr": "DI",
+"tmr": "DIL",
 "tunit": "min",
 "nin": 2,
 "nout": 2,
@@ -836,7 +915,7 @@
 "4144": {
 "op": "PASS",
 "note": "timer/pulse",
-"tmr": "DI",
+"tmr": "DIL",
 "tpar": "2",
 "tunit": "min",
 "nin": 1,

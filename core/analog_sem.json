@@ -15,6 +15,23 @@
   "op": "SELECT",
   "name": "Analog Switch(for HCNT)"
  },
+ "20FB": {
+  "op": "CMPHI_P",
+  "on": "1",
+  "off": "2",
+  "name": "Comparator (+)(for HCNT). H=1 khi X>=P1, tat khi X<P2 (P1>=P2: tre)."
+ },
+ "20FC": {
+  "op": "CMPLO_P",
+  "on": "1",
+  "off": "2",
+  "name": "Comparator (-)(for HCNT). L=1 khi X<=P1, tat khi X>P2 (P1<=P2: tre)."
+ },
+ "20FD": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "Rate Limiter(for HCNT)"
+ },
  "20FF": {
   "op": "SIGNSUM",
   "signs": [
@@ -56,12 +73,21 @@
   "name": "4 Adder(4) for HCNT"
  },
  "2103": {
-  "op": "PASS",
-  "name": "Upper Limitter(for HCNT)"
+  "op": "CLAMPHI_P",
+  "lim": "1",
+  "name": "Upper Limitter(for HCNT). Y=min(X,HL); D=1 khi X>=HL. HL=PARAMNO 1."
  },
  "2104": {
-  "op": "PASS",
-  "name": "Lower Limitter(for HCNT)"
+  "op": "CLAMPLO_P",
+  "lim": "1",
+  "name": "Lower Limitter(for HCNT). Y=max(X,LL); D=1 khi X<=LL. LL=PARAMNO 1."
+ },
+ "2107": {
+  "op": "LIMIT_P",
+  "hl": "1",
+  "ll": "2",
+  "sig": "left",
+  "name": "Lead Lag(for HCNT). On dinh: Y=X kep trong [LL,HL] (P1=HL, P2=LL)."
  },
  "210F": {
   "op": "CLAMPHI",
@@ -204,6 +230,48 @@
   "op": "PASS",
   "sig": "left",
   "name": "F(t) - First Order LAG (T:input / without SW)"
+ },
+ "403C": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:para / SW:Upside). On dinh: Y=X kep trong [LL1,HL1]."
+ },
+ "403D": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:para / SW:Downside). On dinh: Y=X kep trong [LL1,HL1]."
+ },
+ "403E": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:input / SW:Upside). On dinh: Y=X kep trong [LL1,HL1]."
+ },
+ "403F": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:input / SW:Downside). On dinh: Y=X kep trong [LL1,HL1]."
+ },
+ "4040": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:para / without SW). On dinh: Y=X kep trong [LL1,HL1]."
+ },
+ "4041": {
+  "op": "LIMIT_P",
+  "hl": "2",
+  "ll": "3",
+  "sig": "left",
+  "name": "LLG - Lead/Lag (T:input / without SW). On dinh: Y=X kep trong [LL1,HL1]."
  },
  "4042": {
   "op": "MAX",
@@ -378,6 +446,16 @@
  "407A": {
   "op": "PASS",
   "name": "Z^(-n) - Sampling Delay Gate"
+ },
+ "408B": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "DEAD TIME - Pure Delay (SW:Upside)"
+ },
+ "408C": {
+  "op": "PASS",
+  "sig": "left",
+  "name": "DEAD TIME - Pure Delay (SW:Downside)"
  },
  "4090": {
   "op": "SELECT",

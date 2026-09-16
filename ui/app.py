@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout, QCheckBox, QGroupBox, QComboBox, QScrollArea,
     QDoubleSpinBox, QSpinBox, QPushButton, QFormLayout, QMenu, QTabWidget,
 )
-from PySide6.QtGui import QPainter, QAction, QPixmap, QShortcut, QKeySequence
+from PySide6.QtGui import QPainter, QAction, QPixmap, QShortcut, QKeySequence, QCursor
 from PySide6.QtCore import Qt
 
 from core.model import (Circuit, BLOCK_SPECS,
@@ -390,6 +390,39 @@ class AnalogSimDialog(QDialog):
             l.setText("%s = %.1f" % (o, out.get(o, 0.0)))
 
 
+def _badge_info(b):
+    """Rut gon 1 khoi dong (sheet_dyn) thanh dict cho badge tren ban ve.
+
+    Dung CHUNG cho ca hai duong: badge tinh (_dyn_info) va badge sau khi chay dong
+    (_dyninfo). Truoc day hai cho chep y het nhau nen them mot ho khoi la phai sua hai
+    lan - va lan nao quen la badge cho ho do lai roi ve nhanh mac dinh (in "∫ I")."""
+    from core import sheet_dyn as DYN
+    from core import ai_explain as AE
+    k = b.get("kind", "I")
+    if k == "S":
+        return {"kind": "S", "code": b["code"],
+                "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
+                "outs": dict(b.get("last_out") or {}),
+                "in_nets": b["in_nets"], "out_nets": b["out_nets"],
+                "real_params": dict(b["sim"].params)}
+    if k == "T":
+        # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang b["ti"] o day se
+        # nem KeyError va lam mat sach badge cua MOI khoi dong tren sheet do.
+        return {"kind": "T", "out": b["out"], "code": b["code"], "tmr": b.get("tmr"),
+                "T": b.get("Tef", b.get("T")), "toff": b.get("toff"),
+                "left": DYN.timer_left(b)}
+    d = {"ti": b.get("ti"), "out": b["out"], "code": b["code"], "kind": k}
+    if k == "R":
+        d.update(up=b.get("up"), dn=b.get("dn"))
+    elif k == "C":
+        d.update(hi=b.get("hi"), on=b.get("on"), off=b.get("off"))
+    elif k == "G":
+        d.update(hl=b.get("hl"), ll=b.get("ll"), le=b.get("le"), la=b.get("la"))
+    elif k == "I":
+        d.update(hl=b.get("hl"), ll=b.get("ll"))
+    return d
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -413,6 +446,12 @@ class MainWindow(QMainWindow):
                                    # nhu station_sims nhung cho khoi I/D/L/R: giu de lan tinh sau
                                    # TIEP TUC tu day (diem dao dong tien 1 buoc moi tick) thay vi
                                    # nhay ve 0. Reset cung luc voi station_sims.
+        self.sim_latch = {}       # {(db_path, sheet_id): {bid: 0/1}} - BO NHO KHOI F/F (S/R).
+                                   # sheet_sim.simulate() giai lai tu dau moi lan goi nen neu
+                                   # khong giu rieng thi chot quen mat no dang o 1: dat Set=1
+                                   # dau ra len 1, tha Set ve 0 la dau ra rot ngay xuong 0
+                                   # trong khi F/F phai giu cho toi khi co Reset. Reset cung
+                                   # luc voi station_sims.
         from PySide6.QtCore import QTimer
         self._osc_timer = QTimer(self)
         self._osc_timer.timeout.connect(self._osc_tick)
@@ -778,6 +817,8 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
         # Tim tin hieu: phim tat Ctrl+F
         QShortcut(QKeySequence("Ctrl+F"), self, activated=self.find_signal)
+        # F1: chuc nang khoi trong phan mem goc duoc quy dinh o file nao
+        QShortcut(QKeySequence("F1"), self, activated=self.show_source_help)
         self.sim_sheet_act = QAction("Simulate on sheet", self)
         self.sim_sheet_act.setCheckable(True)
         self.sim_sheet_act.setToolTip("Toggle: color 0/1 on the logic sheet; click inputs to change 0/1")
@@ -960,6 +1001,7 @@ class MainWindow(QMainWindow):
             self.sim_dyn_over = {}
             self.station_sims.pop((self.db_path, sheet_id), None)   # mo sheet -> khoi tram bat dau lai
             self.sim_dyn_state.pop((self.db_path, sheet_id), None)
+            self.sim_latch.pop((self.db_path, sheet_id), None)
             self._stop_sim_run()                 # dong ho khong chay tiep sang sheet khac
             from core import sheet_dyn as _DYN
             self.sim_run_act.setEnabled(_DYN.has_dynamic(self.db_path, sheet_id))
@@ -1145,9 +1187,61 @@ class MainWindow(QMainWindow):
         else:
             self.status("Block %s has no simulation model yet (available: MOV/SWGR family and MV/SV/PID)." % code)
 
+    def show_block_help(self, code, name="", bid=None):
+        """Chuot phai len khoi -> Help: giai thich chuc nang bang chu, VE LAI khoi
+        (gian do xung cho ho timer, so do cong logic noi cho ho cong), kem tham so
+        va chan THAT cua dung khoi do. Cua so nay CHI DOC."""
+        from ui.block_help_dialog import BlockHelpDialog
+        on_params = None
+        if bid is not None and getattr(self, "db_path", None) is not None:
+            on_params = lambda: self._open_block_params(code, name, bid)
+        BlockHelpDialog(code, name, bid,
+                        db_path=getattr(self, "db_path", None),
+                        sheet_id=getattr(self, "cur_sheet", None),
+                        parent=self,
+                        sim_values=getattr(self, "sim_values", None),
+                        dig_env=getattr(self, "sim_env", None),
+                        ana_env=getattr(self, "sim_analog", None),
+                        on_params=on_params).exec()
+
+    def show_source_help(self):
+        """F1: tom tat 4 nguon goc quy dinh chuc nang khoi. Chuot dang nam tren 1 khoi
+        cua ban ve -> kem vi tri that cua khoi do; khong thi lay khoi vua bam."""
+        from ui.source_help_dialog import SourceHelpDialog
+        code, name = self._block_under_cursor()
+        SourceHelpDialog(code, name, self).exec()
+
+    def _block_under_cursor(self):
+        """(ma, ten) cua khoi duoi con tro chuot, hoac khoi vua bam, hoac (None, "")."""
+        v = self.view
+        p = v.viewport().mapFromGlobal(QCursor.pos())
+        sc = v.scene()
+        if v.viewport().rect().contains(p) and hasattr(sc, "block_at"):
+            hit = sc.block_at(v.mapToScene(p))
+            if hit:
+                return (hit[0] or "").upper(), hit[1] or ""
+        return self._last_block_code, ""
+
+    def _open_block_params(self, code, name, bid):
+        """Bang tham so cai dat cua khoi - sua duoc de chay mo phong."""
+        self._last_block_code = code
+        from ui.block_param_dialog import BlockParamDialog
+        # sau khi ap dung tham so -> tinh lai sheet ngay (neu dang bat mo phong)
+        def _after():
+            sc = getattr(self, "sheet_scene", None)
+            if sc is not None and getattr(sc, "sim_values", None) is not None:
+                self._apply_sheet_sim()      # dang bat mo phong -> tinh lai ngay
+        BlockParamDialog(self.db_path, bid, code, name, self, on_applied=_after,
+                         sim_values=getattr(self, "sim_values", None),
+                         sheet_id=getattr(self, "cur_sheet", None),
+                         dig_env=getattr(self, "sim_env", None),
+                         ana_env=getattr(self, "sim_analog", None)).exec()
+
     def block_context_menu(self, code, name, bid, global_pos):
         code = (code or "").upper()
         m = QMenu(self)
+        a_help = m.addAction("Help")
+        m.addSeparator()
         a_graph = m.addAction("View signal node diagram")
         a_view = m.addAction("View function (internal logic)")
         a_sim = m.addAction("Block parameters (edit for simulation)")
@@ -1157,25 +1251,16 @@ class MainWindow(QMainWindow):
         a_sim.setEnabled(has_db and bid is not None)
         a_graph.setEnabled(has_db)
         act = m.exec(global_pos)
-        if act == a_graph:
+        if act == a_help:
+            self.show_block_help(code, name, bid)
+        elif act == a_graph:
             from core.signal_graph import block_output_net
             net = block_output_net(self.db_path, self.cur_sheet, bid)
             self._open_node_tab(net, name)
         elif act == a_view:
             self.show_internal_logic(code, name)
         elif act == a_sim:
-            self._last_block_code = code
-            from ui.block_param_dialog import BlockParamDialog
-            # sau khi ap dung tham so -> tinh lai sheet ngay (neu dang bat mo phong)
-            def _after():
-                sc = getattr(self, "sheet_scene", None)
-                if sc is not None and getattr(sc, "sim_values", None) is not None:
-                    self._apply_sheet_sim()      # dang bat mo phong -> tinh lai ngay
-            BlockParamDialog(self.db_path, bid, code, name, self, on_applied=_after,
-                             sim_values=getattr(self, "sim_values", None),
-                             sheet_id=getattr(self, "cur_sheet", None),
-                             dig_env=getattr(self, "sim_env", None),
-                             ana_env=getattr(self, "sim_analog", None)).exec()
+            self._open_block_params(code, name, bid)
 
     def signal_context_menu(self, net, linename, global_pos):
         """Chuot phai len 1 TIN HIEU (terminal) -> xem so do node."""
@@ -1350,7 +1435,8 @@ class MainWindow(QMainWindow):
             if cfg is not None:
                 analog[net] = cfg["value"]
         try:
-            values, _ = SS.simulate(db, sheet, digital, analog)
+            values, _ = SS.simulate(db, sheet, digital, analog,
+                                    latch=self.sim_latch.setdefault((db, sheet), {}))
         except Exception:
             return
         self._export_sim_global(db, sheet, values, terms=sh.terms)
@@ -1395,6 +1481,7 @@ class MainWindow(QMainWindow):
             self.sim_dyn_over = {}
             self.station_sims.pop((self.db_path, self.cur_sheet), None)  # bat lai -> khoi tram tu 0
             self.sim_dyn_state.pop((self.db_path, self.cur_sheet), None)
+            self.sim_latch.pop((self.db_path, self.cur_sheet), None)
             sc.on_sim_toggle = self._sim_toggle
             sc.on_sim_set_analog = self._sim_set_analog
             sc.on_sim_dyn_config = self._sim_dyn_config
@@ -1410,6 +1497,7 @@ class MainWindow(QMainWindow):
                     self.sim_osc.pop(k, None)
             self.station_sims.pop((db, sh), None)  # tat -> huy state khoi tram dang tich luy
             self.sim_dyn_state.pop((db, sh), None)
+            self.sim_latch.pop((db, sh), None)
             self._stop_sim_run()
             self.sim_run_act.setEnabled(False)
             self.status("Sheet simulation turned off.")
@@ -1471,31 +1559,12 @@ class MainWindow(QMainWindow):
         badge phan anh dung tin hieu dang chay toi (xem ghi chu trong sheet_dyn._dyn_blocks).
         Dung self.station_sims[(db,sh)] lam sim_cache de MV khoi TRAM tich luy xuyen cac lan goi."""
         from core import sheet_dyn as DYN
-        from core import ai_explain as AE
         info = {}
         cache = self.station_sims.setdefault((db, sh), {})
         try:
             for b in DYN._dyn_blocks(db, sh, getattr(self, "sim_dyn_over", {}),
                                      live_values=live_values, sim_cache=cache):
-                if b["kind"] == "S":
-                    info[b["bid"]] = {"kind": "S", "code": b["code"],
-                                      "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
-                                      "outs": dict(b.get("last_out") or {}),
-                                      "in_nets": b["in_nets"], "out_nets": b["out_nets"],
-                                      "real_params": dict(b["sim"].params)}
-                elif b["kind"] == "T":
-                    # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang
-                    # b["ti"] o day se nem KeyError va lam mat sach badge cua MOI khoi
-                    # dong tren sheet do.
-                    info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
-                                      "tmr": b.get("tmr"), "T": b.get("Tef", b.get("T")),
-                                      "toff": b.get("toff"), "left": DYN.timer_left(b)}
-                else:
-                    info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
-                                      "kind": b.get("kind", "I")}
-                    if b.get("kind") == "R":
-                        info[b["bid"]]["up"] = b.get("up")
-                        info[b["bid"]]["dn"] = b.get("dn")
+                info[b["bid"]] = _badge_info(b)
         except Exception:
             pass
         return info
@@ -1509,16 +1578,27 @@ class MainWindow(QMainWindow):
         ten = {"DI": "Tre BAT (on-delay)", "DIL": "Tre BAT (on-delay, dat bang phut)",
                "DT": "Tre TAT (off-delay)", "PO": "Xung mot nhat SS1 (giu 1 khoang T)",
                "TDWO": "Xung mot nhat SS2 (dau vao tat la cat xung ngay)",
-               "PG": "Mach dao dong co cong"}
+               "1SH1": "Xung 1 chu ky quet o suon LEN", "PG": "Mach dao dong co cong",
+               "1SH2": "Xung 1 chu ky quet o suon XUONG"}
         fam = cur.get("tmr") or "timer"
         dlg = QDialog(self)
         dlg.setWindowTitle("%s - %s" % (fam, ten.get(fam, "delay/xung")))
         form = QFormLayout(dlg)
         cur_t = over.get(bid, {}).get("tsec", cur.get("T"))
+        # Ho DIL cai bang PHUT tren ban ve (chan ra in chu "M"); engine giu moi thu bang
+        # giay. Hop thoai phai hoi DUNG don vi ban ve, khong thi khoi ghi "30" mo ra thay
+        # "1800" va nguoi dung tuong may cai dat sai.
+        dvt, hs = ("phut", 60.0) if fam == "DIL" else ("giay", 1.0)
         sp_t = QDoubleSpinBox(); sp_t.setRange(0.0, 1e6); sp_t.setDecimals(3)
-        sp_t.setValue(float(cur_t) if cur_t is not None else 0.0)
-        # Quy HET ve giay (DIL dat bang phut tren ban ve da doi san) de so thang voi dt.
-        form.addRow("T - thoi gian (giay):", sp_t)
+        sp_t.setValue(float(cur_t) / hs if cur_t is not None else 0.0)
+        # Ho one-scan-shot khong co tham so thoi gian nao ca (sach macro trang P-118):
+        # do rong xung LUON bang dung mot chu ky quet. Hien o nhap se moi nguoi dung cai
+        # mot con so ma engine khong dung toi.
+        mot_nhip = fam in ("1SH1", "1SH2")
+        if mot_nhip:
+            form.addRow("Do rong xung:", QLabel("1 chu ky quet (khong cai duoc)"))
+        else:
+            form.addRow("T - thoi gian (%s):" % dvt, sp_t)
         if fam == "PG":
             off = cur.get("toff")
             form.addRow("Nua chu ky TAT (giay):",
@@ -1534,7 +1614,8 @@ class MainWindow(QMainWindow):
         def _upd():
             # Canh bao thang: dt qua tho thi timer khong bao gio dem toi noi.
             tong = sp_dt.value() * sp_steps.value()
-            th = " - CHUA DU DAI cho T=%gs!" % sp_t.value() if tong < sp_t.value() else ""
+            tsec = sp_t.value() * hs
+            th = "" if mot_nhip or tong >= tsec else " - CHUA DU DAI cho T=%gs!" % tsec
             lbl_t.setText("%.1f s%s" % (tong, th))
         for w in (sp_dt, sp_steps, sp_t):
             w.valueChanged.connect(_upd)
@@ -1545,7 +1626,8 @@ class MainWindow(QMainWindow):
         form.addRow(row)
 
         def _apply_run():
-            over[bid] = {"tsec": sp_t.value()}
+            if not mot_nhip:
+                over[bid] = {"tsec": sp_t.value() * hs}
             self.sim_dyn_over = over
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
             dlg.accept()
@@ -1568,8 +1650,12 @@ class MainWindow(QMainWindow):
         cur_init = over.get(bid, {}).get("init", 0.0)
 
         kind = cur.get("kind")
-        titles = {"D": "Derivative settings", "L": "F(t) lag filter settings", "R": "Rate limiter settings"}
-        plabels = {"D": "G - gain:", "L": "T - time constant (seconds):"}
+        titles = {"D": "Derivative settings", "L": "F(t) lag filter settings",
+                  "R": "Rate limiter settings", "Q": "Dead time - do tre thuan",
+                  "C": "So sanh co tre (HCNT)", "G": "Lead/Lag settings"}
+        plabels = {"D": "G - gain:", "L": "T - time constant (seconds):",
+                   "Q": "Do tre (giay):", "G": "Lag TLa - hang so tre (giay):",
+                   "C": "Muc BAT (nguong so sanh):"}
         dlg = QDialog(self)
         dlg.setWindowTitle(titles.get(kind, "Integrator settings"))
         form = QFormLayout(dlg)
@@ -1590,7 +1676,21 @@ class MainWindow(QMainWindow):
         sp_init = QDoubleSpinBox(); sp_init.setRange(-1e9, 1e9); sp_init.setDecimals(3); sp_init.setValue(float(cur_init))
         sp_dt = QDoubleSpinBox(); sp_dt.setRange(0.01, 60.0); sp_dt.setDecimals(2); sp_dt.setSingleStep(0.1); sp_dt.setValue(float(getattr(self, "_dyn_dt", 0.5)))
         sp_steps = QSpinBox(); sp_steps.setRange(1, 100000); sp_steps.setValue(int(getattr(self, "_dyn_steps", 300)))
-        form.addRow("Initial output value:", sp_init)
+        if kind == "C":
+            # Khoi so sanh ra tin hieu SO va tu suy trang thai tu dau vao - khong co
+            # "gia tri dau ra ban dau" nao de cai. Hien them muc NHA cho biet be rong
+            # vong tre thuc te dang cai trong DB.
+            off = cur.get("off")
+            form.addRow("Muc NHA (theo DB):",
+                        QLabel("%g" % off if isinstance(off, (int, float)) else "?"))
+        elif kind == "Q":
+            # Khoi tre thuan NAP DAY hang doi bang chinh dau vao ngay o buoc dau (xem
+            # _step_delay trong core/sheet_dyn.py), nen khong co cho nao xai duoc mot
+            # "gia tri dau ra ban dau" do nguoi dung go vao. Bay o nhap se lam nguoi dung
+            # tuong minh cai duoc ma thuc te engine bo qua.
+            form.addRow("Gia tri dau:", QLabel("bang chinh dau vao (khoi dang on dinh)"))
+        else:
+            form.addRow("Initial output value:", sp_init)
         form.addRow("dt - time step (seconds):", sp_dt)
         form.addRow("Steps:", sp_steps)
         lbl_t = QLabel(""); form.addRow("Total time:", lbl_t)
@@ -1605,6 +1705,8 @@ class MainWindow(QMainWindow):
         def _apply_run():
             if kind == "R":
                 over[bid] = {"up": sp_up.value(), "dn": sp_dn.value(), "init": sp_init.value()}
+            elif kind in ("C", "Q"):
+                over[bid] = {"ti": sp_ti.value()}
             else:
                 over[bid] = {"ti": sp_ti.value(), "init": sp_init.value()}
             self.sim_dyn_over = over
@@ -1916,12 +2018,24 @@ class MainWindow(QMainWindow):
                 self._apply_sheet_dyn(db, sh, advance)
                 return
             except Exception as e:
-                # hong o duong dong thi ve duong tinh, con hon de trong sheet
-                self.status("Dynamic step failed (%s) - showing steady-state values." % e)
+                # Hong o duong dong thi ve duong tinh, con hon de trong sheet. Nhung phai
+                # bao cho ro: o duong tinh khoi timer la op "PASS" - dau ra bam thang dau
+                # vao, KHONG con delay nao. Nguoi dung chi thay "khoi DI mat delay" chu
+                # khong biet engine da hong, vi truoc day chi co mot dong status thoang
+                # qua roi bi ghi de. In them vet loi ra console de con lan ra duoc.
+                import traceback
+                traceback.print_exc()
+                self.status("LOI mo phong dong (%s) - dang hien gia tri XAC LAP: "
+                            "timer/tich phan KHONG con tre, dau ra bam thang dau vao." % e)
         self._dyn_last = None
         kinds = SS._kind_map(db, sh)
+        latch = self.sim_latch.setdefault((db, sh), {})
+        # Luot 1 giai voi dau ra khoi tram con la 0 mac dinh - chua phai gia tri that,
+        # nen cho no ghi chot vao BAN SAO: neu khong, mot xung Set gia o luot nay se
+        # dinh vinh vien vao F/F. Chi luot cuoi (dung dau ra tram) moi duoc ghi that.
+        tmp = dict(latch)
         values, _ = SS.simulate(db, sh, getattr(self, "sim_env", {}),
-                                getattr(self, "sim_analog", {}))
+                                getattr(self, "sim_analog", {}), latch=tmp)
         dyn = self._dyn_info(db, sh, values)   # khoi tram da step 1 buoc (co cache)
         # DAU RA KHOI TRAM (Auto/MV/ABN...): bom nguoc vao mach roi tinh THEM 1 luot.
         # Cac net nay bi coi la "dau vao" luc mo sheet (khoi khong co mo hinh tinh) nen
@@ -1944,7 +2058,9 @@ class MainWindow(QMainWindow):
                     ana[net] = v
                 else:
                     dig[net] = 1 if v > 0.5 else 0
-            values, _ = SS.simulate(db, sh, dig, ana)
+            values, _ = SS.simulate(db, sh, dig, ana, latch=latch)
+        else:
+            latch.update(tmp)                  # khong co khoi tram -> luot 1 la ket qua that
         inputs = [n for n, _ in SS.input_nets(db, sh) if n not in souts]
         self.sim_values = values          # luu lai de tai su dung (VD trong trinh ve logic noi)
         self._export_sim_global(db, sh, values)     # cho sheet KHAC mo sau lay lai duoc
@@ -1975,10 +2091,10 @@ class MainWindow(QMainWindow):
         state = self.sim_dyn_state.setdefault((db, sh), {})
         cache = self.station_sims.setdefault((db, sh), {})
         if advance:
-            # run() giai gia tri ROI MOI tich phan trong cung 1 vong, va vong lap la
-            # range(nsteps+1) -> nsteps+1 buoc tich phan. Muon tien DUNG 'advance' buoc dt
-            # (1 nhip dong ho = 1 dt) thi phai tru 1, khong thi moi nhip di 2 buoc.
-            nsteps, settle = max(int(advance) - 1, 0), 0
+            # run() tien dung 'nsteps' buoc dt roi giai lai lan cuoi de DOC ket qua, nen
+            # 1 nhip dong ho = 1 dt la truyen thang advance. (Truoc day phai tru 1 vi
+            # run() tien thua 1 buoc so voi gia tri no tra ve - da sua trong sheet_dyn.)
+            nsteps, settle = int(advance), 0
         else:
             nsteps, settle = getattr(self, "_dyn_steps", 300), 4
         st = {}
@@ -1992,7 +2108,7 @@ class MainWindow(QMainWindow):
             db, sh, getattr(self, "sim_env", {}), getattr(self, "sim_analog", {}),
             dt=dt, nsteps=nsteps, overrides=getattr(self, "sim_dyn_over", {}),
             settle=settle, state=state, sim_cache=cache, stats=st,
-            freeze_tmr=not advance)
+            freeze_tmr=not advance, latch=self.sim_latch.setdefault((db, sh), {}))
         kinds = SS._kind_map(db, sh)
         dynouts = self._dyn_outs(blocks)
         inputs = [n for n, _ in SS.input_nets(db, sh) if n not in dynouts]
@@ -2024,28 +2140,9 @@ class MainWindow(QMainWindow):
 
     def _dyninfo(self, blocks):
         """{bid: thong tin badge} tu danh sach khoi dong tra ve boi sheet_dyn."""
-        from core import ai_explain as AE
-        from core import sheet_dyn as DYN
         info = {}
         for b in blocks:
-            if b["kind"] == "S":
-                info[b["bid"]] = {"kind": "S", "code": b["code"],
-                                  "name": AE._catalog().get(b["code"], {}).get("short", b["code"]),
-                                  "outs": dict(b.get("last_out") or {}),
-                                  "in_nets": b["in_nets"], "out_nets": b["out_nets"],
-                                  "real_params": dict(b["sim"].params)}
-            elif b["kind"] == "T":
-                # Khoi timer KHONG co khoa "ti" nhu khoi tich phan - doc thang b["ti"] o day
-                # se nem KeyError va lam mat sach badge cua moi khoi dong tren sheet do.
-                info[b["bid"]] = {"kind": "T", "out": b["out"], "code": b["code"],
-                                  "tmr": b.get("tmr"), "T": b.get("Tef", b.get("T")),
-                                  "toff": b.get("toff"), "left": DYN.timer_left(b)}
-            else:
-                info[b["bid"]] = {"ti": b["ti"], "out": b["out"], "code": b["code"],
-                                  "kind": b.get("kind", "I")}
-                if b.get("kind") == "R":
-                    info[b["bid"]]["up"] = b.get("up")
-                    info[b["bid"]]["dn"] = b.get("dn")
+            info[b["bid"]] = _badge_info(b)
         return info
 
     def _dyn_outs(self, blocks):
@@ -2084,10 +2181,12 @@ class MainWindow(QMainWindow):
             self.station_sims.pop((db, sh), None)
             st = {}
             self.sim_dyn_state[(db, sh)] = st
+            lt = {}
+            self.sim_latch[(db, sh)] = lt
             val, hist, blocks = DYN.run(db, sh, getattr(self, "sim_env", {}),
                                         getattr(self, "sim_analog", {}), dt=dt, nsteps=nsteps,
                                         record=record, overrides=getattr(self, "sim_dyn_over", {}),
-                                        state=st,
+                                        state=st, latch=lt,
                                         sim_cache=self.station_sims.setdefault((db, sh), {}))
         except Exception as e:
             self.status("Dynamic run error: %s" % e)

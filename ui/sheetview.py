@@ -533,20 +533,49 @@ class SheetScene(QGraphicsScene):
                 vs = ("%g" % outv) if isinstance(outv, (int, float)) and not isinstance(outv, bool) else "?"
                 pstr = ("%g" % ti) if ti is not None else "?"
                 if k == "T":
+                    # Ho DIL dat bang PHUT tren ban ve (chan ra in chu "M"), engine thi quy
+                    # het ve giay. Badge phai in lai dung don vi ban ve - khong thi khoi ghi
+                    # "30" lai hien "T=1800s" va nguoi doc tuong cai dat sai.
+                    fam = info.get("tmr") or "timer"
+                    dv, hs = ("m", 60.0) if fam == "DIL" else ("s", 1.0)
                     ts = info.get("T")
-                    tstr = ("%gs" % ts) if isinstance(ts, (int, float)) else "?"
+                    tstr = ("%g%s" % (ts / hs, dv)) if isinstance(ts, (int, float)) else "?"
                     off = info.get("toff")
                     if isinstance(off, (int, float)):
-                        tstr = "%s/%gs" % (tstr, off)     # PG: nua chu ky BAT/TAT
+                        tstr = "%s/%g%s" % (tstr, off / hs, dv)   # PG: nua chu ky BAT/TAT
                     lf = info.get("left")
-                    con = ("  con %.1fs" % lf) if isinstance(lf, (int, float)) else ""
-                    txt = "%s  T=%s  y=%s%s" % (info.get("tmr") or "timer", tstr, vs, con)
+                    con = ("  con %.1f%s" % (lf / hs, dv)) if isinstance(lf, (int, float)) else ""
+                    txt = "%s  T=%s  y=%s%s" % (fam, tstr, vs, con)
+                    if fam in ("1SH1", "1SH2"):
+                        # One-scan-shot khong co tham so thoi gian nao (sach macro trang
+                        # P-118) - in "T=0s" chi lam nguoi doc tuong khoi bi cai sai.
+                        txt = "1 scan %s  y=%s" % ("↑" if fam == "1SH1" else "↓", vs)
                 elif k == "D":
                     txt = "d/dt  G=%s  y=%s" % (pstr, vs)
                 elif k == "L":
                     txt = "F(t)  T=%s  y=%s" % (pstr, vs)
+                elif k == "Q":
+                    txt = "tre thuan  %ss  y=%s" % (pstr, vs)
+                elif k == "C":
+                    # So sanh co tre: hai muc BAT/NHA moi la thu can nhin, "TI" vo nghia.
+                    # Chi in mot so khi hai muc bang nhau (khong co vong tre) cho gon.
+                    on, off = info.get("on"), info.get("off")
+                    ms = ("%g" % on) if on == off else ("%g/%g" % (on, off))
+                    txt = "%s %s  y=%s" % ("H ≥" if info.get("hi") else "L ≤", ms, vs)
+                elif k == "G":
+                    le, la = info.get("le"), info.get("la")
+                    fm = lambda v: ("%g" % v) if isinstance(v, (int, float)) else "?"
+                    txt = "LLG  Le/La=%s/%ss  y=%s" % (fm(le), fm(la), vs)
+                elif k == "R":
+                    up, dn = info.get("up"), info.get("dn")
+                    fm = lambda v: ("%g" % v) if isinstance(v, (int, float)) else "?"
+                    txt = "RL  +%s/-%s  y=%s" % (fm(up), fm(dn), vs)
                 else:
                     txt = "∫ I  TI=%s  y=%s" % (pstr, vs)
+                    hl, ll = info.get("hl"), info.get("ll")
+                    if isinstance(hl, (int, float)) or isinstance(ll, (int, float)):
+                        fm = lambda v: ("%g" % v) if isinstance(v, (int, float)) else "?"
+                        txt = "∫ I  TI=%s  [%s..%s]  y=%s" % (pstr, fm(ll), fm(hl), vs)
             bx, by = rect.left(), rect.top() - 17
             r = self.addRect(bx, by, 16 + 7 * len(txt), 16, QPen(orange, 1.0), QBrush(QColor("#FFF7ED")))
             r.setZValue(7)

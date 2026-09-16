@@ -44,6 +44,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPixmap, QIcon
 from PySide6.QtCore import Qt, QRectF, QPointF, QSize, QTimer
 
+from . import symbol_paint as _sp
+
 SC = 6.0                       # ty le ve ky hieu (don vi symbol_shapes -> px)
 _COL_SYM = QColor("#3346B5")
 _COL_WIRE = QColor("#6B7280")
@@ -380,106 +382,13 @@ def _resolve_pin_signals(db_path, bid):
         return {}
 
 
-def _sym_bbox(shp):
-    xs, ys = [], []
-    for x1, y1, x2, y2 in shp.get("lines", []):
-        xs += [x1, x2]; ys += [y1, y2]
-    for rx, ry, rw, rh, *_ in shp.get("rects", []):
-        xs += [rx, rx + rw]; ys += [ry, ry + rh]
-    for cx, cy, cr, *_ in shp.get("circles", []):
-        xs += [cx - cr, cx + cr]; ys += [cy - cr, cy + cr]
-    if not xs:
-        return 0.0, 0.0, shp.get("w", 10.0) or 10.0, shp.get("h", 10.0) or 10.0
-    return min(xs), min(ys), (max(xs) - min(xs)) or 1.0, (max(ys) - min(ys)) or 1.0
-
-
-def _ports_of(shp):
-    """Suy ra diem noi (port) tu hinh hoc ky hieu. 1 port la dau day 'thua' (dangling)
-    cua 1 stub: dau kia cua stub phai BAM vao than khoi (tren vien/trong than) - nho vay
-    khong nham voi duong vien khoi. Chan o canh PHAI = output; trai/tren/duoi = input
-    (VD ham chia A/B co B o canh tren). Tra ve list (x, y, side) theo don vi symbol;
-    neu khong thay -> mac dinh 1 in trai + 1 out phai."""
-    rects = shp.get("rects", [])
-    # loai net TRUNG (mot so ky hieu ve lap doan giong het nhau) -> tranh dem sai bac
-    # dinh khien mep than khoi bi keo lech va bo sot chan vao/ra
-    seen = set()
-    lines = []
-    for x1, y1, x2, y2 in shp.get("lines", []):
-        key = tuple(sorted([(round(x1, 1), round(y1, 1)), (round(x2, 1), round(y2, 1))]))
-        if key in seen:
-            continue
-        seen.add(key)
-        lines.append((x1, y1, x2, y2))
-    cnt = defaultdict(int)
-    for x1, y1, x2, y2 in lines:
-        cnt[(round(x1, 1), round(y1, 1))] += 1
-        cnt[(round(x2, 1), round(y2, 1))] += 1
-    conn = [(x, y) for (x, y), c in cnt.items() if c >= 2]
-    for rx, ry, rw, rh, *_ in rects:
-        conn += [(rx, ry), (rx + rw, ry + rh), (rx, ry + rh), (rx + rw, ry)]
-    if not conn:
-        conn = list(cnt.keys())
-    if not conn:      # ky hieu rong (op khong co shape) -> port mac dinh 1 in trai + 1 out phai
-        bx, by, bw, bh = _sym_bbox(shp)
-        return [(bx, by + bh / 2, "in"), (bx + bw, by + bh / 2, "out")]
-    xs = [p[0] for p in conn]; ys = [p[1] for p in conn]
-    bl, br, bt, bb = min(xs), max(xs), min(ys), max(ys)
-
-    def on_rect(x, y):
-        for rx, ry, rw, rh, *_ in rects:
-            if rx - 0.7 <= x <= rx + rw + 0.7 and ry - 0.7 <= y <= ry + rh + 0.7:
-                if (abs(x - rx) < 0.7 or abs(x - (rx + rw)) < 0.7
-                        or abs(y - ry) < 0.7 or abs(y - (ry + rh)) < 0.7):
-                    return True
-        return False
-
-    def anchored(x, y):     # diem bam vao than khoi (tren vien hoac trong than)
-        return on_rect(x, y) or (bl - 0.5 <= x <= br + 0.5 and bt - 0.5 <= y <= bb + 0.5)
-
-    def outside(x, y):      # tho HAN ra ngoai than (khong phai net trang tri ben trong)
-        return x < bl - 0.3 or x > br + 0.3 or y < bt - 0.3 or y > bb + 0.3
-
-    # tim dau day thua cua stub (dau kia bam vao than, dau nay tho ra ngoai) -> 1 diem noi
-    tips = []
-    for x1, y1, x2, y2 in lines:
-        for (ex, ey), (ox, oy) in (((x1, y1), (x2, y2)), ((x2, y2), (x1, y1))):
-            k = (round(ex, 1), round(ey, 1))
-            if cnt[k] == 1 and not on_rect(ex, ey) and outside(ex, ey) and anchored(ox, oy):
-                tips.append((ex, ey))
-
-    clusters = []
-    for x, y in tips:
-        for c in clusters:
-            if abs(c[0] / c[2] - x) <= 2.5 and abs(c[1] / c[2] - y) <= 2.5:
-                c[0] += x; c[1] += y; c[2] += 1; break
-        else:
-            clusters.append([x, y, 1])
-
-    ports = []
-    for sx, sy, n in clusters:
-        x, y = sx / n, sy / n
-        right = x >= br - 0.5 and bt - 0.5 <= y <= bb + 0.5
-        ports.append((round(x, 1), round(y, 1), "out" if right else "in"))
-    ports.sort(key=lambda p: (p[2] != "in", p[1], p[0]))
-    if not ports:
-        bx, by, bw, bh = _sym_bbox(shp)
-        ports = [(bx, by + bh / 2, "in"), (bx + bw, by + bh / 2, "out")]
-    return ports
-
-
-def _port_roles(shp, unit_ports):
-    """Nhan vai tro tung chan theo NHAN CHU gan nhat trong ky hieu ('+','-','A','B',
-    'S','R'...). Dung de biet chan nao la so bi tru / mau so... khi tinh."""
-    texts = [t for t in shp.get("texts", []) if str(t[3]).strip() and len(str(t[3]).strip()) <= 3]
-    roles = []
-    for (px, py, _side) in unit_ports:
-        best, bd = "", None
-        for t in texts:
-            d = (t[0] - px) ** 2 + (t[1] - py) ** 2
-            if bd is None or d < bd:
-                bd, best = d, str(t[3]).strip()
-        roles.append(best.upper() if (bd is not None and bd <= 40) else "")
-    return roles
+# Ba ham hinh hoc duoi day tung nam ngay o file nay, nay dua sang ui/symbol_paint.py
+# de o ve trong cua so Help dung CHUNG mot cach suy diem noi. Hai ban chep tay tung
+# giong het nhau, nhung sua mot ben roi quen ben kia thi cung mot ky hieu se ra hai
+# bo chan khac nhau - da doi chieu ca 931 ky hieu, khong ky hieu nao lech.
+_sym_bbox = _sp.sym_bbox
+_ports_of = _sp.ports_of
+_port_roles = _sp.port_roles
 
 
 def _sym_icon(sym):

@@ -12,6 +12,7 @@ from . import dbreader as D
 from . import cond_tree as CT
 from . import sheet_render as SR
 from . import signal_graph as SG
+from . import macro_def as _MD
 
 
 def _all_nets(db, sheet):
@@ -118,6 +119,83 @@ def _const_value(db, sheet, p):
     return _num(pm.get("2"))
 
 
+_ORDER = {}
+
+
+def _phu_thuoc(net, prod, aprod):
+    """Danh sach net dau vao cua khoi sinh ra `net` (rong neu net la nguon)."""
+    p = prod.get(net)
+    if p:
+        return [i[0] for i in p["ins"]]
+    a = aprod.get(net)
+    if a:
+        return [d.get("net") for d in a.get("ins", [])]
+    return []
+
+
+def _xep_topo(db, sheet, prod, aprod):
+    """(thu_tu_duyet, bo_net, {net_hoi_tiep: khoa_bo_nho}) - cache theo (db, sheet).
+
+    THU TU DUYET: dau vao phai tinh XONG truoc dau ra. Bat buoc, vi simulate() lap kieu
+    Gauss-Seidel - ghi de tai cho ngay trong mot luot - nen duyet lung tung thi mot cong
+    co the bi tinh khi dau vao cua no CON None. None duoc coi la 0, di qua mot cong NOT
+    thanh 1: ra mot xung NHIEU khong he co that. Xung do tu tan sau vai vong, TRU KHI no
+    chui vao mach TU GIU - o do no bi chot lai vinh vien.
+
+    Do that tren 06 BPS A sheet 316 (BT-151 HOUSE LOAD OPERATION): dung dau vao that cua
+    hien truong (GCB CLSD=1, ANY PULV MOT RUN=1, con lai 0) thi '15' = NOT(HOUSELOAD
+    OPRT=0) = 1 va 'd1' = NOT('15') = 0. Duyet 'd1' TRUOC '15' thi d1 = NOT(None->0) = 1
+    -> c2 = 1 -> c0 = 1 -> c4 = 1, keo mach tu giu c5 = OR(c4, 01) len 1 va giu luon; dau
+    ra HLO/BSO thanh 1 va khoi DI 60s bat dau dem, trong khi thuc te KHONG co dieu kien
+    set nao. Truoc day 'nets' la mot set nen thu tu duyet doi theo hash seed cua Python:
+    cung mot dau vao, chay 6 lan thi 2 lan ra 01=1, 4 lan ra 01=0.
+
+    NET HOI TIEP: net bi canh quay lui tro toi - chot S/R, mach tu giu. O day khong co
+    thu tu nao dung ca, nen canh quay lui bi bo qua va tri so lay tu BO NHO (xem latch
+    trong simulate). Duyet theo ten net da sap xep nen thu tu van CO DINH giua cac lan
+    chay, khong con phu thuoc hash seed.
+
+    Khoa bo nho cua net hoi tiep la (bid, ten_net) chu khong phai ten net khong: bid la
+    so hieu khoi trong DB nen khong doi khi mo lai sheet, con ten net de tach hai ngo ra
+    cua cung mot khoi.
+    """
+    key = (db, sheet)
+    if key in _ORDER:
+        return _ORDER[key]
+    nets = _all_nets(db, sheet) | set(prod) | set(aprod)
+    thu_tu, xong, dang_di, vong = [], set(), set(), {}
+    for goc in sorted(nets):
+        if goc in xong:
+            continue
+        ngan = [(goc, None)]
+        while ngan:
+            n, con = ngan[-1]
+            if con is None:
+                dang_di.add(n)
+                # giu ca canh tro ve chinh no (co that: 4074, 8242 co ngo ra noi
+                # thang vao mot chan vao cua chinh khoi) - nhanh 'd in dang_di' ben
+                # duoi bat duoc ngay va khong day lai len ngan, nen khong lap vo tan
+                deps = sorted({d for d in _phu_thuoc(n, prod, aprod)
+                               if d and d in nets})
+                ngan[-1] = (n, iter(deps))
+                continue
+            for d in con:
+                if d in dang_di:              # canh quay lui = vong hoi tiep that
+                    p = prod.get(d) or aprod.get(d)
+                    if p:
+                        vong[d] = (p["bid"], d)
+                elif d not in xong:
+                    ngan.append((d, None))
+                    break
+            else:
+                dang_di.discard(n)
+                xong.add(n)
+                thu_tu.append(n)
+                ngan.pop()
+    _ORDER[key] = (thu_tu, nets, vong)
+    return _ORDER[key]
+
+
 def _compute(net, prod, sem, val, thr=None, cst=None):
     thr = thr or {}
     cst = cst or {}
@@ -218,36 +296,65 @@ def _compute(net, prod, sem, val, thr=None, cst=None):
     return val.get(net)
 
 
-def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
+def simulate(db, sheet, overrides=None, analog=None, max_iter=80, latch=None):
     """Tra ve (values{net:0/1 (digital) hoac so (analog)/None}, so_vong_lap).
-    overrides = dau vao digital {net:0/1}; analog = dau vao analog {net: so}."""
+    overrides = dau vao digital {net:0/1}; analog = dau vao analog {net: so}.
+
+    latch: {bid: 0/1} BO NHO CUA KHOI FLIP-FLOP (S/R), do NGUOI GOI giu song giua cac
+        lan goi. simulate() la bo giai TRANG THAI XAC LAP: no khoi tao moi net = None
+        roi lap den khi hoi tu, nen neu khong co dict nay thi moi lan goi la mot lan
+        "mat dien" - chot quen minh dang o 1 hay 0. Hau qua do duoc tren ban ve that
+        (06 BPS A, sheet 316, khoi 3160008 ma 4011): Set len 1 -> dau ra 1, Set ve 0
+        -> dau ra RUNG XUONG 0 ngay, trong khi F/F phai giu 1 cho toi khi co Reset.
+        Truyen None = coi nhu chot dang o 0 (hanh vi cu)."""
+    _MD.dung_db(db)          # chon bo than lenh DEF theo CAD_CPU.CPUTYPE
     overrides = {k: int(v) for k, v in (overrides or {}).items()}
     analog = {k: float(v) for k, v in (analog or {}).items()}
     sem = CT._sem()
     prod = CT._producers(db, sheet)
     aprod = _analog_producers(db, sheet)
-    nets = _all_nets(db, sheet) | set(prod) | set(aprod) | set(overrides) | set(analog)
+    thu_tu, bo_net, vong = _xep_topo(db, sheet, prod, aprod)
+    # net chi co trong overrides/analog la net NGUON: khong co khoi nao sinh ra, dat
+    # len dau cho chac chan xong truoc moi thu khac
+    thu_tu = sorted(n for n in set(overrides) | set(analog) if n not in bo_net) + thu_tu
+    nets = bo_net | set(overrides) | set(analog)
     # cai dat rieng cua tung khoi: nguong so sanh (CMP) va gia tri cong tac (CONST)
     thr = {}
     cst = {}
+    sr = {}                                  # {net dau ra F/F: bid} - de gieo/luu chot
     for onet, p in prod.items():
         op0 = (sem.get(p["code"]) or {}).get("op")
         if op0 == "CMP":
             thr[onet] = _cmp_threshold(db, sheet, p)
         elif op0 == "CONST":
             cst[onet] = _const_value(db, sheet, p)
+        elif op0 == "SR":
+            sr[onet] = p["bid"]
     val = {}
-    for n in nets:
+    for n in thu_tu:
         if n in overrides:
             val[n] = overrides[n]
         elif n in analog:
             val[n] = analog[n]
+        elif latch is not None and n in sr and latch.get(sr[n]) is not None:
+            # Gieo lai chot tu lan giai truoc: khoa bid chu khong khoa ten net, vi bid
+            # la so hieu khoi trong DB - khong doi khi mo lai sheet hay doi ten day.
+            val[n] = int(latch[sr[n]])
+        elif latch is not None and latch.get(vong.get(n)) is not None:
+            # Mach TU GIU bang cong logic thuong (khong phai khoi S/R), vi du 06 BPS A
+            # sheet 316: c5 = OR(c4, 01) va 01 = AND(c9, c5, c7). Dieu kien set c4 chi
+            # len 1 mot lat roi ve 0, sau do mach tu nuoi minh qua duong hoi tiep. Bo
+            # giai nay khoi tao moi net = None nen moi lan goi la mot lan "mat dien":
+            # khong gieo lai thi mach tu giu RA 0 ngay khi dieu kien set vua tat, dung
+            # cai loi da sua cho khoi S/R. Gieo xong van chay lai het cac vong lap, nen
+            # duong reset that (o day c7 hay c9 ve 0) van keo duoc mach xuong.
+            val[n] = int(latch[vong[n]])
         else:
             val[n] = None
     it = 0
     for it in range(1, max_iter + 1):
         changed = False
-        for n in nets:
+        for n in thu_tu:
             if n in overrides:
                 nv = overrides[n]
             elif n in analog:
@@ -260,6 +367,15 @@ def simulate(db, sheet, overrides=None, analog=None, max_iter=80):
                 val[n] = nv; changed = True
         if not changed:
             break
+    if latch is not None:
+        for onet, bid in sr.items():
+            v = val.get(onet)
+            if v in (0, 1):
+                latch[bid] = v
+        for onet, kh in vong.items():
+            v = val.get(onet)
+            if v in (0, 1):
+                latch[kh] = v
     return val, it
 
 
@@ -423,10 +539,13 @@ def _chan_tin_hieu(ins):
     kind 'L' va 'R'): bo chan so (PIN_TYPE=1 la SW) va chan ten 'I' (toc do), con lai
     lay chan TRAI NHAT. Do tren 1.134 khoi cua du an: sau khi loc khong khoi nao con
     hai chan cung do trai, tuc quy tac luon chi ra dung mot chan."""
-    ana = [d for d in ins if d.get("ptype") != 1 and d.get("name") != "I"]
+    ana = [d for d in ins if d.get("ptype") != 1
+           and d.get("name") not in ("I", "Le", "La")]
     if not ana:
         return ins
-    return [min(ana, key=lambda d: d.get("dx", 0.0))]
+    # Ho LLG "T:input" (403E/403F/4041) ve chan Lead/Lag NGAY CANH chan X, cung do
+    # trai (dx=0) -> phai pha the bang do CAO: chan tin hieu chinh luon nam TREN.
+    return [min(ana, key=lambda d: (d.get("dx", 0.0), -d.get("dy", 0.0)))]
 
 
 def _resolve_transfer(ins, name, box):
@@ -628,6 +747,57 @@ def _eval_analog(net, aprod, val, db, sheet):
             if oidx == 0:
                 return max(x, lim)
             return 1.0 if x <= lim else 0.0
+    if op in ("CLAMPHI_P", "CLAMPLO_P"):
+        # Limitter cua HCNT (2103 FUL / 2104 FLL): GIONG CLAMPHI/CLAMPLO nhung muc gioi
+        # han nam trong THAM SO cua chinh khoi (PARAMNO ghi o khoa "lim"), khong phai
+        # mot chan vao thu hai. Do tren du an: 60 khoi 2103 cai 1,5 / 0,3 / 2 / 10 / 5...
+        # va 66 khoi 2104 cai 0 / -1,5 / -0,3 / -10 / 0,8...  Truoc day ca hai deu la
+        # "PASS" nen ngo ra bang y dau vao - sai ngay ca khi dau vao vuot muc cai.
+        # oidx=0 -> Y (gia tri da kep); oidx=1 -> D (co bao dang bi kep).
+        if not xs or not _isnum(xs[0]):
+            return None
+        pm = _params(db, sheet).get(p["bid"], {})
+        sem = _analog_sem().get(p["code"], {})
+        lim = _num(pm.get(sem.get("lim", "1")))
+        if lim is None:
+            return None                     # muc cai la thanh ghi AN#### -> chua ro, khong doan
+        x = xs[0]
+        oidx = p.get("oidx", 0)
+        if op == "CLAMPHI_P":
+            return (min(x, lim) if oidx == 0 else (1.0 if x >= lim else 0.0))
+        return (max(x, lim) if oidx == 0 else (1.0 if x <= lim else 0.0))
+    if op in ("CMPHI_P", "CMPLO_P"):
+        # So sanh co TRE cua HCNT (20FB CPPH ra "H" / 20FC CPMH ra "L"): bat o muc P1,
+        # nha o muc P2. Do tren du an: 11/96 khoi 20FB co P1<>P2 va LAN NAO P1 cung LON
+        # hon P2 (900/890, 0,5/0,1, -0,3/-1,3...), 15/59 khoi 20FC co P1<>P2 va lan nao
+        # P1 cung NHO hon P2 (4500/4510, 50/53, 0/0,5...) -> dung la vong tre.
+        # Lop TINH khong co bo nho nen chi lay nguong BAT (P1); vong tre that do lop
+        # DONG giu (core/sheet_dyn.py, nhanh kind 'C').
+        if not xs or not _isnum(xs[0]):
+            return None
+        pm = _params(db, sheet).get(p["bid"], {})
+        sem = _analog_sem().get(p["code"], {})
+        on = _num(pm.get(sem.get("on", "1")))
+        if on is None:
+            return None
+        return (1.0 if xs[0] >= on else 0.0) if op == "CMPHI_P" else (1.0 if xs[0] <= on else 0.0)
+    if op == "LIMIT_P":
+        # Ho Lead/Lag (403C-4041, 2107 LLAG cua HCNT): o trang thai ON DINH thi khau
+        # (1+Tle*s)/(1+Tla*s) cho ra dung dau vao, chi con lai HAI MUC KEP HL1/LL1
+        # (sach macro trang P-90..94: Y = Max(LL1, Min(HL1, ...))). Dac tinh dong that
+        # do sheet_dyn nhanh kind 'G' lo.
+        if not xs or not _isnum(xs[0]):
+            return None
+        pm = _params(db, sheet).get(p["bid"], {})
+        sem = _analog_sem().get(p["code"], {})
+        y = xs[0]
+        hl = _num(pm.get(sem.get("hl", "2")))
+        ll = _num(pm.get(sem.get("ll", "3")))
+        if hl is not None:
+            y = min(y, hl)
+        if ll is not None:
+            y = max(y, ll)
+        return y
     if op == "MULG":
         # nhan 2 dau vao roi nhan them he so co dinh (param vi tri "2", giong quy uoc GAIN)
         if len(xs) < 2 or not allnum(xs[:2]):
