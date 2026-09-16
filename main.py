@@ -114,7 +114,22 @@ QSS_MUI_TEN = """
 QComboBox::down-arrow { image: url(%s); width: 11px; height: 11px; }
 QComboBox::down-arrow:disabled { image: none; }
 """
-
+# --- Dong goi ---------------------------------------------------------------
+#  Chay:  .\build.ps1              (PowerShell - ban dang dung)
+#         build.bat                 (cmd.exe - ban cu, van giu de khong pha thoi quen)
+#
+#  Truoc day cho nay chep nguyen lenh pyinstaller vao mot chuoi tro troi. Lenh do
+#  noi dong bang dau ^ tuc cu phap cmd.exe, ai copy ra dan vao PowerShell la nhan
+#  ngay mot loat "Missing expression after unary operator '--'". Va no chi co moi
+#  buoc pyinstaller: thieu ca buoc cai requests lan buoc soi lai ban vua ra, nen
+#  dong goi bang no se cho mot ban chay duoc nhung chet luc bam AI. Bon buoc
+#  day du nam trong build.ps1 - dung chep lenh ra ngoai nua:
+#    1) cai thu vien (co requests - thieu no la AI chet luc bam)
+#    2) pyinstaller
+#    3) chep DEF/SR21E cua hang ra canh file exe. Thieu buoc nay thi may khac
+#       mat 12.667/12.871 khoi tram khi mo phong, vi core/def_sim.py chay thang
+#       than lenh goc trong TAG_MCR.DEF ma file do nam ngoai repo.
+#    4) soi lai ban vua ra
 
 def _ve_mui_ten():
     """Ve mui ten xuong cho o chon, tra ve duong dan file (rong neu that bai).
