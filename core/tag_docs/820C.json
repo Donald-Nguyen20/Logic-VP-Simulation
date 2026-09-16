@@ -1,0 +1,206 @@
+{
+ "code": "820C",
+ "summary": {
+  "en": "SV station: holds the set value (SV) for a controller. In Manual the operator moves SV with INC/DEC. In Auto SV follows the Auto SV input, at most RL per second. SV starts from ISV, can be overridden with OR-SV, and is always kept between LL-SV and HL-SV. This block has no alarm logic.",
+  "vi": "Trạm SV: giữ giá trị đặt (SV) cho bộ điều khiển. Ở chế độ Tay người vận hành nhích SV bằng INC/DEC. Ở chế độ Tự động SV chạy theo đầu vào Auto SV, nhanh nhất RL mỗi giây. SV khởi động bằng ISV, có thể bị ghi đè bằng OR-SV, và luôn nằm trong khoảng LL-SV…HL-SV. Khối này không có phần báo động."
+ },
+ "sections": [
+  {"title": {"en": "Auto / Manual mode", "vi": "Chế độ Tự động / Tay"}, "def": "8-20",
+   "points": [
+    {"en": "Auto request = pin Auto OR button at (OPS_IN5). Manual request = pin Manual OR button mn (OPS_IN4). There is no drive fault input.",
+     "vi": "Yêu cầu Tự động = chân Auto HOẶC nút at (OPS_IN5). Yêu cầu Tay = chân Manual HOẶC nút mn (OPS_IN4). Khối không có đầu vào lỗi truyền động."},
+    {"en": "The mode is latched (a pulse is enough) and Manual wins. Pin Auto and ats (OPS_OUT5) are 1 in Auto, mns (OPS_OUT6) in Manual.",
+     "vi": "Chế độ được tự giữ (chỉ cần một xung) và Tay thắng Tự động. Chân Auto và ats (OPS_OUT5) bằng 1 khi Tự động, mns (OPS_OUT6) bằng 1 khi Tay."}
+   ]},
+  {"title": {"en": "Manual: moving SV with INC/DEC", "vi": "Chế độ Tay: nhích SV bằng INC/DEC"}, "def": "21-39, 46",
+   "points": [
+    {"en": "Holding inc (OPS_IN2) raises SV by P10 per second, dec (OPS_IN3) lowers it; after P12 seconds the rate becomes P11. Releasing leaves SV where it is.",
+     "vi": "Giữ inc (OPS_IN2) thì SV tăng P10 mỗi giây, giữ dec (OPS_IN3) thì giảm; giữ đủ P12 giây thì chuyển sang tốc độ P11. Nhả nút thì SV đứng yên."},
+    {"en": "RL does not limit inching. In Auto the buttons do nothing.",
+     "vi": "RL không giới hạn tốc độ nhích tay. Ở chế độ Tự động các nút này không có tác dụng."}
+   ]},
+  {"title": {"en": "Auto: following Auto SV", "vi": "Chế độ Tự động: chạy theo Auto SV"}, "def": "40-46",
+   "points": [
+    {"en": "Every scan SV moves toward Auto SV by the difference, but by no more than RL (P9) per second. With the default RL SV jumps to Auto SV at once.",
+     "vi": "Mỗi vòng quét SV tiến về Auto SV đúng bằng phần chênh lệch, nhưng không quá RL (P9) mỗi giây. Để RL mặc định thì SV nhảy ngay bằng Auto SV."},
+    {"en": "If Auto SV is not wired it is 0, so switching to Auto drives SV to 0 (or LL-SV).",
+     "vi": "Nếu không nối Auto SV thì nó bằng 0, nên chuyển sang Tự động sẽ kéo SV về 0 (hoặc về LL-SV)."}
+   ]},
+  {"title": {"en": "Start value, override and limits", "vi": "Giá trị khởi động, ghi đè và giới hạn"}, "def": "47-58",
+   "points": [
+    {"en": "On the first scan SV = ISV (P7). While OR-R-SV is on, SV = OR-SV every scan in either mode; after release SV continues from there.",
+     "vi": "Ở vòng quét đầu tiên SV = ISV (P7). Khi OR-R-SV bật, mỗi vòng quét SV = OR-SV ở cả hai chế độ; nhả ra thì SV đi tiếp từ giá trị đó."},
+    {"en": "sor (OPS_OUT13) is 1 during the override and on the first scan.",
+     "vi": "sor (OPS_OUT13) bằng 1 khi đang ghi đè và ở vòng quét đầu tiên."},
+    {"en": "SV is clamped to LL-SV…HL-SV every scan, also the start and override values. HL-SV and LL-SV must be wired.",
+     "vi": "Mỗi vòng quét SV bị kẹp trong LL-SV…HL-SV, kể cả giá trị khởi động và giá trị ghi đè. Phải nối HL-SV và LL-SV."}
+   ]},
+  {"title": {"en": "Output and display signals", "vi": "Tín hiệu ra và hiển thị"}, "def": "7, 59-66",
+   "points": [
+    {"en": "Pin SV and svs (OPS_OUT2) = SV; asv (OPS_OUT12) = Auto SV; out (OPS_OUT10) = PV; shv/slv (OPS_OUT14/15) = HL-SV/LL-SV.",
+     "vi": "Chân SV và svs (OPS_OUT2) = SV; asv (OPS_OUT12) = Auto SV; out (OPS_OUT10) = PV; shv/slv (OPS_OUT14/15) = HL-SV/LL-SV."},
+    {"en": "tor (OPS_IN6) is copied to tos (OPS_OUT11). CND(15) is 1 while OS_MTM is not 0. PV is only displayed, it is not used in any calculation.",
+     "vi": "tor (OPS_IN6) được chép sang tos (OPS_OUT11). CND(15) bằng 1 khi OS_MTM khác 0. PV chỉ để hiển thị, không tham gia tính toán."}
+   ]}
+ ],
+ "pins": {
+  "1": {"en": "Auto request from logic (a pulse is enough).", "vi": "Yêu cầu Tự động từ logic (một xung là đủ)."},
+  "2": {"en": "Manual request from logic (wins over Auto).", "vi": "Yêu cầu Tay từ logic (thắng yêu cầu Tự động)."},
+  "3": {"en": "Target SV used in Auto, followed at RL per second.", "vi": "SV mục tiêu dùng khi Tự động, được bám theo với tốc độ RL mỗi giây."},
+  "4": {"en": "Override request: while 1, SV = OR-SV.", "vi": "Yêu cầu ghi đè: khi bằng 1 thì SV = OR-SV."},
+  "5": {"en": "Override value.", "vi": "Giá trị ghi đè."},
+  "6": {"en": "SV high limit. Must be wired.", "vi": "Giới hạn trên của SV. Bắt buộc phải nối."},
+  "7": {"en": "SV low limit. Must be wired.", "vi": "Giới hạn dưới của SV. Bắt buộc phải nối."},
+  "8": {"en": "Process value, only shown on out (OPS_OUT10).", "vi": "Giá trị quá trình, chỉ hiển thị trên out (OPS_OUT10)."},
+  "9": {"en": "1 while the station is in Auto.", "vi": "Bằng 1 khi trạm đang ở Tự động."},
+  "10": {"en": "SV after the HL-SV/LL-SV clamp.", "vi": "SV sau khi kẹp theo HL-SV/LL-SV."}
+ },
+ "params": {
+  "1": {"short": "", "name": "Tag No.", "en": "Tag number text. Not used by the logic.", "vi": "Số hiệu tag (chữ). Logic không dùng."},
+  "2": {"short": "", "name": "Tag Description 1", "en": "Tag description text. Not used by the logic.", "vi": "Mô tả tag (chữ). Logic không dùng."},
+  "3": {"short": "", "name": "Auto", "en": "Text for the Auto button. Not used by the logic.", "vi": "Chữ ghi trên nút Tự động. Logic không dùng."},
+  "4": {"short": "", "name": "Increase", "en": "Text for the increase button. Not used by the logic.", "vi": "Chữ ghi trên nút tăng. Logic không dùng."},
+  "5": {"short": "", "name": "Manual", "en": "Text for the Manual button. Not used by the logic.", "vi": "Chữ ghi trên nút Tay. Logic không dùng."},
+  "6": {"short": "", "name": "Decrease", "en": "Text for the decrease button. Not used by the logic.", "vi": "Chữ ghi trên nút giảm. Logic không dùng."},
+  "7": {"short": "ISV", "name": "Initial SV", "en": "SV on the first scan (still clamped by HL-SV/LL-SV).", "vi": "SV ở vòng quét đầu tiên (vẫn bị kẹp theo HL-SV/LL-SV)."},
+  "8": {"short": "Un1", "name": "Unit of Initial SV", "en": "Unit text for ISV. Not used by the logic.", "vi": "Chữ đơn vị của ISV. Logic không dùng."},
+  "9": {"short": "RL", "name": "Rate Limiter of SV", "en": "Max speed of SV in Auto, units per second. Does not limit inching or override.", "vi": "Tốc độ tối đa của SV khi Tự động, đơn vị mỗi giây. Không giới hạn nhích tay và ghi đè."},
+  "10": {"short": "", "name": "Inching Rate of SV (slow) (for CNT)", "en": "Slow INC/DEC rate, SV units per second.", "vi": "Tốc độ nhích chậm khi giữ INC/DEC, đơn vị SV mỗi giây."},
+  "11": {"short": "", "name": "Inching Rate of SV (fast) (for CNT)", "en": "Fast INC/DEC rate, SV units per second.", "vi": "Tốc độ nhích nhanh, đơn vị SV mỗi giây."},
+  "12": {"short": "", "name": "Time to Change Inching Rate", "en": "Seconds a button must be held before the fast rate starts.", "vi": "Số giây phải giữ nút trước khi chuyển sang tốc độ nhanh."},
+  "13": {"short": "", "name": "Category", "en": "Alarm category. This block has no alarm, so it is not used.", "vi": "Nhóm báo động. Khối này không có báo động nên không dùng."}
+ },
+ "hmi": [
+  {"tok": "OPS_IN2", "name": "inc", "en": "Increase button, Manual only.", "vi": "Nút tăng, chỉ ở chế độ Tay."},
+  {"tok": "OPS_IN3", "name": "dec", "en": "Decrease button, Manual only.", "vi": "Nút giảm, chỉ ở chế độ Tay."},
+  {"tok": "OPS_IN4", "name": "mn", "en": "Manual mode button.", "vi": "Nút chuyển chế độ Tay."},
+  {"tok": "OPS_IN5", "name": "at", "en": "Auto mode button.", "vi": "Nút chuyển chế độ Tự động."},
+  {"tok": "OPS_IN6", "name": "tor", "en": "Tag-out request value, copied to tos.", "vi": "Giá trị yêu cầu tag-out, được chép sang tos."},
+  {"tok": "OPS_OUT2", "name": "svs", "en": "Shows SV.", "vi": "Hiển thị SV."},
+  {"tok": "OPS_OUT5", "name": "ats", "en": "1 in Auto.", "vi": "Bằng 1 khi ở chế độ Tự động."},
+  {"tok": "OPS_OUT6", "name": "mns", "en": "1 in Manual.", "vi": "Bằng 1 khi ở chế độ Tay."},
+  {"tok": "OPS_OUT10", "name": "out", "en": "Shows PV.", "vi": "Hiển thị PV."},
+  {"tok": "OPS_OUT11", "name": "tos", "en": "Tag-out signal (copy of tor).", "vi": "Tín hiệu tag-out (bản sao của tor)."},
+  {"tok": "OPS_OUT12", "name": "asv", "en": "Shows Auto SV.", "vi": "Hiển thị Auto SV."},
+  {"tok": "OPS_OUT13", "name": "sor", "en": "1 during override and on the first scan.", "vi": "Bằng 1 khi đang ghi đè và ở vòng quét đầu tiên."},
+  {"tok": "OPS_OUT14", "name": "shv", "en": "Shows HL-SV.", "vi": "Hiển thị HL-SV."},
+  {"tok": "OPS_OUT15", "name": "slv", "en": "Shows LL-SV.", "vi": "Hiển thị LL-SV."},
+  {"tok": "OPS_CND(15)", "name": "", "en": "Maintenance mode is on.", "vi": "Đang ở chế độ bảo trì."},
+  {"tok": "OS_MTM", "name": "mtm", "en": "Maintenance mode.", "vi": "Chế độ bảo trì."}
+ ],
+ "notes": [
+  {"en": "Wire Auto SV before using Auto, otherwise SV runs to 0. Wire HL-SV and LL-SV, otherwise SV stays at 0.",
+   "vi": "Nối Auto SV trước khi dùng Tự động, nếu không SV chạy về 0. Phải nối HL-SV và LL-SV, nếu không SV luôn bằng 0."},
+  {"en": "RL only slows Auto. A jump caused by override or by the operator's fast inching is not rate-limited.",
+   "vi": "RL chỉ làm chậm ở chế độ Tự động. Nhảy do ghi đè hoặc do người vận hành nhích nhanh thì không bị giới hạn tốc độ."},
+  {"en": "No alarm: tar, trr, qir, OS_ACK and Category have no effect on this block.",
+   "vi": "Không có báo động: tar, trr, qir, OS_ACK và Category không có tác dụng với khối này."},
+  {"en": "The charts come from this app's simulator with a 0.5 s scan. On the real controller an edge can move by one scan.",
+   "vi": "Các biểu đồ lấy từ bộ mô phỏng của app với vòng quét 0,5 giây. Trên bộ điều khiển thật, thời điểm chuyển có thể lệch một vòng quét."}
+ ],
+ "scenarios": [
+  {"id": "auto_follow", "chart": true,
+   "title": {"en": "Auto: SV follows Auto SV at RL = 4 per second", "vi": "Tự động: SV bám Auto SV với RL = 4 mỗi giây"},
+   "note": {"en": "Auto pulse at 1 s with Auto SV = 10: SV climbs 2 per scan (4 per second) and reaches 10 at 3 s. Auto SV drops to 5 at 4 s: SV comes down the same way.",
+            "vi": "Giây 1 có xung Auto, Auto SV = 10: SV tăng 2 mỗi vòng quét (4 mỗi giây) và tới 10 ở giây 3. Giây 4 Auto SV giảm còn 5: SV giảm xuống theo cùng tốc độ."},
+   "dt": 0.5, "until": 7,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "prm:9": 4, "in:Auto SV": 10},
+   "events": [{"t": 1, "pulse": {"in:Auto": 1}}, {"t": 4, "set": {"in:Auto SV": 5}}],
+   "show": [
+    {"sig": "in:Auto", "kind": "bit", "label": {"en": "Auto request", "vi": "yêu cầu Tự động"}},
+    {"sig": "out:Auto", "kind": "bit", "label": {"en": "Auto (out)", "vi": "Auto (ra)"}},
+    {"sig": "in:Auto SV", "kind": "num", "label": {"en": "Auto SV", "vi": "Auto SV"}},
+    {"sig": "out:SV", "kind": "num", "label": {"en": "SV", "vi": "SV"}}
+   ],
+   "checks": [
+    {"t": [0, 0.5], "sig": "out:SV", "eq": 0},
+    {"t": [0, 0.5], "sig": "st:OPS_OUT6", "eq": 1},
+    {"t": 1, "sig": "out:SV", "eq": 2},
+    {"t": 2, "sig": "out:SV", "eq": 6},
+    {"t": [3, 3.5], "sig": "out:SV", "eq": 10},
+    {"t": 4, "sig": "out:SV", "eq": 8},
+    {"t": 4.5, "sig": "out:SV", "eq": 6},
+    {"t": [5, 7], "sig": "out:SV", "eq": 5},
+    {"t": [1, 7], "sig": "out:Auto", "eq": 1},
+    {"t": [1, 7], "sig": "st:OPS_OUT5", "eq": 1},
+    {"t": [4, 7], "sig": "st:OPS_OUT12", "eq": 5}
+   ]},
+  {"id": "manual_inch_override", "chart": true,
+   "title": {"en": "Manual: ISV, INC slow then fast, override clamped by HL-SV, DEC", "vi": "Tay: ISV, INC chậm rồi nhanh, ghi đè bị HL-SV kẹp, DEC"},
+   "note": {"en": "ISV = 20, HL-SV = 50, slow rate 2/s, fast rate 10/s after 2 s. INC held 1–4.5 s; OR-R-SV 6–7 s with OR-SV = 70 gives only 50; DEC held 8–9 s.",
+            "vi": "ISV = 20, HL-SV = 50, tốc độ chậm 2/giây, nhanh 10/giây sau 2 giây. Giữ INC từ giây 1 tới 4,5; OR-R-SV từ giây 6–7 với OR-SV = 70 chỉ được 50; giữ DEC từ giây 8 tới 9."},
+   "dt": 0.5, "until": 10,
+   "set": {"in:HL-SV": 50, "in:LL-SV": 5, "prm:7": 20, "prm:10": 2, "prm:11": 10, "prm:12": 2, "in:OR-SV": 70},
+   "events": [{"t": 1, "set": {"ops:OPS_IN2": 1}}, {"t": 4.5, "set": {"ops:OPS_IN2": 0}},
+              {"t": 6, "set": {"in:OR-R-SV": 1}}, {"t": 7, "set": {"in:OR-R-SV": 0}},
+              {"t": 8, "set": {"ops:OPS_IN3": 1}}, {"t": 9, "set": {"ops:OPS_IN3": 0}}],
+   "show": [
+    {"sig": "ops:OPS_IN2", "kind": "bit", "label": {"en": "inc button", "vi": "nút inc"}},
+    {"sig": "ops:OPS_IN3", "kind": "bit", "label": {"en": "dec button", "vi": "nút dec"}},
+    {"sig": "in:OR-R-SV", "kind": "bit", "label": {"en": "OR-R-SV", "vi": "OR-R-SV"}},
+    {"sig": "st:OPS_OUT13", "kind": "bit", "label": {"en": "sor", "vi": "sor"}},
+    {"sig": "out:SV", "kind": "num", "label": {"en": "SV", "vi": "SV"}}
+   ],
+   "checks": [
+    {"t": [0, 0.5], "sig": "out:SV", "eq": 20},
+    {"t": 0, "sig": "st:OPS_OUT13", "eq": 1},
+    {"t": [0.5, 5.5], "sig": "st:OPS_OUT13", "eq": 0},
+    {"t": 1, "sig": "out:SV", "eq": 21},
+    {"t": 2, "sig": "out:SV", "eq": 23},
+    {"t": 2.5, "sig": "out:SV", "eq": 28},
+    {"t": [4, 5.5], "sig": "out:SV", "eq": 43},
+    {"t": [6, 7.5], "sig": "out:SV", "eq": 50},
+    {"t": [6, 6.5], "sig": "st:OPS_OUT13", "eq": 1},
+    {"t": [7, 10], "sig": "st:OPS_OUT13", "eq": 0},
+    {"t": 8, "sig": "out:SV", "eq": 49},
+    {"t": [8.5, 10], "sig": "out:SV", "eq": 48}
+   ]},
+  {"id": "override_in_auto", "chart": false,
+   "title": {"en": "Override also works in Auto; RL default follows at once", "vi": "Ghi đè chạy cả ở Tự động; RL mặc định thì bám ngay"},
+   "dt": 0.5, "until": 4,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:Auto SV": 10, "in:OR-SV": 30, "in:Auto": 1},
+   "events": [{"t": 1, "set": {"in:OR-R-SV": 1}}, {"t": 2, "set": {"in:OR-R-SV": 0}}],
+   "checks": [
+    {"t": 0, "sig": "out:SV", "eq": 0},
+    {"t": 0.5, "sig": "out:SV", "eq": 10},
+    {"t": [1, 1.5], "sig": "out:SV", "eq": 30},
+    {"t": [2, 4], "sig": "out:SV", "eq": 10}
+   ]},
+  {"id": "no_limits", "chart": false,
+   "title": {"en": "HL-SV/LL-SV not wired: SV stays 0", "vi": "Không nối HL-SV/LL-SV: SV luôn bằng 0"},
+   "dt": 0.5, "until": 1,
+   "set": {"prm:7": 20},
+   "checks": [{"t": [0, 1], "sig": "out:SV", "eq": 0}]},
+  {"id": "auto_ignores_inc", "chart": false,
+   "title": {"en": "INC does nothing in Auto", "vi": "INC không có tác dụng ở Tự động"},
+   "dt": 0.5, "until": 2,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:Auto": 1, "ops:OPS_IN2": 1},
+   "checks": [{"t": [0, 2], "sig": "out:SV", "eq": 0}, {"t": [0, 2], "sig": "out:Auto", "eq": 1}]},
+  {"id": "buttons_manual_wins", "chart": false,
+   "title": {"en": "at button, Manual wins, mn button", "vi": "Nút at, Tay thắng, nút mn"},
+   "dt": 0.5, "until": 3,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:Auto SV": 7},
+   "events": [{"t": 0.5, "pulse": {"ops:OPS_IN5": 1}}, {"t": 1.5, "set": {"in:Auto": 1, "in:Manual": 1}}, {"t": 2.5, "pulse": {"ops:OPS_IN4": 1}}],
+   "checks": [
+    {"t": [0.5, 1], "sig": "out:Auto", "eq": 1},
+    {"t": [0.5, 3], "sig": "out:SV", "eq": 7},
+    {"t": [1.5, 3], "sig": "out:Auto", "eq": 0},
+    {"t": [1.5, 3], "sig": "st:OPS_OUT6", "eq": 1}
+   ]},
+  {"id": "display_clamp", "chart": false,
+   "title": {"en": "Display signals; Auto SV above HL-SV", "vi": "Tín hiệu hiển thị; Auto SV vượt HL-SV"},
+   "dt": 0.5, "until": 1,
+   "set": {"in:HL-SV": 80, "in:LL-SV": 10, "in:Auto SV": 95, "in:PV": 33, "ops:OPS_IN6": 4, "ops:OS_MTM": 1, "in:Auto": 1},
+   "checks": [
+    {"t": 0, "sig": "out:SV", "eq": 10},
+    {"t": [0.5, 1], "sig": "out:SV", "eq": 80},
+    {"t": [0.5, 1], "sig": "st:OPS_OUT2", "eq": 80},
+    {"t": [0, 1], "sig": "st:OPS_OUT10", "eq": 33},
+    {"t": [0, 1], "sig": "st:OPS_OUT11", "eq": 4},
+    {"t": [0, 1], "sig": "st:OPS_OUT12", "eq": 95},
+    {"t": [0, 1], "sig": "st:OPS_OUT14", "eq": 80},
+    {"t": [0, 1], "sig": "st:OPS_OUT15", "eq": 10},
+    {"t": [0, 1], "sig": "st:OPS_CND(15)", "eq": 1}
+   ]}
+ ]
+}

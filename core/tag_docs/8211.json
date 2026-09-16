@@ -1,0 +1,166 @@
+{
+ "code": "8211",
+ "summary": {
+  "en": "SV bias station: SV = Auto SV + a bias that the operator sets with INC/DEC. The bias is kept between LL-Bias and HL-Bias and is set back to 0 by the Reset pin. The sum is rate-limited to RL per second and clamped to LL-SV…HL-SV. There is no Auto/Manual mode and no alarm logic.",
+  "vi": "Trạm cộng độ lệch cho SV: SV = Auto SV + một độ lệch (bias) do người vận hành chỉnh bằng INC/DEC. Bias nằm trong khoảng LL-Bias…HL-Bias và về 0 khi chân Reset bật. Tổng này bị giới hạn tốc độ RL mỗi giây rồi kẹp trong LL-SV…HL-SV. Khối không có chế độ Tự động/Tay và không có báo động."
+ },
+ "sections": [
+  {"title": {"en": "Setting the bias with INC/DEC", "vi": "Chỉnh bias bằng INC/DEC"}, "def": "4-23",
+   "points": [
+    {"en": "Holding inc (OPS_IN2) raises the bias by P6 per second, dec (OPS_IN3) lowers it; after P8 seconds the rate becomes P7. The buttons always work, there is no mode.",
+     "vi": "Giữ inc (OPS_IN2) thì bias tăng P6 mỗi giây, giữ dec (OPS_IN3) thì giảm; giữ đủ P8 giây thì chuyển sang tốc độ P7. Nút luôn có tác dụng vì khối không có chế độ."}
+   ]},
+  {"title": {"en": "Reset and bias limits", "vi": "Reset và giới hạn bias"}, "def": "24-29",
+   "points": [
+    {"en": "While pin Reset is 1 the bias is 0 (inching is ignored); br (OPS_OUT17) shows Reset.",
+     "vi": "Khi chân Reset bằng 1 thì bias = 0 (bấm nhích không có tác dụng); br (OPS_OUT17) hiển thị Reset."},
+    {"en": "The bias is clamped to LL-Bias…HL-Bias every scan. If these pins are not wired both are 0 and the bias can never move.",
+     "vi": "Mỗi vòng quét bias bị kẹp trong LL-Bias…HL-Bias. Nếu không nối hai chân này thì cả hai bằng 0 và bias không bao giờ thay đổi được."}
+   ]},
+  {"title": {"en": "Computing SV", "vi": "Tính SV"}, "def": "30-34",
+   "points": [
+    {"en": "Auto SV + bias goes through a rate limiter: it changes by at most RL (P5) per second. With the default RL it passes through at once.",
+     "vi": "Auto SV + bias đi qua bộ giới hạn tốc độ: mỗi giây thay đổi không quá RL (P5). Để RL mặc định thì đi qua ngay."},
+    {"en": "The result is clamped to LL-SV…HL-SV and sent to pin SV. The limiter works on the value before this clamp, so if Auto SV + bias went above HL-SV, SV stays at HL-SV until the limiter has come back down (see chart).",
+     "vi": "Kết quả bị kẹp trong LL-SV…HL-SV rồi đưa ra chân SV. Bộ giới hạn tốc độ tính trên giá trị trước khi kẹp, nên nếu Auto SV + bias từng vượt HL-SV thì SV đứng ở HL-SV cho tới khi giá trị bên trong giảm về lại (xem biểu đồ)."}
+   ]},
+  {"title": {"en": "Output and display signals", "vi": "Tín hiệu ra và hiển thị"}, "def": "3, 35-45",
+   "points": [
+    {"en": "Pin SV Bias and svb (OPS_OUT16) = bias; bhv/blv (OPS_OUT18/19) = HL-Bias/LL-Bias; pin SV and svs (OPS_OUT2) = SV; shv/slv (OPS_OUT14/15) = HL-SV/LL-SV; out (OPS_OUT10) = PV.",
+     "vi": "Chân SV Bias và svb (OPS_OUT16) = bias; bhv/blv (OPS_OUT18/19) = HL-Bias/LL-Bias; chân SV và svs (OPS_OUT2) = SV; shv/slv (OPS_OUT14/15) = HL-SV/LL-SV; out (OPS_OUT10) = PV."},
+    {"en": "tor (OPS_IN6) is copied to tos (OPS_OUT11). CND(15) is 1 while OS_MTM is not 0. PV is only displayed.",
+     "vi": "tor (OPS_IN6) được chép sang tos (OPS_OUT11). CND(15) bằng 1 khi OS_MTM khác 0. PV chỉ để hiển thị."}
+   ]}
+ ],
+ "pins": {
+  "1": {"en": "While 1, the bias is 0.", "vi": "Khi bằng 1 thì bias = 0."},
+  "2": {"en": "Base SV; the bias is added to it.", "vi": "SV gốc; bias được cộng vào giá trị này."},
+  "3": {"en": "Bias high limit. Must be wired to use the bias.", "vi": "Giới hạn trên của bias. Phải nối thì mới chỉnh được bias."},
+  "4": {"en": "Bias low limit (usually negative). Must be wired to use the bias.", "vi": "Giới hạn dưới của bias (thường là số âm). Phải nối thì mới chỉnh được bias."},
+  "5": {"en": "SV high limit. Must be wired.", "vi": "Giới hạn trên của SV. Bắt buộc phải nối."},
+  "6": {"en": "SV low limit. Must be wired.", "vi": "Giới hạn dưới của SV. Bắt buộc phải nối."},
+  "7": {"en": "Process value, only shown on out (OPS_OUT10).", "vi": "Giá trị quá trình, chỉ hiển thị trên out (OPS_OUT10)."},
+  "8": {"en": "Current bias.", "vi": "Bias hiện tại."},
+  "9": {"en": "Auto SV + bias, rate-limited and clamped.", "vi": "Auto SV + bias, đã giới hạn tốc độ và kẹp."}
+ },
+ "params": {
+  "1": {"short": "", "name": "Tag No.", "en": "Tag number text. Not used by the logic.", "vi": "Số hiệu tag (chữ). Logic không dùng."},
+  "2": {"short": "", "name": "Tag Description 1", "en": "Tag description text. Not used by the logic.", "vi": "Mô tả tag (chữ). Logic không dùng."},
+  "3": {"short": "", "name": "Increase", "en": "Text for the increase button. Not used by the logic.", "vi": "Chữ ghi trên nút tăng. Logic không dùng."},
+  "4": {"short": "", "name": "Decrease", "en": "Text for the decrease button. Not used by the logic.", "vi": "Chữ ghi trên nút giảm. Logic không dùng."},
+  "5": {"short": "RL", "name": "Rate Limiter of SV", "en": "Max speed of SV (Auto SV + bias), units per second.", "vi": "Tốc độ tối đa của SV (Auto SV + bias), đơn vị mỗi giây."},
+  "6": {"short": "", "name": "Inching Rate of SV (slow) (for CNT)", "en": "Slow INC/DEC rate of the bias, units per second.", "vi": "Tốc độ nhích chậm của bias, đơn vị mỗi giây."},
+  "7": {"short": "", "name": "Inching Rate of SV (fast) (for CNT)", "en": "Fast INC/DEC rate of the bias, units per second.", "vi": "Tốc độ nhích nhanh của bias, đơn vị mỗi giây."},
+  "8": {"short": "", "name": "Time to Change Inching Rate", "en": "Seconds a button must be held before the fast rate starts.", "vi": "Số giây phải giữ nút trước khi chuyển sang tốc độ nhanh."},
+  "9": {"short": "", "name": "Category", "en": "Alarm category. This block has no alarm, so it is not used.", "vi": "Nhóm báo động. Khối này không có báo động nên không dùng."}
+ },
+ "hmi": [
+  {"tok": "OPS_IN2", "name": "inc", "en": "Increase bias button.", "vi": "Nút tăng bias."},
+  {"tok": "OPS_IN3", "name": "dec", "en": "Decrease bias button.", "vi": "Nút giảm bias."},
+  {"tok": "OPS_IN6", "name": "tor", "en": "Tag-out request value, copied to tos.", "vi": "Giá trị yêu cầu tag-out, được chép sang tos."},
+  {"tok": "OPS_OUT2", "name": "svs", "en": "Shows SV.", "vi": "Hiển thị SV."},
+  {"tok": "OPS_OUT10", "name": "out", "en": "Shows PV.", "vi": "Hiển thị PV."},
+  {"tok": "OPS_OUT11", "name": "tos", "en": "Tag-out signal (copy of tor).", "vi": "Tín hiệu tag-out (bản sao của tor)."},
+  {"tok": "OPS_OUT14", "name": "shv", "en": "Shows HL-SV.", "vi": "Hiển thị HL-SV."},
+  {"tok": "OPS_OUT15", "name": "slv", "en": "Shows LL-SV.", "vi": "Hiển thị LL-SV."},
+  {"tok": "OPS_OUT16", "name": "svb", "en": "Shows the bias.", "vi": "Hiển thị bias."},
+  {"tok": "OPS_OUT17", "name": "br", "en": "Shows the Reset pin.", "vi": "Hiển thị chân Reset."},
+  {"tok": "OPS_OUT18", "name": "bhv", "en": "Shows HL-Bias.", "vi": "Hiển thị HL-Bias."},
+  {"tok": "OPS_OUT19", "name": "blv", "en": "Shows LL-Bias.", "vi": "Hiển thị LL-Bias."},
+  {"tok": "OPS_CND(15)", "name": "", "en": "Maintenance mode is on.", "vi": "Đang ở chế độ bảo trì."},
+  {"tok": "OS_MTM", "name": "mtm", "en": "Maintenance mode.", "vi": "Chế độ bảo trì."}
+ ],
+ "notes": [
+  {"en": "Wire HL-Bias and LL-Bias (LL-Bias negative if the bias may go down), plus HL-SV and LL-SV. Unwired limits are 0.",
+   "vi": "Phải nối HL-Bias và LL-Bias (LL-Bias là số âm nếu muốn bias giảm được), cùng HL-SV và LL-SV. Chân giới hạn không nối thì bằng 0."},
+  {"en": "With RL set, keep Auto SV + bias inside HL-SV/LL-SV; otherwise SV stays at the limit for a while after the sum comes back.",
+   "vi": "Khi có đặt RL, nên giữ Auto SV + bias trong khoảng HL-SV/LL-SV; nếu không, sau khi tổng quay về SV vẫn đứng ở giới hạn thêm một lúc."},
+  {"en": "Reset puts the bias back to 0; with RL set, SV then moves back to Auto SV at RL per second.",
+   "vi": "Reset đưa bias về 0; nếu có đặt RL thì SV quay về Auto SV với tốc độ RL mỗi giây."},
+  {"en": "The charts come from this app's simulator with a 0.5 s scan. The rate limiter is assumed to start at its input value. On the real controller an edge can move by one scan.",
+   "vi": "Các biểu đồ lấy từ bộ mô phỏng của app với vòng quét 0,5 giây. Bộ giới hạn tốc độ được giả định khởi động bằng giá trị đầu vào. Trên bộ điều khiển thật, thời điểm chuyển có thể lệch một vòng quét."}
+ ],
+ "scenarios": [
+  {"id": "bias_inch_reset", "chart": true,
+   "title": {"en": "INC raises the bias to HL-Bias, Reset brings it back", "vi": "INC tăng bias tới HL-Bias, Reset đưa về 0"},
+   "note": {"en": "Auto SV = 40, HL-Bias = 2, RL = 2 per second. INC held 0.5–6 s: slow for 3 s, then fast, stops at 2. Reset pulse at 7 s: bias 0 at once, SV returns 1 per scan.",
+            "vi": "Auto SV = 40, HL-Bias = 2, RL = 2 mỗi giây. Giữ INC từ giây 0,5 tới 6: chậm trong 3 giây, sau đó nhanh, dừng ở 2. Giây 7 có xung Reset: bias về 0 ngay, SV giảm về 1 mỗi vòng quét."},
+   "dt": 0.5, "until": 9,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:HL-Bias": 2, "in:LL-Bias": -2, "in:Auto SV": 40, "in:PV": 12, "prm:5": 2},
+   "events": [{"t": 0.5, "set": {"ops:OPS_IN2": 1}}, {"t": 6, "set": {"ops:OPS_IN2": 0}}, {"t": 7, "pulse": {"in:Reset": 1}}],
+   "show": [
+    {"sig": "ops:OPS_IN2", "kind": "bit", "label": {"en": "inc button", "vi": "nút inc"}},
+    {"sig": "in:Reset", "kind": "bit", "label": {"en": "Reset", "vi": "Reset"}},
+    {"sig": "out:SV Bias", "kind": "num", "label": {"en": "SV Bias", "vi": "SV Bias"}},
+    {"sig": "out:SV", "kind": "num", "label": {"en": "SV", "vi": "SV"}}
+   ],
+   "checks": [
+    {"t": 0, "sig": "out:SV", "eq": 40},
+    {"t": 0.5, "sig": "out:SV Bias", "eq": 0.05},
+    {"t": 2.5, "sig": "out:SV Bias", "eq": 0.25},
+    {"t": 3, "sig": "out:SV Bias", "eq": 0.75},
+    {"t": 4, "sig": "out:SV Bias", "eq": 1.75},
+    {"t": [4.5, 6.5], "sig": "out:SV Bias", "eq": 2},
+    {"t": 4, "sig": "out:SV", "eq": 41.75},
+    {"t": [4.5, 6.5], "sig": "out:SV", "eq": 42},
+    {"t": [4.5, 6.5], "sig": "st:OPS_OUT16", "eq": 2},
+    {"t": [7, 9], "sig": "out:SV Bias", "eq": 0},
+    {"t": 7, "sig": "st:OPS_OUT17", "eq": 1},
+    {"t": 7.5, "sig": "st:OPS_OUT17", "eq": 0},
+    {"t": 7, "sig": "out:SV", "eq": 41},
+    {"t": [7.5, 9], "sig": "out:SV", "eq": 40},
+    {"t": [7.5, 9], "sig": "st:OPS_OUT2", "eq": 40}
+   ]},
+  {"id": "rate_and_hl", "chart": true,
+   "title": {"en": "RL = 10/s with HL-SV = 45: SV waits at the limit", "vi": "RL = 10/giây với HL-SV = 45: SV đứng chờ ở giới hạn"},
+   "note": {"en": "Auto SV jumps 20 → 70 at 2 s: SV climbs 5 per scan and stops at HL-SV 45. Auto SV drops to 30 at 7.5 s: the limiter comes down from 70, so SV stays 45 until 9.5 s and reaches 30 at 11 s.",
+            "vi": "Giây 2 Auto SV nhảy 20 → 70: SV tăng 5 mỗi vòng quét và dừng ở HL-SV 45. Giây 7,5 Auto SV giảm còn 30: bộ giới hạn đi xuống từ 70, nên SV đứng ở 45 tới giây 9,5 và về 30 ở giây 11."},
+   "dt": 0.5, "until": 12,
+   "set": {"in:HL-SV": 45, "in:LL-SV": 0, "in:HL-Bias": 5, "in:LL-Bias": -5, "in:Auto SV": 20, "prm:5": 10},
+   "events": [{"t": 2, "set": {"in:Auto SV": 70}}, {"t": 7.5, "set": {"in:Auto SV": 30}}],
+   "show": [
+    {"sig": "in:Auto SV", "kind": "num", "label": {"en": "Auto SV", "vi": "Auto SV"}},
+    {"sig": "out:SV", "kind": "num", "label": {"en": "SV", "vi": "SV"}}
+   ],
+   "checks": [
+    {"t": [0, 1.5], "sig": "out:SV", "eq": 20},
+    {"t": 2, "sig": "out:SV", "eq": 25},
+    {"t": 3, "sig": "out:SV", "eq": 35},
+    {"t": [4, 9.5], "sig": "out:SV", "eq": 45},
+    {"t": 10, "sig": "out:SV", "eq": 40},
+    {"t": 10.5, "sig": "out:SV", "eq": 35},
+    {"t": [11, 12], "sig": "out:SV", "eq": 30}
+   ]},
+  {"id": "no_bias_limits", "chart": false,
+   "title": {"en": "HL-Bias/LL-Bias not wired: INC does nothing", "vi": "Không nối HL-Bias/LL-Bias: INC không có tác dụng"},
+   "dt": 0.5, "until": 2,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:Auto SV": 40, "ops:OPS_IN2": 1},
+   "checks": [{"t": [0, 2], "sig": "out:SV Bias", "eq": 0}, {"t": [0, 2], "sig": "out:SV", "eq": 40}]},
+  {"id": "reset_held", "chart": false,
+   "title": {"en": "Reset held: INC ignored", "vi": "Giữ Reset: INC bị bỏ qua"},
+   "dt": 0.5, "until": 2,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 0, "in:HL-Bias": 5, "in:LL-Bias": -5, "in:Auto SV": 40, "in:Reset": 1, "ops:OPS_IN2": 1, "prm:6": 2},
+   "checks": [{"t": [0, 2], "sig": "out:SV Bias", "eq": 0}, {"t": [0, 2], "sig": "out:SV", "eq": 40}, {"t": [0, 2], "sig": "st:OPS_OUT17", "eq": 1}]},
+  {"id": "dec_display", "chart": false,
+   "title": {"en": "DEC stops at LL-Bias; display signals", "vi": "DEC dừng ở LL-Bias; tín hiệu hiển thị"},
+   "dt": 0.5, "until": 3,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 38.5, "in:HL-Bias": 5, "in:LL-Bias": -1, "in:Auto SV": 40, "prm:6": 2, "ops:OPS_IN6": 9, "ops:OS_MTM": 1, "in:PV": 7},
+   "events": [{"t": 0.5, "set": {"ops:OPS_IN3": 1}}],
+   "checks": [
+    {"t": [0.5, 3], "sig": "out:SV Bias", "eq": -1},
+    {"t": [0.5, 3], "sig": "out:SV", "eq": 39},
+    {"t": [0, 3], "sig": "st:OPS_OUT18", "eq": 5},
+    {"t": [0, 3], "sig": "st:OPS_OUT19", "eq": -1},
+    {"t": [0, 3], "sig": "st:OPS_OUT14", "eq": 100},
+    {"t": [0, 3], "sig": "st:OPS_OUT15", "eq": 38.5},
+    {"t": [0, 3], "sig": "st:OPS_OUT11", "eq": 9},
+    {"t": [0, 3], "sig": "st:OPS_OUT10", "eq": 7},
+    {"t": [0, 3], "sig": "st:OPS_CND(15)", "eq": 1}
+   ]},
+  {"id": "ll_sv_clamp", "chart": false,
+   "title": {"en": "SV never goes below LL-SV", "vi": "SV không xuống dưới LL-SV"},
+   "dt": 0.5, "until": 2,
+   "set": {"in:HL-SV": 100, "in:LL-SV": 39.5, "in:HL-Bias": 5, "in:LL-Bias": -5, "in:Auto SV": 40, "prm:6": 2, "ops:OPS_IN3": 1},
+   "checks": [{"t": 0, "sig": "out:SV Bias", "eq": -1}, {"t": 0.5, "sig": "out:SV Bias", "eq": -2}, {"t": [0, 2], "sig": "out:SV", "eq": 39.5}]}
+ ]
+}

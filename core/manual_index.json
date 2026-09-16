@@ -1,0 +1,4954 @@
+{
+"codes": {
+"4013": {
+"doc": "macro",
+"group": "Send Log Data : 414BH ....................................................................................................................................................................................................... 187",
+"sections": [
+[
+15,
+130.7,
+811.9
+]
+],
+"explain": "After input changes to ON, output is turned ON after a delay of the specified time.",
+"shared": false
+},
+"4000": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+16,
+130.5,
+462.3
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": false
+},
+"4001": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+16,
+462.3,
+607.5
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4002": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+16,
+607.5,
+811.9
+],
+[
+17,
+78.0,
+811.9
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4003": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+18,
+78.3,
+324.7
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4004": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+18,
+324.7,
+599.1
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4005": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+18,
+599.1,
+811.9
+],
+[
+19,
+78.0,
+208.1
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4006": {
+"doc": "macro",
+"group": "AND : 4000H - 4006H",
+"sections": [
+[
+19,
+208.1,
+492.5
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4130": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+19,
+526.2,
+811.9
+],
+[
+20,
+78.0,
+155.8
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": false
+},
+"4131": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+20,
+155.8,
+316.5
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4132": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+20,
+316.5,
+811.9
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4133": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+21,
+78.3,
+232.9
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4134": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+21,
+232.9,
+405.4
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4135": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+21,
+405.4,
+587.0
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4136": {
+"doc": "macro",
+"group": "AND (Variable - input type) : 4130H-4136H",
+"sections": [
+[
+21,
+587.0,
+811.9
+]
+],
+"explain": "Results of ANDing “n” inputs are output.",
+"shared": true
+},
+"4007": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+22,
+98.1,
+420.9
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": false
+},
+"4008": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+22,
+420.9,
+561.3
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"4009": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+22,
+561.3,
+811.9
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"400A": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+23,
+78.3,
+323.5
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"400B": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+23,
+323.5,
+598.6
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"400C": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+23,
+598.6,
+811.9
+],
+[
+24,
+78.0,
+207.6
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"400D": {
+"doc": "macro",
+"group": "OR : 4007H - 400DH",
+"sections": [
+[
+24,
+207.6,
+496.0
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"4137": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+24,
+541.7,
+811.9
+],
+[
+25,
+78.0,
+155.8
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": false
+},
+"4138": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+25,
+155.8,
+304.5
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"4139": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+25,
+304.5,
+811.9
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"413A": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+26,
+78.3,
+232.9
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"413B": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+26,
+232.9,
+405.4
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"413C": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+26,
+405.4,
+587.0
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"413D": {
+"doc": "macro",
+"group": "OR (Variable - input type) : 4137H-413DH",
+"sections": [
+[
+26,
+587.0,
+811.9
+]
+],
+"explain": "Results of ORing “n” inputs are output.",
+"shared": true
+},
+"400F": {
+"doc": "macro",
+"group": "Exclusive OR: 400FH",
+"sections": [
+[
+27,
+98.1,
+265.4
+]
+],
+"explain": "Results of Exclusive OR of two inputs are output.",
+"shared": false
+},
+"4010": {
+"doc": "macro",
+"group": "NOT : 4010H",
+"sections": [
+[
+27,
+323.8,
+443.8
+]
+],
+"explain": "Results of inversion logic of input are output.",
+"shared": false
+},
+"400E": {
+"doc": "macro",
+"group": "Two Out of Three : 400EH",
+"sections": [
+[
+27,
+503.8,
+811.9
+]
+],
+"explain": "If two or three inputs are \"1\" among three inputs, the output will become \"1\".",
+"shared": false
+},
+"4011": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+28,
+130.5,
+406.6
+]
+],
+"explain": "This is a flip flop giving the priority to reset conditions. After CPU power supply is turned Off and turned On, Output “Y” is calculated from 0.",
+"shared": false
+},
+"4012": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+28,
+406.6,
+811.9
+]
+],
+"explain": "This is a flip flop giving the priority to set conditions. After CPU power supply is turned Off and turned On, Output “Y” is calculated from 0.",
+"shared": false
+},
+"407B": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+29,
+78.3,
+348.8
+]
+],
+"explain": "This is a latched flip flop giving the priority to reset conditions. Even if CPU power supply is turned Off and turned On, Output “Y” keeps the previous status before CPU power supply is turned off, because hardware memory keeps the status. This function is not provided in CPUX01, CPUX02 and CPUL01. *1 ; No change from previous status",
+"shared": false
+},
+"40BB": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+29,
+348.8,
+811.9
+]
+],
+"explain": "This is a flip flop giving the priority to set conditions. After CPU power supply is turned Off and turned On, Output “Y” is calculated from 0. If Output “Y” is necessary to keep the previous status before CPU power supply is turned off, use Flip Flop (Hardware Back Up) macro. This function is not provided in CPUX01, CPUX02 and CPUL01. *1 ; No change from previous status",
+"shared": false
+},
+"4141": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+30,
+78.3,
+412.0
+]
+],
+"explain": "This is a flip flop giving the priority to reset conditions. 1) After CPU power supply is turned Off and turned On, Output “Y” is calculated from 0.",
+"shared": false
+},
+"4142": {
+"doc": "macro",
+"group": "Flip Flop : 4011H, 4012H, 407BH, 40BBH, 4141H, 4142H",
+"sections": [
+[
+30,
+412.0,
+811.9
+]
+],
+"explain": "This is a flip flop giving the priority to set conditions. 1) After CPU power supply is turned Off and turned On, Output “Y” is calculated from 0.",
+"shared": false
+},
+"407C": {
+"doc": "macro",
+"group": "Delay Initiation of output : 4013H, 407CH - 407EH, 4143H",
+"sections": [
+[
+32,
+78.3,
+324.0
+]
+],
+"explain": "",
+"shared": false
+},
+"407D": {
+"doc": "macro",
+"group": "Delay Initiation of output : 4013H, 407CH - 407EH, 4143H",
+"sections": [
+[
+32,
+324.0,
+566.2
+]
+],
+"explain": "",
+"shared": false
+},
+"407E": {
+"doc": "macro",
+"group": "Delay Initiation of output : 4013H, 407CH - 407EH, 4143H",
+"sections": [
+[
+32,
+566.2,
+811.9
+],
+[
+33,
+78.0,
+102.4
+]
+],
+"explain": "",
+"shared": false
+},
+"4143": {
+"doc": "macro",
+"group": "Delay Initiation of output : 4013H, 407CH - 407EH, 4143H",
+"sections": [
+[
+33,
+102.4,
+811.9
+]
+],
+"explain": "This macro doesn't process tracking. Use this macro to avoid overwriting macro internal register at tracking function during transmission in asynchronous duplex system of CPUL01(EHC).",
+"shared": false
+},
+"4014": {
+"doc": "macro",
+"group": "Delay Initiation (Long) of output : 4014H, 407FH - 4081H, 4144H",
+"sections": [
+[
+34,
+98.1,
+811.9
+]
+],
+"explain": "After input changes to ON, output is turned ON after a delay of the specified time. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": false
+},
+"407F": {
+"doc": "macro",
+"group": "Delay Initiation (Long) of output : 4014H, 407FH - 4081H, 4144H",
+"sections": [
+[
+35,
+78.3,
+321.9
+]
+],
+"explain": "After input changes to ON, output is turned ON after a delay of the specified time. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4080": {
+"doc": "macro",
+"group": "Delay Initiation (Long) of output : 4014H, 407FH - 4081H, 4144H",
+"sections": [
+[
+35,
+321.9,
+568.2
+]
+],
+"explain": "After input changes to ON, output is turned ON after a delay of the specified time. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4081": {
+"doc": "macro",
+"group": "Delay Initiation (Long) of output : 4014H, 407FH - 4081H, 4144H",
+"sections": [
+[
+35,
+568.2,
+811.9
+],
+[
+36,
+78.0,
+102.3
+]
+],
+"explain": "After input changes to ON, output is turned ON after a delay of the specified time. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4144": {
+"doc": "macro",
+"group": "Delay Initiation (Long) of output : 4014H, 407FH - 4081H, 4144H",
+"sections": [
+[
+36,
+102.3,
+811.9
+]
+],
+"explain": "This macro doesn't process tracking. Use this macro to avoid overwriting macro internal register at tracking function during transmission in asynchronous duplex system of CPUL01(EHC).",
+"shared": false
+},
+"4015": {
+"doc": "macro",
+"group": "Delay Termination of output : 4015H, 4082H - 4084H, 4145H",
+"sections": [
+[
+37,
+98.1,
+811.9
+]
+],
+"explain": "After input changes to OFF, time is delayed by specified time and output is turned OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": false
+},
+"4082": {
+"doc": "macro",
+"group": "Delay Termination of output : 4015H, 4082H - 4084H, 4145H",
+"sections": [
+[
+38,
+78.3,
+323.6
+]
+],
+"explain": "After input changes to OFF, time is delayed by specified time and output is turned OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4083": {
+"doc": "macro",
+"group": "Delay Termination of output : 4015H, 4082H - 4084H, 4145H",
+"sections": [
+[
+38,
+323.6,
+568.2
+]
+],
+"explain": "After input changes to OFF, time is delayed by specified time and output is turned OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4084": {
+"doc": "macro",
+"group": "Delay Termination of output : 4015H, 4082H - 4084H, 4145H",
+"sections": [
+[
+38,
+568.2,
+811.9
+],
+[
+39,
+78.0,
+103.9
+]
+],
+"explain": "After input changes to OFF, time is delayed by specified time and output is turned OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in minute units. Fractions below the decimal point are displayed rounded up to whole numbers.",
+"shared": true
+},
+"4145": {
+"doc": "macro",
+"group": "Delay Termination of output : 4015H, 4082H - 4084H, 4145H",
+"sections": [
+[
+39,
+103.9,
+811.9
+]
+],
+"explain": "This macro doesn't process tracking. Use this macro to avoid overwriting macro internal register at tracking function during transmission in asynchronous duplex system of CPUL01(EHC).",
+"shared": false
+},
+"4016": {
+"doc": "macro",
+"group": "Pulse Output : 4016H, 4085H - 4087H, 4146H",
+"sections": [
+[
+40,
+98.1,
+811.9
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units. Fractions below the decimal point are displayed by rounding to integers.",
+"shared": false
+},
+"4085": {
+"doc": "macro",
+"group": "Pulse Output : 4016H, 4085H - 4087H, 4146H",
+"sections": [
+[
+41,
+78.3,
+324.9
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units. Fractions below the decimal point are displayed by rounding to integers.",
+"shared": true
+},
+"4086": {
+"doc": "macro",
+"group": "Pulse Output : 4016H, 4085H - 4087H, 4146H",
+"sections": [
+[
+41,
+324.9,
+570.5
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units. Fractions below the decimal point are displayed by rounding to integers.",
+"shared": true
+},
+"4087": {
+"doc": "macro",
+"group": "Pulse Output : 4016H, 4085H - 4087H, 4146H",
+"sections": [
+[
+41,
+570.5,
+811.9
+],
+[
+42,
+78.0,
+102.3
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units. Fractions below the decimal point are displayed by rounding to integers.",
+"shared": true
+},
+"4146": {
+"doc": "macro",
+"group": "Pulse Output : 4016H, 4085H - 4087H, 4146H",
+"sections": [
+[
+42,
+102.3,
+811.9
+]
+],
+"explain": "This macro doesn't process tracking. Use this macro to avoid overwriting macro internal register at tracking function during transmission in asynchronous duplex system of CPUL01(EHC).",
+"shared": false
+},
+"4017": {
+"doc": "macro",
+"group": "Pulse Output – Wipe Out : 4017H, 4088H - 408AH, 4147H",
+"sections": [
+[
+43,
+98.1,
+811.9
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. Output also turns OFF when input turns OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units . Fractions below the decimal point are displayed by rounding to integers",
+"shared": false
+},
+"4088": {
+"doc": "macro",
+"group": "Pulse Output – Wipe Out : 4017H, 4088H - 408AH, 4147H",
+"sections": [
+[
+44,
+78.3,
+322.0
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. Output also turns OFF when input turns OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units . Fractions below the decimal point are displayed by rounding to integers",
+"shared": true
+},
+"4089": {
+"doc": "macro",
+"group": "Pulse Output – Wipe Out : 4017H, 4088H - 408AH, 4147H",
+"sections": [
+[
+44,
+322.0,
+564.7
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. Output also turns OFF when input turns OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units . Fractions below the decimal point are displayed by rounding to integers",
+"shared": true
+},
+"408A": {
+"doc": "macro",
+"group": "Pulse Output – Wipe Out : 4017H, 4088H - 408AH, 4147H",
+"sections": [
+[
+44,
+564.7,
+811.9
+]
+],
+"explain": "A time-limit pulse for a specified time is output starting when input changes from OFF to ON. Output also turns OFF when input turns OFF. NOTE: Display of remaining time In monitor display, the remaining time will be displayed in the remaining time part of the symbol in second units . Fractions below the decimal point are displayed by rounding to integers",
+"shared": true
+},
+"4147": {
+"doc": "macro",
+"group": "Pulse Output – Wipe Out : 4017H, 4088H - 408AH, 4147H",
+"sections": [
+[
+45,
+96.3,
+811.9
+]
+],
+"explain": "This macro doesn't process tracking. Use this macro to avoid overwriting macro internal register at tracking function during transmission in asynchronous duplex system of CPUL01(EHC).",
+"shared": false
+},
+"40C7": {
+"doc": "macro",
+"group": "Count1 : 40C7H",
+"sections": [
+[
+46,
+130.5,
+811.9
+]
+],
+"explain": "When input X changes from OFF to ON, the value of output Y is addition of Y and D1. Y = Y + D1 (See the following diagram.)",
+"shared": false
+},
+"40C8": {
+"doc": "macro",
+"group": "Count2 : 40C8H",
+"sections": [
+[
+47,
+98.1,
+811.9
+]
+],
+"explain": "Count the number of 'OFF=>ON' changes in input X, Output Y will be ON, when counter value reach the specified value S1. case of S1 = 4",
+"shared": false
+},
+"40BC": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+48,
+130.5,
+526.8
+]
+],
+"explain": "The output Y is a value determined by AND calculation of each bit between X1 and X2.",
+"shared": false
+},
+"40BD": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+48,
+526.8,
+811.9
+]
+],
+"explain": "The output Y is a value determined by AND calculation of each bit between X1 and SI.",
+"shared": false
+},
+"40BE": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+49,
+78.3,
+456.6
+]
+],
+"explain": "The output Y is a value determined by OR calculation of each bit between X1 and X2.",
+"shared": false
+},
+"40BF": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+49,
+456.6,
+811.9
+]
+],
+"explain": "The output Y is a value determined by OR calculation of each bit between X1 and SI.",
+"shared": false
+},
+"40C0": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+50,
+78.0,
+456.6
+]
+],
+"explain": "The output Y is a value determined by XOR calculation of each bit between X1 and X2.",
+"shared": false
+},
+"40C1": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+50,
+456.6,
+811.9
+]
+],
+"explain": "The output Y is a value determined by XOR calculation of each bit between X1 and SI.",
+"shared": false
+},
+"40D6": {
+"doc": "macro",
+"group": "Register : 40BCH - 40C1H, 40D6H",
+"sections": [
+[
+51,
+78.3,
+811.9
+]
+],
+"explain": "The value of output Y is X1 rotated by X2 bits. If X2 is positive value, rotates to the left. If X2 is negative value, rotates to the right. 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 4 bits left rotation 0 0 1 0 0 1 0 0 1 0 0 0 0 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0 4 bits right rotation 1 0 0 0 0 0 0 1 0 0 1 0 0 1 0 1",
+"shared": false
+},
+"40C2": {
+"doc": "macro",
+"group": "Register Check : 40C2H - 40C4H",
+"sections": [
+[
+52,
+98.1,
+297.2
+]
+],
+"explain": "If the input X1 is 0, the output Y turns OFF. If the input X1 is not 0, the output Y turns ON.",
+"shared": false
+},
+"40C3": {
+"doc": "macro",
+"group": "Register Check : 40C2H - 40C4H",
+"sections": [
+[
+52,
+297.2,
+506.0
+]
+],
+"explain": "If the AR between X1 and SI is 0, the output Y turns OFF. If the AR between X1 and SI is not 0, the output Y turns ON.",
+"shared": false
+},
+"40C4": {
+"doc": "macro",
+"group": "Register Check : 40C2H - 40C4H",
+"sections": [
+[
+52,
+506.0,
+811.9
+]
+],
+"explain": "If the XOR between X1 and SI is 0, the output Y turns OFF. If the XOR between X1 and SI is not 0, the output Y turns ON.",
+"shared": false
+},
+"401A": {
+"doc": "macro",
+"group": "Summing : 401AH - 401CH",
+"sections": [
+[
+53,
+130.5,
+355.5
+]
+],
+"explain": "This function calculates addition of two inputs.",
+"shared": false
+},
+"401B": {
+"doc": "macro",
+"group": "Summing : 401AH - 401CH",
+"sections": [
+[
+53,
+355.5,
+559.2
+]
+],
+"explain": "This function calculates addition of two inputs.",
+"shared": true
+},
+"401C": {
+"doc": "macro",
+"group": "Summing : 401AH - 401CH",
+"sections": [
+[
+53,
+559.2,
+811.9
+]
+],
+"explain": "This function calculates addition of two inputs.",
+"shared": true
+},
+"4021": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+54,
+97.6,
+322.6
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": false
+},
+"4022": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+54,
+322.6,
+544.3
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": true
+},
+"4023": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+54,
+544.3,
+811.9
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": true
+},
+"4024": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+55,
+78.3,
+298.6
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": true
+},
+"4025": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+55,
+298.6,
+543.4
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": true
+},
+"4026": {
+"doc": "macro",
+"group": "Difference : 4021H - 4026H",
+"sections": [
+[
+55,
+543.4,
+811.9
+]
+],
+"explain": "This function calculates differential of two inputs.",
+"shared": true
+},
+"4027": {
+"doc": "macro",
+"group": "Multiplying : 4027H - 4029H",
+"sections": [
+[
+56,
+98.1,
+326.1
+]
+],
+"explain": "This function calculates multiplying of two inputs.",
+"shared": false
+},
+"4028": {
+"doc": "macro",
+"group": "Multiplying : 4027H - 4029H",
+"sections": [
+[
+56,
+326.1,
+489.2
+]
+],
+"explain": "This function calculates multiplying of two inputs.",
+"shared": true
+},
+"4029": {
+"doc": "macro",
+"group": "Multiplying : 4027H - 4029H",
+"sections": [
+[
+56,
+489.2,
+811.9
+]
+],
+"explain": "This function calculates multiplying of two inputs.",
+"shared": true
+},
+"402A": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+57,
+98.1,
+388.8
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": false
+},
+"402B": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+57,
+388.8,
+546.4
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": true
+},
+"402C": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+57,
+546.4,
+811.9
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": true
+},
+"402D": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+58,
+78.3,
+239.9
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": true
+},
+"402E": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+58,
+239.9,
+409.5
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": true
+},
+"402F": {
+"doc": "macro",
+"group": "Dividing : 402AH - 402FH",
+"sections": [
+[
+58,
+409.5,
+811.9
+]
+],
+"explain": "This function calculates dividing of two inputs. NOTE: X2 should not be “0”.",
+"shared": true
+},
+"4030": {
+"doc": "macro",
+"group": "Summing with Gain : 4030H - 4032H",
+"sections": [
+[
+59,
+130.5,
+394.0
+]
+],
+"explain": "This function calculates summing with gain.",
+"shared": false
+},
+"4031": {
+"doc": "macro",
+"group": "Summing with Gain : 4030H - 4032H",
+"sections": [
+[
+59,
+394.0,
+597.1
+]
+],
+"explain": "This function calculates summing with gain.",
+"shared": true
+},
+"4032": {
+"doc": "macro",
+"group": "Summing with Gain : 4030H - 4032H",
+"sections": [
+[
+59,
+597.1,
+811.9
+],
+[
+60,
+78.0,
+172.2
+]
+],
+"explain": "This function calculates summing with gain.",
+"shared": true
+},
+"405F": {
+"doc": "macro",
+"group": "Digital Summing : 405FH - 4063H",
+"sections": [
+[
+60,
+223.5,
+558.7
+]
+],
+"explain": "Adds and subtracts two inputs with a gain.",
+"shared": false
+},
+"4060": {
+"doc": "macro",
+"group": "Digital Summing : 405FH - 4063H",
+"sections": [
+[
+60,
+558.7,
+811.9
+],
+[
+61,
+78.0,
+245.6
+]
+],
+"explain": "Adds and subtracts two inputs with a gain.",
+"shared": true
+},
+"4061": {
+"doc": "macro",
+"group": "Digital Summing : 405FH - 4063H",
+"sections": [
+[
+61,
+245.6,
+811.9
+]
+],
+"explain": "Adds and subtracts two inputs with a gain.",
+"shared": true
+},
+"4062": {
+"doc": "macro",
+"group": "Digital Summing : 405FH - 4063H",
+"sections": [
+[
+62,
+78.3,
+546.3
+]
+],
+"explain": "Adds and subtracts two inputs with a gain.",
+"shared": true
+},
+"4063": {
+"doc": "macro",
+"group": "Digital Summing : 405FH - 4063H",
+"sections": [
+[
+62,
+546.3,
+811.9
+],
+[
+63,
+78.0,
+811.9
+]
+],
+"explain": "Adds and subtracts two inputs with a gain.",
+"shared": true
+},
+"401D": {
+"doc": "macro",
+"group": "Averaging : 401DH - 4020H",
+"sections": [
+[
+64,
+98.1,
+344.3
+]
+],
+"explain": "This function calculates average of two or three inputs.",
+"shared": false
+},
+"401E": {
+"doc": "macro",
+"group": "Averaging : 401DH - 4020H",
+"sections": [
+[
+64,
+344.3,
+489.2
+]
+],
+"explain": "This function calculates average of two or three inputs.",
+"shared": true
+},
+"401F": {
+"doc": "macro",
+"group": "Averaging : 401DH - 4020H",
+"sections": [
+[
+64,
+489.2,
+646.9
+]
+],
+"explain": "This function calculates average of two or three inputs.",
+"shared": true
+},
+"4020": {
+"doc": "macro",
+"group": "Averaging : 401DH - 4020H",
+"sections": [
+[
+64,
+646.9,
+811.9
+]
+],
+"explain": "This function calculates average of two or three inputs.",
+"shared": true
+},
+"4079": {
+"doc": "macro",
+"group": "Negative : 4079H",
+"sections": [
+[
+65,
+98.1,
+216.3
+]
+],
+"explain": "",
+"shared": false
+},
+"4033": {
+"doc": "macro",
+"group": "Square Root : 4033H",
+"sections": [
+[
+65,
+287.5,
+500.9
+]
+],
+"explain": "This function calculates square roots.",
+"shared": false
+},
+"4064": {
+"doc": "macro",
+"group": "Absolute Value : 4064H",
+"sections": [
+[
+65,
+539.8,
+811.9
+]
+],
+"explain": "This function calculates absolute values.",
+"shared": false
+},
+"4034": {
+"doc": "macro",
+"group": "Exponential (Power) : 4034H",
+"sections": [
+[
+66,
+98.1,
+403.5
+]
+],
+"explain": "This function calculates exponential(power).",
+"shared": false
+},
+"405D": {
+"doc": "macro",
+"group": "Exponential of X : 405DH",
+"sections": [
+[
+66,
+442.4,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"414C": {
+"doc": "macro",
+"group": "Trigonometric Function (sine) : 414CH",
+"sections": [
+[
+67,
+98.1,
+286.6
+]
+],
+"explain": "",
+"shared": false
+},
+"414D": {
+"doc": "macro",
+"group": "Trigonometric Function (cosine): 414DH",
+"sections": [
+[
+67,
+418.6,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"4150": {
+"doc": "macro",
+"group": "Inverse Trigonometric Function (arcsine) : 4150H",
+"sections": [
+[
+68,
+98.1,
+421.3
+]
+],
+"explain": "",
+"shared": false
+},
+"4151": {
+"doc": "macro",
+"group": "Inverse Trigonometric Function (arccosine): 4151H",
+"sections": [
+[
+68,
+468.3,
+811.9
+],
+[
+69,
+78.0,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"40B6": {
+"doc": "macro",
+"group": "Converter between Integer and Digital : 40B6H, 40B7H",
+"sections": [
+[
+70,
+98.1,
+811.9
+]
+],
+"explain": "The output is a value determined by conversion from integer input to digital bits.",
+"shared": false
+},
+"40B7": {
+"doc": "macro",
+"group": "Converter between Integer and Digital : 40B6H, 40B7H",
+"sections": [
+[
+71,
+78.3,
+811.9
+],
+[
+72,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by conversion from digital inputs to integer value.",
+"shared": false
+},
+"40D1": {
+"doc": "macro",
+"group": "Converter between Floating and Integer: 40D1H, 40D2H, 4153H",
+"sections": [
+[
+73,
+98.1,
+318.6
+]
+],
+"explain": "This macro converts floating value to 16 bit signed integer value. (The output is rounded off to the whole number). If the input value is less than -32768, the output value is -32768. If the input value is more than 32767, the output value is 32767.",
+"shared": false
+},
+"40D2": {
+"doc": "macro",
+"group": "Converter between Floating and Integer: 40D1H, 40D2H, 4153H",
+"sections": [
+[
+73,
+318.6,
+489.7
+]
+],
+"explain": "This macro converts 16 bit signed integer value to floating value.",
+"shared": false
+},
+"4153": {
+"doc": "macro",
+"group": "Converter between Floating and Integer: 40D1H, 40D2H, 4153H",
+"sections": [
+[
+73,
+489.7,
+811.9
+],
+[
+74,
+78.0,
+811.9
+]
+],
+"explain": "This macro moves X1 16 bit register data to upper 16 bit of Y 32 bit register, and X2 16 bit register data to lower 16 bit of Y 32 bit register. 16 bit register area 32 bit register area It is premised that the combined value is in floating point format.",
+"shared": false
+},
+"40D3": {
+"doc": "macro",
+"group": "Converter between Binary and BCD: 40D3H, 40D4H",
+"sections": [
+[
+75,
+98.1,
+452.7
+]
+],
+"explain": "This macro converts 16 bit signed integer value to BCD number. Output value is more than or equal to -7999, and less than or equal to 7999. If the input value is less than -7999, the output value is -7999. If the input value is more than 7999, the output value is 7999. Format of output BCD number is described below.",
+"shared": false
+},
+"40D4": {
+"doc": "macro",
+"group": "Converter between Binary and BCD: 40D3H, 40D4H",
+"sections": [
+[
+75,
+452.7,
+811.9
+]
+],
+"explain": "This macro converts BCD number to 16 bit signed integer value . In case where input BCD number has format error, output value doesn't change. Format of input BCD number is described below.",
+"shared": false
+},
+"4035": {
+"doc": "macro",
+"group": "Function generator : 4035H",
+"sections": [
+[
+76,
+98.1,
+811.9
+],
+[
+77,
+78.0,
+811.9
+]
+],
+"explain": "Based on the break points (Xi, Yi), the output value (approximate value) Y for the input value X is determined as follows. number of break points : 𝑛𝑛 (2 ≤𝑛𝑛≤15) (𝑋𝑋−𝑋𝑋𝑖𝑖) × (𝑌𝑌𝑖𝑖+1 −𝑌𝑌𝑖𝑖)",
+"shared": false
+},
+"4077": {
+"doc": "macro",
+"group": "Interpolator : 4077H",
+"sections": [
+[
+78,
+98.1,
+811.9
+],
+[
+79,
+78.0,
+811.9
+],
+[
+80,
+78.0,
+811.9
+]
+],
+"explain": "Interpolation by the table.",
+"shared": false
+},
+"4065": {
+"doc": "macro",
+"group": "Dead Band : 4065H, 4066H",
+"sections": [
+[
+81,
+130.5,
+525.0
+]
+],
+"explain": "Dead band width of a subtraction type is processed. In the diagram on the right:",
+"shared": false
+},
+"4066": {
+"doc": "macro",
+"group": "Dead Band : 4065H, 4066H",
+"sections": [
+[
+81,
+525.0,
+811.9
+],
+[
+82,
+78.0,
+179.3
+]
+],
+"explain": "Dead band width of a jump type is processed. In the diagram on the right:",
+"shared": false
+},
+"405E": {
+"doc": "macro",
+"group": "Pure Delay : 405EH, 408BH, 408CH",
+"sections": [
+[
+82,
+230.2,
+811.9
+],
+[
+83,
+78.0,
+811.9
+],
+[
+84,
+78.0,
+811.9
+]
+],
+"explain": "Input variations are delayed specified time and output is made in the same variation quantity as that of input. NOTE 1:This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Delay Time (s) = ε × T1 × M1 : Cyclic Scanning Period (s) T1 : Number of CPU cycle (Cycle) M1 : Number of samples (Times) In case ε is 0.2 sec, we recommend the setting value of T1 and M1 in the following table.",
+"shared": false
+},
+"408B": {
+"doc": "macro",
+"group": "Pure Delay : 405EH, 408BH, 408CH",
+"sections": [
+[
+85,
+78.3,
+376.9
+]
+],
+"explain": "Input variations are delayed specified time and output is made in the same variation quantity as that of input. NOTE 1:This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Delay Time (s) = ε × T1 × M1 : Cyclic Scanning Period (s) T1 : Number of CPU cycle (Cycle) M1 : Number of samples (Times) In case ε is 0.2 sec, we recommend the setting value of T1 and M1 in the following table.",
+"shared": true
+},
+"408C": {
+"doc": "macro",
+"group": "Pure Delay : 405EH, 408BH, 408CH",
+"sections": [
+[
+85,
+376.9,
+811.9
+]
+],
+"explain": "Input variations are delayed specified time and output is made in the same variation quantity as that of input. NOTE 1:This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Delay Time (s) = ε × T1 × M1 : Cyclic Scanning Period (s) T1 : Number of CPU cycle (Cycle) M1 : Number of samples (Times) In case ε is 0.2 sec, we recommend the setting value of T1 and M1 in the following table.",
+"shared": true
+},
+"407A": {
+"doc": "macro",
+"group": "Sampling Delay Gate : 407AH",
+"sections": [
+[
+86,
+98.1,
+811.9
+]
+],
+"explain": "Y equals X in n1 sampling time before. Ex) n1 = 1",
+"shared": false
+},
+"4036": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+87,
+98.1,
+602.4
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": false
+},
+"4037": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+87,
+602.4,
+811.9
+],
+[
+88,
+78.0,
+811.9
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"4038": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+89,
+78.3,
+347.7
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"4039": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+89,
+347.7,
+627.7
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"403A": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+89,
+627.7,
+811.9
+],
+[
+90,
+78.0,
+205.5
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"403B": {
+"doc": "macro",
+"group": "Time Function (First order LAG) : 4036H - 403BH",
+"sections": [
+[
+90,
+205.5,
+423.9
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop. (scheduled scanning). NOTE 2: This macro considers that parameter ‘T1’ is equal to execution period when parameter 'T1' is less than execution period. The value of Output ‘Y’ is the value of ‘X’ when parameter 'T1' is 0. NOTE 3: Parameter ‘T1’ must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"403C": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+90,
+475.3,
+811.9
+],
+[
+91,
+78.0,
+811.9
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": false
+},
+"403D": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+92,
+78.3,
+458.0
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"403E": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+92,
+458.0,
+811.9
+],
+[
+93,
+78.0,
+117.6
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"403F": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+93,
+117.6,
+811.9
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"4040": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+94,
+78.3,
+436.2
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"4041": {
+"doc": "macro",
+"group": "Lead/Lag : 403CH - 4041H",
+"sections": [
+[
+94,
+436.2,
+811.9
+]
+],
+"explain": "NOTE 1: This macro can be operated only if the function actuation mode is the constant period processing loop (scheduled scanning). NOTE 2: Parameter ‘Tla’ (Lag Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n:positive integer; ε:constant period of processing loop).",
+"shared": true
+},
+"4057": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+95,
+98.1,
+811.9
+],
+[
+96,
+78.0,
+456.3
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": false
+},
+"4058": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+96,
+456.3,
+811.9
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": true
+},
+"4059": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+97,
+78.3,
+367.0
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": true
+},
+"405A": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+97,
+367.0,
+642.8
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": true
+},
+"405B": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+97,
+642.8,
+811.9
+],
+[
+98,
+78.0,
+226.2
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": true
+},
+"405C": {
+"doc": "macro",
+"group": "Velocity Limiter : 4057H - 405CH",
+"sections": [
+[
+98,
+226.2,
+478.2
+]
+],
+"explain": "Tracks input in step-form variation at a specified rate and output in a ramp form. NOTE: This macro can be operated only if the function actuation mode is the constant-period processing loop (scheduled scanning). Input X / Output Y In case of X decreasing In case of X increasing",
+"shared": true
+},
+"4073": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+98,
+511.6,
+811.9
+],
+[
+99,
+78.0,
+811.9
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": false
+},
+"4074": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+100,
+78.3,
+430.3
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": true
+},
+"4075": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+100,
+430.3,
+811.9
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": true
+},
+"4076": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+101,
+78.3,
+811.9
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": true
+},
+"4090": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+102,
+78.3,
+430.5
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": true
+},
+"4091": {
+"doc": "macro",
+"group": "Bump less Transfer : 4073H - 4076H, 4090H - 4091H",
+"sections": [
+[
+102,
+430.5,
+811.9
+]
+],
+"explain": "Output (Y) gradually approaches (bump less switch) X1 or X2 at a fixed rate (R12 , R21) . Y gradually approaches from X2 to the value of X1 at a fixed rate (R21) Y = previous output value + R (However, X1 > Y > X2) Y gradually approaches from X1 to the value of X2 at a fixed rate (R12) Y = previous output value - R (However, X1 > Y > X2)",
+"shared": true
+},
+"40AE": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+103,
+98.1,
+811.9
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": false
+},
+"40AF": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+104,
+78.3,
+465.0
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": true
+},
+"40B0": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+104,
+465.0,
+811.9
+],
+[
+105,
+78.0,
+131.2
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": true
+},
+"40B1": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+105,
+131.2,
+490.6
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": true
+},
+"40B2": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+105,
+490.6,
+811.9
+],
+[
+106,
+78.0,
+261.4
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": true
+},
+"40B3": {
+"doc": "macro",
+"group": "Bump less Transfer (LAG Type) : 40AEH - 40B3H",
+"sections": [
+[
+106,
+261.4,
+811.9
+]
+],
+"explain": "Output (Y) gradually increases or decreases to X1 or X2 in Time Constant (T12 or T21) when SW changes.",
+"shared": true
+},
+"4042": {
+"doc": "macro",
+"group": "High Selecting : 4042H - 4044H",
+"sections": [
+[
+107,
+130.5,
+459.1
+]
+],
+"explain": "Selects a larger value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": false
+},
+"4043": {
+"doc": "macro",
+"group": "High Selecting : 4042H - 4044H",
+"sections": [
+[
+107,
+459.1,
+654.7
+]
+],
+"explain": "Selects a larger value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": true
+},
+"4044": {
+"doc": "macro",
+"group": "High Selecting : 4042H - 4044H",
+"sections": [
+[
+107,
+654.7,
+811.9
+],
+[
+108,
+78.0,
+811.9
+]
+],
+"explain": "Selects a larger value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": true
+},
+"4045": {
+"doc": "macro",
+"group": "Low Selecting : 4045H - 4047H",
+"sections": [
+[
+109,
+98.1,
+419.2
+]
+],
+"explain": "Selects a smaller value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": false
+},
+"4046": {
+"doc": "macro",
+"group": "Low Selecting : 4045H - 4047H",
+"sections": [
+[
+109,
+419.2,
+687.9
+]
+],
+"explain": "Selects a smaller value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": true
+},
+"4047": {
+"doc": "macro",
+"group": "Low Selecting : 4045H - 4047H",
+"sections": [
+[
+109,
+687.9,
+811.9
+],
+[
+110,
+78.0,
+244.4
+]
+],
+"explain": "Selects a smaller value of inputs (X1 and X2) and uses it as output (Y).",
+"shared": true
+},
+"4067": {
+"doc": "macro",
+"group": "Value Selector : 4067H - 4069H",
+"sections": [
+[
+110,
+278.0,
+576.0
+]
+],
+"explain": "This function outputs the maximum value of the Inputs.",
+"shared": false
+},
+"4068": {
+"doc": "macro",
+"group": "Value Selector : 4067H - 4069H",
+"sections": [
+[
+110,
+576.0,
+811.9
+],
+[
+111,
+78.0,
+161.5
+]
+],
+"explain": "This function outputs the minimum value of the Inputs.",
+"shared": false
+},
+"4069": {
+"doc": "macro",
+"group": "Value Selector : 4067H - 4069H",
+"sections": [
+[
+111,
+161.5,
+811.9
+]
+],
+"explain": "This function outputs the medium value of the Inputs.",
+"shared": false
+},
+"4053": {
+"doc": "macro",
+"group": "Limiter : 4053H - 4056H",
+"sections": [
+[
+112,
+130.5,
+651.5
+]
+],
+"explain": "High limit of input signals is enforced. High limit value parameter can be set from HL input (with right macro).",
+"shared": false
+},
+"4054": {
+"doc": "macro",
+"group": "Limiter : 4053H - 4056H",
+"sections": [
+[
+112,
+651.5,
+811.9
+],
+[
+113,
+78.0,
+811.9
+]
+],
+"explain": "High limit of input signals is enforced. High limit value parameter can be set from HL input (with right macro).",
+"shared": true
+},
+"4055": {
+"doc": "macro",
+"group": "Limiter : 4053H - 4056H",
+"sections": [
+[
+114,
+78.3,
+611.3
+]
+],
+"explain": "Low limit of input signals is enforced. Low limit value parameter can be set from LL input (with right macro).",
+"shared": false
+},
+"4056": {
+"doc": "macro",
+"group": "Limiter : 4053H - 4056H",
+"sections": [
+[
+114,
+611.3,
+811.9
+],
+[
+115,
+78.0,
+811.9
+]
+],
+"explain": "Low limit of input signals is enforced. Low limit value parameter can be set from LL input (with right macro).",
+"shared": true
+},
+"4052": {
+"doc": "macro",
+"group": "Variable Signal Generator : 4052H",
+"sections": [
+[
+116,
+98.1,
+811.9
+]
+],
+"explain": "This function generates constant signals.",
+"shared": false
+},
+"40A4": {
+"doc": "macro",
+"group": "Ever On/Off : 40A4H, 40A5H",
+"sections": [
+[
+117,
+98.1,
+260.2
+]
+],
+"explain": "The output is continuous true (ON).",
+"shared": false
+},
+"40A5": {
+"doc": "macro",
+"group": "Ever On/Off : 40A4H, 40A5H",
+"sections": [
+[
+117,
+260.2,
+442.3
+]
+],
+"explain": "The output is continuous false (OFF).",
+"shared": false
+},
+"4018": {
+"doc": "macro",
+"group": "Digital Switch : 4018H",
+"sections": [
+[
+117,
+481.2,
+811.9
+]
+],
+"explain": "The output is ON or OFF which is selected by parameter.",
+"shared": false
+},
+"40B4": {
+"doc": "macro",
+"group": "One Scan Shot : 40B4H, 40B5H",
+"sections": [
+[
+118,
+98.1,
+458.2
+]
+],
+"explain": "If the input X turns ON, the output Y turns ON in one controller cycle.",
+"shared": false
+},
+"40B5": {
+"doc": "macro",
+"group": "One Scan Shot : 40B4H, 40B5H",
+"sections": [
+[
+118,
+458.2,
+811.9
+]
+],
+"explain": "If the input X turns OFF, the output Y turns ON in one controller cycle.",
+"shared": false
+},
+"4019": {
+"doc": "macro",
+"group": "Pulse Generator : 4019H",
+"sections": [
+[
+119,
+98.1,
+811.9
+]
+],
+"explain": "Output is turned on and off for each function execution period in accordance with the ON time and OFF time specified by Parameter. If X = 1: Pulse is output. If X = 0: Pulse is not output.",
+"shared": false
+},
+"4048": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+120,
+98.1,
+339.0
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": false
+},
+"4049": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+120,
+339.0,
+582.4
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": true
+},
+"404A": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+120,
+582.4,
+811.9
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": true
+},
+"404B": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+121,
+78.3,
+309.7
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": true
+},
+"404C": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+121,
+309.7,
+552.7
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": true
+},
+"404D": {
+"doc": "macro",
+"group": "Transfer (Analog Switch) : 4048H - 404DH",
+"sections": [
+[
+121,
+552.7,
+811.9
+]
+],
+"explain": "Selects signals by switching conditions.",
+"shared": true
+},
+"40D5": {
+"doc": "macro",
+"group": "Transfer (Digital Switch) : 40D5H",
+"sections": [
+[
+122,
+98.1,
+811.9
+]
+],
+"explain": "Selects signals by switching conditions. SW = ON (1) SW = OFF (0)",
+"shared": false
+},
+"406A": {
+"doc": "macro",
+"group": "Proportional : 406AH, 406BH",
+"sections": [
+[
+123,
+130.5,
+421.0
+]
+],
+"explain": "",
+"shared": false
+},
+"406B": {
+"doc": "macro",
+"group": "Proportional : 406AH, 406BH",
+"sections": [
+[
+123,
+421.0,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"4070": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+124,
+98.1,
+811.9
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": false
+},
+"4071": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+125,
+78.0,
+456.9
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": true
+},
+"4072": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+125,
+456.9,
+811.9
+],
+[
+126,
+78.0,
+105.6
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": true
+},
+"408D": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+126,
+105.6,
+811.9
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": true
+},
+"408E": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+127,
+78.3,
+433.8
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": true
+},
+"408F": {
+"doc": "macro",
+"group": "Differential : 4070H - 4072H, 408DH - 408FH",
+"sections": [
+[
+127,
+433.8,
+811.9
+]
+],
+"explain": "NOTE: Parameter ‘TD1’ (Differential Time) must be larger than or equal to execution period, must be specified",
+"shared": true
+},
+"406C": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+128,
+98.1,
+811.9
+],
+[
+129,
+78.0,
+366.3
+]
+],
+"explain": "NOTE : Parameter ‘TI1’ (Integral Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": false
+},
+"406D": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+129,
+366.3,
+741.9
+]
+],
+"explain": "NOTE : Parameter ‘TI1’ (Integral Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"406E": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+129,
+741.9,
+811.9
+],
+[
+130,
+78.0,
+393.3
+]
+],
+"explain": "NOTE : Parameter ‘TI1’ (Integral Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"406F": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+130,
+393.3,
+811.9
+],
+[
+131,
+78.0,
+98.1
+]
+],
+"explain": "NOTE : Parameter ‘TI1’ (Integral Time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"4093": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+131,
+98.1,
+811.9
+],
+[
+132,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by SV – PV direction. NOTE :Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": false
+},
+"4095": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+133,
+78.3,
+811.9
+],
+[
+134,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by SV – PV direction. NOTE :Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"4097": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+135,
+78.3,
+811.9
+],
+[
+136,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by SV – PV direction. NOTE :Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"4099": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+137,
+78.3,
+811.9
+],
+[
+138,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by SV – PV direction. NOTE :Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"409B": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+139,
+78.3,
+811.9
+],
+[
+140,
+78.0,
+811.9
+],
+[
+141,
+78.0,
+98.1
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by SV – PV direction. NOTE :Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"4094": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+141,
+98.1,
+811.9
+],
+[
+142,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by PV – SV direction. NOTE: Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": false
+},
+"4096": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+143,
+78.3,
+811.9
+],
+[
+144,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by PV – SV direction. NOTE: Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"4098": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+145,
+78.3,
+811.9
+],
+[
+146,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by PV – SV direction. NOTE: Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"409A": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+147,
+78.3,
+811.9
+],
+[
+148,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by PV – SV direction. NOTE: Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"409C": {
+"doc": "macro",
+"group": "Integral with High / Low Limit : 406CH - 406FH",
+"sections": [
+[
+149,
+78.3,
+811.9
+],
+[
+150,
+78.0,
+811.9
+]
+],
+"explain": "The output is a value determined by PID calculation result of the two inputs and each parameter. The output direction is determined by PV – SV direction. NOTE: Parameter ‘Td’ (Differential time) must be larger than or equal to execution period, must be specified on 0.1 second time scale and must be n x ε (n: positive integer; ε: constant period of processing loop).",
+"shared": true
+},
+"404E": {
+"doc": "macro",
+"group": "Signal Monitor : 404EH - 4051H",
+"sections": [
+[
+151,
+130.5,
+811.9
+]
+],
+"explain": "Compares input value (X) with set values (set/reset values) and makes LV output (Y) of the result of it. Parameter can be set from input S and R (with right macro). Parameter S1 / R1",
+"shared": false
+},
+"404F": {
+"doc": "macro",
+"group": "Signal Monitor : 404EH - 4051H",
+"sections": [
+[
+152,
+78.3,
+811.9
+]
+],
+"explain": "Compares input value (X) with set values (set/reset values) and makes LV output (Y) of the result of it. Parameter can be set from input S and R (with right macro). Parameter S1 / R1",
+"shared": true
+},
+"4050": {
+"doc": "macro",
+"group": "Signal Monitor : 404EH - 4051H",
+"sections": [
+[
+153,
+78.3,
+811.9
+]
+],
+"explain": "Compares input value (X) with set values (set/reset values) and makes LV output(Y) of the result of it. Parameter can be set from input S and R (with right macro). Parameter S1 / R1",
+"shared": false
+},
+"4051": {
+"doc": "macro",
+"group": "Signal Monitor : 404EH - 4051H",
+"sections": [
+[
+154,
+78.3,
+811.9
+]
+],
+"explain": "Compares input value (X) with set values (set/reset values) and makes LV output(Y) of the result of it. Parameter can be set from input S and R (with right macro). Parameter S1 / R1",
+"shared": true
+},
+"40A8": {
+"doc": "macro",
+"group": "Deviation High : 40A8H - 40AAH",
+"sections": [
+[
+155,
+98.1,
+811.9
+],
+[
+156,
+78.0,
+258.3
+]
+],
+"explain": "Parameter S1 / R1 Input X1 / X2",
+"shared": false
+},
+"40A9": {
+"doc": "macro",
+"group": "Deviation High : 40A8H - 40AAH",
+"sections": [
+[
+156,
+258.3,
+579.8
+]
+],
+"explain": "Parameter S1 / R1 Input X1 / X2",
+"shared": true
+},
+"40AA": {
+"doc": "macro",
+"group": "Deviation High : 40A8H - 40AAH",
+"sections": [
+[
+156,
+579.8,
+811.9
+],
+[
+157,
+78.0,
+811.9
+]
+],
+"explain": "Parameter S1 / R1 Input X1 / X2",
+"shared": true
+},
+"40AB": {
+"doc": "macro",
+"group": "Change Rate High : 40ABH, 40ACH",
+"sections": [
+[
+158,
+98.1,
+583.3
+]
+],
+"explain": "If the change rate of the input is high (> S1), the output value turns ON.",
+"shared": false
+},
+"40AC": {
+"doc": "macro",
+"group": "Change Rate High : 40ABH, 40ACH",
+"sections": [
+[
+158,
+583.3,
+811.9
+],
+[
+159,
+78.0,
+811.9
+]
+],
+"explain": "If the change rate of the input is high (> S1), the output value turns ON.",
+"shared": true
+},
+"409D": {
+"doc": "macro",
+"group": "Data Transfer : 409DH, 409EH",
+"sections": [
+[
+160,
+130.5,
+388.8
+]
+],
+"explain": "",
+"shared": false
+},
+"409E": {
+"doc": "macro",
+"group": "Data Transfer : 409DH, 409EH",
+"sections": [
+[
+160,
+388.8,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"40CA": {
+"doc": "macro",
+"group": "Move: 40CAH",
+"sections": [
+[
+161,
+98.1,
+811.9
+]
+],
+"explain": "In case of SW=On, Output Y is outputted value of ‘X’. In case of SW=Off, Output Y is hold.",
+"shared": false
+},
+"40D8": {
+"doc": "macro",
+"group": "Collective Move: 40D8H",
+"sections": [
+[
+162,
+98.1,
+811.9
+]
+],
+"explain": "A series of data (RN) which begins from the address specified by X is stored in the register array which begins from the address specified by Y. A command is not executed. (Bypass) ・ This command is not executed when the number (RN) is 513 or more (512 or less area is not processed, either). Moreover , this error log does not remain. ・ The line of X and Y must be defined in [Internal Line Information] at [Edit]-[System Configuration Setting]. (ID Line cannot be used.) ・ In order to execute this command, it is required for a series of data of input-output line to continue on a physical address. Only the inside of the size which defined this continuity by [Internal Line Information] is guaranteed. When RN is set up to become larger than the size which the storing final address defined, the data which is not related may be broken. ・ Please do not set zero or less value to RN (Number of Register). Start of register arrays As shown in the left figure, a part for the number is overwritten from the register specified as Y. If this register is used in the part which is not related, it will become a cause of unexpected trouble. Please fully check that the output lines are not used in the part which is not related.",
+"shared": false
+},
+"4123": {
+"doc": "macro",
+"group": "Sort : 4123H, 4124H",
+"sections": [
+[
+163,
+98.1,
+811.9
+],
+[
+164,
+78.0,
+811.9
+],
+[
+165,
+78.0,
+228.0
+]
+],
+"explain": "Head internal line (number of data is specified by absolute value of RN) appointed by input X is sorted, and the output is sorting result Y1 and sorting information Y2. When RN value is greater than 0, data is sorted in ascending order. When RN value is less than 0, data is sorted in descending order. [Sorting direction and size]",
+"shared": false
+},
+"4124": {
+"doc": "macro",
+"group": "Sort : 4123H, 4124H",
+"sections": [
+[
+165,
+228.0,
+811.9
+]
+],
+"explain": "When SW is ON, this macro performs the same processing as \"Sorting without switch\" (4123_I). Refer to the last item for details. When SW is OFF, this macro does not process and the output data area of Y1 and Y2 keep last value.",
+"shared": false
+},
+"40CF": {
+"doc": "macro",
+"group": "Jump and Entry: 40CFH, 40D0H",
+"sections": [
+[
+166,
+130.5,
+627.3
+]
+],
+"explain": "This \"GO\" macro executes conditional branch within a LOOP. If the execution condition is ON, CPU card executes the next macro after the \"ENTRY\" macro. (see P.166) If the execution condition is OFF, CPU card executes the next macro after the \"GO\" macro. (\"ENTRY\" macro has to be put on the sheet, which is defined as \"Sheet number\" parameter. Block number of the \"ENTRY\" macro has to be the first one on the sheet.) You can use more than one pair of \"GO\" and \"ENTRY\" macros, also you can use one \"ENTRY\" macro for multiple \"GO\" macros. If \"ENTRY\" macro does not exist as the first block number of the sheet which is defined as \"Sheet number\" parameter of \"GO\" macro, error occurs when you compile program. If \"Sheet number\" parameter is not existing sheet number, error occurs when you compile program. The default number of \"Sheet number\" parameter is Zero. Be sure to set sheet number (1 to 99), because sheet number zero does not exist. After program compile finished without error, if you move the sheet which have \"ENTRY\" macro to other sheet number, or if you move \"ENTRY\" macro to another sheet, you must set the \"Sheet number\" parameter of \"GO\" macro again. The parameter is not automatically changed. If you put the \"ENTRY\" macro on the sheet before \"GO\" macro, you can program loop logic. Loop logic causes forever loop or execution time over error, you must pay close attention to program loop logic. In case of forever loop or execution time over error, CPU card detects watch dog timer er",
+"shared": false
+},
+"40D0": {
+"doc": "macro",
+"group": "Jump and Entry: 40CFH, 40D0H",
+"sections": [
+[
+166,
+627.3,
+811.9
+],
+[
+167,
+78.0,
+811.9
+]
+],
+"explain": "The \"ENTRY\" macro is a target place of \"GO\" macro. Block number of \"ENTRY\" macro have to be the first one on the sheet.",
+"shared": false
+},
+"40DE": {
+"doc": "macro",
+"group": "ULOG : 40DEH",
+"sections": [
+[
+168,
+98.1,
+311.8
+]
+],
+"explain": "",
+"shared": false
+},
+"40DF": {
+"doc": "macro",
+"group": "UDI : 40DFH",
+"sections": [
+[
+168,
+481.0,
+811.9
+],
+[
+169,
+78.0,
+811.9
+]
+],
+"explain": "Output Y is used as a user DI from the PinNo.1 of the D-SUB(9pin)connector in the CPUX01 module.",
+"shared": false
+},
+"40E0": {
+"doc": "macro",
+"group": "UDO : 40E0H， 40E1H",
+"sections": [
+[
+170,
+98.3,
+490.5
+]
+],
+"explain": "In case of SW=1(ON),the input X is used as a user DO from the PinNo.2of the D-SUB(9pin)connector in the CPUX01 module. 1. In case of SW=1(ON),DO0=X 2. In case of SW=0(OFF), DO0=Current value",
+"shared": false
+},
+"40E1": {
+"doc": "macro",
+"group": "UDO : 40E0H， 40E1H",
+"sections": [
+[
+170,
+490.5,
+811.9
+],
+[
+171,
+78.0,
+811.9
+]
+],
+"explain": "In case of SW=1(ON),the input X is used as a user DO from the PinNo.3of the D-SUB(9pin)connector in the CPUX01 module. 1. In case of SW=1(ON),DO0=X 2. In case of SW=0(OFF), DO0=Current value",
+"shared": false
+},
+"40AD": {
+"doc": "macro",
+"group": "TEMP, PRESS Compensation : 40ADH",
+"sections": [
+[
+172,
+130.5,
+811.9
+]
+],
+"explain": "The output is a value determined by temp, press compensation result of the differential pressure input.",
+"shared": false
+},
+"409F": {
+"doc": "macro",
+"group": "2BAL : 409FH",
+"sections": [
+[
+173,
+98.1,
+811.9
+],
+[
+174,
+78.0,
+811.9
+]
+],
+"explain": "This fucntioin is balancing from one Deleta MV to two Delta MV. Ex) In the case of value1 = value2",
+"shared": false
+},
+"40A0": {
+"doc": "macro",
+"group": "3BAL : 40A0H",
+"sections": [
+[
+175,
+98.1,
+811.9
+],
+[
+176,
+78.0,
+811.9
+]
+],
+"explain": "This fucntioin is balancing from one Deleta MV to three Delta MV. Ex) In the case of value1 = value2 = value3,",
+"shared": false
+},
+"40E8": {
+"doc": "macro",
+"group": "EUIN/OUT : 40E8H， 40E9H",
+"sections": [
+[
+177,
+98.3,
+811.9
+],
+[
+178,
+78.0,
+811.9
+],
+[
+179,
+78.0,
+811.9
+]
+],
+"explain": "XCNT;Converted count value to floating point format XEU ;Value after linear transformation",
+"shared": false
+},
+"40E9": {
+"doc": "macro",
+"group": "EUIN/OUT : 40E8H， 40E9H",
+"sections": [
+[
+180,
+78.3,
+811.9
+],
+[
+181,
+78.0,
+811.9
+],
+[
+182,
+78.0,
+811.9
+]
+],
+"explain": "(1) Assign 8 points (8 input / 8 output). (2) These macros are not necessary for connection line both of Input and Output. When it assigns the first register (or device) number in parameters(2, 3, 4), it calculates for 8 signals automatically (Enclosed Input/Output). (3) Assign the bit shift information for Parameter (5) with the following contents. When the bit shift information was assigned to without these (0, 1 or 2), the calculation is fail and quality device outputs 1. (4) When the Parameter (5) contains bit shift, one-bit left shifted value is output as output count value. Therefore, if bit shifts, parameters about the reasonable limit check and linear transformation should be corresponding value for one-bit left-shifted (×2) output value. (5) Linear transformations are as below. ＸＣＮＴ ＝ ＳＡ × ＸＥＵ ＋ ＳＢ ＳＡ ＝ (CNT-U － CNT-L) ÷ (EU-U － EU-L) ＳＢ ＝ {(CNT-L × EU-U) － (CNT-U × EU-L)} ÷ (EU-U － EU-L) (6) When overflow is occurs on calculation, it is terminated and outputs CNT-U with that output device is 1. (7) When calculation has invalidity, it is terminated and outputs CNT-U with that output device is 1. (8) Output count value is rounded real number after linear transformation (ＸＣＮＴ) to first decimal point. The output count value is stored in the output resister after the reasonable limit check. (9) If the output count value is less than (<) –32768, turn on the device output. (10) If the output count value is greater than (>) +32767, turn on the device output. (11) In reasona",
+"shared": false
+},
+"40B8": {
+"doc": "macro",
+"group": "Override of Value : 40B8H, 40B9H, 40BAH",
+"sections": [
+[
+183,
+130.5,
+397.3
+]
+],
+"explain": "This function is used for TOSHIBA internal test.",
+"shared": false
+},
+"40B9": {
+"doc": "macro",
+"group": "Override of Value : 40B8H, 40B9H, 40BAH",
+"sections": [
+[
+183,
+397.3,
+665.7
+]
+],
+"explain": "This function is used for TOSHIBA internal test.",
+"shared": false
+},
+"40BA": {
+"doc": "macro",
+"group": "Override of Value : 40B8H, 40B9H, 40BAH",
+"sections": [
+[
+183,
+665.7,
+811.9
+],
+[
+184,
+78.0,
+811.9
+]
+],
+"explain": "This function is used for TOSHIBA internal test.",
+"shared": false
+},
+"40F7": {
+"doc": "macro",
+"group": "Restart : 40F7H",
+"sections": [
+[
+185,
+130.5,
+811.9
+]
+],
+"explain": "This function restarts primary CPU. This macro is only to change CPU primary/secondary. So, this macro is available only on the dual RUN mode. Input X / Output Y In case of X =1 In case of X =0 Y=0 (CPUs are NOT restarted.) (a) In case of the dual RUN mode Restart the primary CPU. Y=1 (CPUs are NOT restarted.) (Run mode is judged internally. User’s input is not necessary for it.) Y=0 (CPU is NOT restarted.) This macro has the following limitation. (1) This macro is available only on the dual RUN mode (2) This macro is available only for EXMX01G061 / CPUL01(DCS). * This macro is not recorded into the CPU errorlog. Use [ULOG] （P.168） if necessary. (Use [ULOG] before [RESTART].)",
+"shared": false
+},
+"414A": {
+"doc": "macro",
+"group": "Send Register Data : 414AH",
+"sections": [
+[
+186,
+98.1,
+811.9
+]
+],
+"explain": "The SEND REG macro is for Secure Monitoring. According to input signals, it sends compressed data of following information to multicast address defined in the system configuration. (a) User register ···················· target the primary station only in case of high speed CPU and synchronous duplex operation mode (b) Simulation infomation ········ target the primary station only in case of high speed CPU and synchronous duplex operation mode (c) Current Status ·················· target the primary station and the standby station in case of high speed CPU and synchronous duplex operation mode Do not use more than 1 at one controller. (If multiple SEND REG macros exist, only the last one is enabled.) 1) When TRG status changing from ON to OFF Compresses and sends the data of 5 scans before and after changing ON to OFF (the total 10 scans). 2) When CYC status is ON Compresses and sends the data in the period specified by the parameter 1 (Cyclic Period).",
+"shared": false
+},
+"414B": {
+"doc": "macro",
+"group": "Send Log Data : 414BH",
+"sections": [
+[
+187,
+98.1,
+811.9
+],
+[
+188,
+78.0,
+98.9
+]
+],
+"explain": "The SEND LOG macro is for Secure Monitoring. According to input signals, it sends compressed data of following information to multicast address defined in the system configuration. (a) Error Log Information ·········· target the primary station and the standby station in case of low speed CPU and synchronous duplex operation mode Do not use more than 1 at one controller. (If multiple SEND REG macros exist, only the last one is enabled.) 1) When TRG status changing from ON to OFF Compresses and sends the data (even when CYC status is OFF). 2) When CYC status is ON Compresses and sends the data in the period specified by the parameter 1 (Cyclic Period).",
+"shared": false
+},
+"8200": {
+"doc": "tag",
+"group": "TagType92 --- MV Station (Change Inhibit) ........................................................................................................ 153",
+"sections": [
+[
+15,
+138.3,
+811.9
+]
+],
+"explain": "",
+"shared": false
+},
+"822F": {
+"doc": "tag",
+"group": "TagType02 --- Calculated Digital",
+"sections": [
+[
+16,
+108.1,
+811.9
+]
+],
+"explain": "The DDL macro is used for a digital signal bus transfer from controller to HMI. The maximum number of one TagType macro that is allowed to be used in one CPU is 1,023. If it is still required to use DDL Tag macro while number of TagType 2 macro already exceeded this maximum numbers, use following macros which have same functionality with DDL Tag macro.",
+"shared": false
+},
+"822E": {
+"doc": "tag",
+"group": "TagType02 --- Calculated Digital",
+"sections": [
+[
+17,
+84.3,
+811.9
+]
+],
+"explain": "The DALM macro is used for a digital signal bus transfer with alarm from controller to HMI.",
+"shared": false
+},
+"823C": {
+"doc": "tag",
+"group": "TagType02 --- Calculated Digital",
+"sections": [
+[
+18,
+84.3,
+811.9
+]
+],
+"explain": "The X-DIA macro is used for transfering signals from controller to HMI. X-DIA macro has no functional logic in it.",
+"shared": false
+},
+"8228": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+19,
+108.1,
+811.9
+],
+[
+20,
+78.0,
+811.9
+]
+],
+"explain": "The ALM1F macro is used for an analog signal bus transfer with one level alarm from controller to HMI.",
+"shared": false
+},
+"822A": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+21,
+80.7,
+811.9
+],
+[
+22,
+78.0,
+811.9
+]
+],
+"explain": "The ALM1F macro is used for an analog signal bus transfer with two levels alarm from controller to HMI.",
+"shared": false
+},
+"822C": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+23,
+84.3,
+811.9
+],
+[
+24,
+78.0,
+811.9
+]
+],
+"explain": "The ALM3F macro is used for an analog signal bus transfer with three levels alarm from controller to HMI.",
+"shared": false
+},
+"8229": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+25,
+84.3,
+811.9
+],
+[
+26,
+78.0,
+811.9
+]
+],
+"explain": "The ALM1V macro is used for an analog signal bus transfer with one level alarm from controller to HMI. Alarm set values are variable.",
+"shared": false
+},
+"822B": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+27,
+84.3,
+811.9
+],
+[
+28,
+78.0,
+811.9
+]
+],
+"explain": "The ALM2V macro is used for an analog signal bus transfer with two levels alarm from controller to HMI. Alarm set values are variable.",
+"shared": false
+},
+"822D": {
+"doc": "tag",
+"group": "TagType04 --- Calculated Analog with Alarm",
+"sections": [
+[
+29,
+84.3,
+811.9
+],
+[
+30,
+78.0,
+811.9
+]
+],
+"explain": "The ALM3V macro is used for an analog signal bus transfer with three levels alarm from controller to HMI. Alarm set values are variable.",
+"shared": false
+},
+"8227": {
+"doc": "tag",
+"group": "TagType07 --- Calculated Analog without Alarm",
+"sections": [
+[
+31,
+108.1,
+811.9
+]
+],
+"explain": "The ADL macro is used for an analog signal bus transfer from controller to HMI.",
+"shared": false
+},
+"8202": {
+"doc": "tag",
+"group": "TagType08 --- Motor Operated Valve (Non-Self Hold)",
+"sections": [
+[
+32,
+108.1,
+811.9
+],
+[
+33,
+78.0,
+811.9
+]
+],
+"explain": "The MOV-NSH macro is used for a motor operated valve. DCS does not hold open/close demand in DCS.",
+"shared": false
+},
+"8204": {
+"doc": "tag",
+"group": "TagType08 --- Motor Operated Valve (Non-Self Hold)",
+"sections": [
+[
+34,
+84.3,
+811.9
+],
+[
+35,
+78.0,
+811.9
+]
+],
+"explain": "The MOV2-NSH macro is used for a motor operated valve. DCS does not hold open/close demand in DCS.",
+"shared": false
+},
+"8249": {
+"doc": "tag",
+"group": "TagType08 --- Motor Operated Valve (Non-Self Hold)",
+"sections": [
+[
+36,
+84.3,
+811.9
+],
+[
+37,
+78.0,
+811.9
+]
+],
+"explain": "The MOV3-NSH macro is used for a motor operated valve. DCS does not hold open/close demand in DCS.",
+"shared": false
+},
+"823D": {
+"doc": "tag",
+"group": "TagType08 --- Motor Operated Valve (Non-Self Hold)",
+"sections": [
+[
+38,
+84.3,
+811.9
+],
+[
+39,
+78.0,
+811.9
+]
+],
+"explain": "The X-MOV-NSH macro is used for transfering signals from controller to HMI. X-MOV-NSH macro has no functional logic in it.",
+"shared": false
+},
+"8203": {
+"doc": "tag",
+"group": "TagType11 --- Motor Operated Valve (Self Hold)",
+"sections": [
+[
+40,
+108.1,
+811.9
+],
+[
+41,
+78.0,
+811.9
+],
+[
+42,
+78.0,
+811.9
+]
+],
+"explain": "The MOV-SH macro is used for a motor operated valve. DCS holds open/close demand in DCS.",
+"shared": false
+},
+"8205": {
+"doc": "tag",
+"group": "TagType11 --- Motor Operated Valve (Self Hold)",
+"sections": [
+[
+43,
+84.3,
+811.9
+],
+[
+44,
+78.0,
+811.9
+],
+[
+45,
+78.0,
+811.9
+]
+],
+"explain": "The MOV2-SH macro is used for a motor operated valve. DCS holds open/close demand in DCS.",
+"shared": false
+},
+"824A": {
+"doc": "tag",
+"group": "TagType11 --- Motor Operated Valve (Self Hold)",
+"sections": [
+[
+46,
+84.3,
+811.9
+],
+[
+47,
+78.0,
+811.9
+]
+],
+"explain": "The MOV3-SH macro is used for a motor operated valve. DCS holds open/close demand in DCS.",
+"shared": false
+},
+"823E": {
+"doc": "tag",
+"group": "TagType11 --- Motor Operated Valve (Self Hold)",
+"sections": [
+[
+48,
+84.3,
+811.9
+],
+[
+49,
+78.0,
+811.9
+]
+],
+"explain": "The X-MOV-SH macro is used for transfering signals from controller to HMI. X-MOV-SH macro has no functional logic in it.",
+"shared": false
+},
+"8206": {
+"doc": "tag",
+"group": "TagType12 --- Solenoid Valve",
+"sections": [
+[
+50,
+108.1,
+811.9
+],
+[
+51,
+78.0,
+811.9
+]
+],
+"explain": "The D-SOV macro is used for a double solenoid valve.",
+"shared": false
+},
+"8207": {
+"doc": "tag",
+"group": "TagType12 --- Solenoid Valve",
+"sections": [
+[
+52,
+84.3,
+811.9
+],
+[
+53,
+78.0,
+811.9
+]
+],
+"explain": "The S-SOV-EO macro is used for a single solenoid valve (energize open type).",
+"shared": false
+},
+"8208": {
+"doc": "tag",
+"group": "TagType12 --- Solenoid Valve",
+"sections": [
+[
+54,
+84.3,
+811.9
+],
+[
+55,
+78.0,
+811.9
+]
+],
+"explain": "The S-SOV-EV macro is used for a single solenoid valve (energize close type).",
+"shared": false
+},
+"823F": {
+"doc": "tag",
+"group": "TagType12 --- Solenoid Valve",
+"sections": [
+[
+56,
+84.3,
+811.9
+],
+[
+57,
+78.0,
+811.9
+]
+],
+"explain": "The X-SOV macro is used for transfering signals from controller to HMI. X-SOV macro has no functional logic in it.",
+"shared": false
+},
+"8201": {
+"doc": "tag",
+"group": "TagType13 --- Pump, Motor & Fan",
+"sections": [
+[
+61,
+84.3,
+811.9
+],
+[
+62,
+78.0,
+811.9
+],
+[
+63,
+78.0,
+811.9
+]
+],
+"explain": "The SWGR-L macro is used for LV and MV motor drive which has auxiliaries such as oil pump or fan to be operated prior to main drive.",
+"shared": false
+},
+"8240": {
+"doc": "tag",
+"group": "TagType13 --- Pump, Motor & Fan",
+"sections": [
+[
+64,
+84.3,
+811.9
+],
+[
+65,
+78.0,
+811.9
+]
+],
+"explain": "The X-SWGR macro is used for transfering signals from controller to HMI. X-SWGR macro has no functional logic in it.",
+"shared": false
+},
+"8209": {
+"doc": "tag",
+"group": "TagType14 --- Circuit Breaker",
+"sections": [
+[
+66,
+108.1,
+811.9
+],
+[
+67,
+78.0,
+811.9
+]
+],
+"explain": "The CB macro is used for a circuit breaker operated from DCS.",
+"shared": false
+},
+"8214": {
+"doc": "tag",
+"group": "TagType16 --- Dual Gate Sensor",
+"sections": [
+[
+68,
+108.1,
+811.9
+],
+[
+69,
+78.0,
+811.9
+]
+],
+"explain": "The DUAL macro is used for selecting dual redundant sensors.",
+"shared": false
+},
+"8241": {
+"doc": "tag",
+"group": "TagType16 --- Dual Gate Sensor",
+"sections": [
+[
+70,
+84.3,
+811.9
+],
+[
+71,
+78.0,
+811.9
+]
+],
+"explain": "The X-DUAL macro is used for transfering signals from controller to HMI. X-DUAL macro has no functional logic in it.",
+"shared": false
+},
+"8215": {
+"doc": "tag",
+"group": "TagType17 --- Triple Gate Sensor",
+"sections": [
+[
+72,
+108.1,
+811.9
+],
+[
+73,
+78.0,
+811.9
+],
+[
+74,
+78.0,
+811.9
+]
+],
+"explain": "The TRIPLE macro is used for selecting triple redundant sensors.",
+"shared": false
+},
+"8248": {
+"doc": "tag",
+"group": "TagType17 --- Triple Gate Sensor",
+"sections": [
+[
+75,
+84.3,
+811.9
+],
+[
+76,
+78.0,
+811.9
+]
+],
+"explain": "The X-TRIPLE macro is used for transfering signals from controller to HMI. X-TRIPLE macro has no functional logic in it.",
+"shared": false
+},
+"8225": {
+"doc": "tag",
+"group": "TagType18 --- Group Sequence (GSQ)",
+"sections": [
+[
+77,
+108.1,
+811.9
+],
+[
+78,
+78.0,
+811.9
+]
+],
+"explain": "The SEQ-M macro is used for sequence master which control start/stop/open/close of a series of auxiliaries or actuator sequentially.",
+"shared": false
+},
+"82C4": {
+"doc": "tag",
+"group": "TagType18 --- Group Sequence (GSQ)",
+"sections": [
+[
+79,
+84.3,
+811.9
+],
+[
+80,
+78.0,
+811.9
+]
+],
+"explain": "The SEQ-M macro is used for sequence master which control start/stop/open/close of a series of auxiliaries or actuator sequentially.",
+"shared": false
+},
+"8243": {
+"doc": "tag",
+"group": "TagType18 --- Group Sequence (GSQ)",
+"sections": [
+[
+81,
+84.3,
+811.9
+],
+[
+82,
+78.0,
+811.9
+]
+],
+"explain": "The X-SEQM macro is used for transfering signals from controller to HMI. X-SEQM macro has no functional logic in it.",
+"shared": false
+},
+"820C": {
+"doc": "tag",
+"group": "TagType19 --- SV Station",
+"sections": [
+[
+83,
+108.1,
+811.9
+],
+[
+84,
+78.0,
+811.9
+]
+],
+"explain": "The SV macro is a tag macro of SV station. SV macro is used for a close loop control.",
+"shared": false
+},
+"8211": {
+"doc": "tag",
+"group": "TagType19 --- SV Station",
+"sections": [
+[
+85,
+84.3,
+811.9
+],
+[
+86,
+78.0,
+811.9
+]
+],
+"explain": "The SV-BIAS macro is a tag macro of Bias type SV Station. SV-BIAS macro is used for a closed loop control.",
+"shared": false
+},
+"8246": {
+"doc": "tag",
+"group": "TagType19 --- SV Station",
+"sections": [
+[
+87,
+84.3,
+811.9
+],
+[
+88,
+78.0,
+811.9
+]
+],
+"explain": "The X-SV macro is used for transfering signals from controller to HMI. X-SV macro has no functional logic in it.",
+"shared": false
+},
+"821C": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+89,
+108.1,
+811.9
+],
+[
+90,
+78.0,
+811.9
+],
+[
+91,
+78.0,
+811.9
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": false
+},
+"821B": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+92,
+78.0,
+296.4
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"821A": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+92,
+296.4,
+498.3
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8219": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+92,
+498.3,
+811.9
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8218": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+93,
+78.0,
+222.8
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8217": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+93,
+222.8,
+381.3
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8216": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+93,
+381.3,
+811.9
+]
+],
+"explain": "The SEL-*PB macros are used for alternative selection function. SEL-*PB macros have seven types, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8224": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+94,
+84.3,
+811.9
+],
+[
+95,
+78.0,
+811.9
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": false
+},
+"8223": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+96,
+78.0,
+235.0
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8222": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+96,
+235.0,
+411.9
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8221": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+96,
+411.9,
+564.9
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"8220": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+96,
+564.9,
+811.9
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"821F": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+97,
+78.0,
+191.8
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"821E": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+97,
+191.8,
+302.4
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"821D": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+97,
+302.4,
+811.9
+]
+],
+"explain": "The LPB-* macros are used for PB (Push Button) function. LPB-* macros have eight types, 1 PB, 2 PBs, 3 PBs, 4 PBs, 5 PBs, 6 PBs, 7 PBs and 8 PBs.",
+"shared": true
+},
+"82D0": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+98,
+80.7,
+811.9
+],
+[
+99,
+78.0,
+811.9
+]
+],
+"explain": "The SELECTOR macro is used for alternative selection function. All the selection signals are cleared when the CNT Input 17 (ABN:Abnormal TAG Status) becomes True.",
+"shared": false
+},
+"8242": {
+"doc": "tag",
+"group": "TagType21 --- Selector",
+"sections": [
+[
+100,
+84.3,
+811.9
+],
+[
+101,
+78.0,
+811.9
+]
+],
+"explain": "The LAMP & PB macro is used for transfering signals from controller to HMI. LAMP & PB macro has no functional logic in it.",
+"shared": false
+},
+"820A": {
+"doc": "tag",
+"group": "TagType22 --- SV & MV Station",
+"sections": [
+[
+102,
+108.1,
+811.9
+],
+[
+103,
+78.0,
+811.9
+],
+[
+104,
+78.0,
+811.9
+]
+],
+"explain": "The SV/MV-POS macro is a tag macro of SV and MV station. SV/MV-POS macro is used for a closed loop control with position feedback signal.",
+"shared": false
+},
+"820B": {
+"doc": "tag",
+"group": "TagType22 --- SV & MV Station",
+"sections": [
+[
+105,
+84.3,
+811.9
+],
+[
+106,
+78.0,
+811.9
+],
+[
+107,
+78.0,
+811.9
+]
+],
+"explain": "The SV/MV macro is a tag macro of SV and MV Station. SV/MV macro is used for a closed loop control.",
+"shared": false
+},
+"8245": {
+"doc": "tag",
+"group": "TagType22 --- SV & MV Station",
+"sections": [
+[
+108,
+84.3,
+811.9
+],
+[
+109,
+78.0,
+811.9
+]
+],
+"explain": "The X-SV/MV macro is used for transfering signals from controller to HMI. X-SV/MV macro has no functional logic in it.",
+"shared": false
+},
+"8226": {
+"doc": "tag",
+"group": "TagType25 --- Group Sequence (Step)",
+"sections": [
+[
+110,
+108.1,
+811.9
+],
+[
+111,
+78.0,
+811.9
+]
+],
+"explain": "The SEQ-S macro is used for each step of sequence master which controls start/stop/open/close of a series of auxiliaries or actuator sequentially. NOTICE --- When the product (Parameter4 x1000)/CPU Cycle(expressed in ms) is greater than 30,000, adjust the value of Parameter4 to be a divisor of 60.",
+"shared": false
+},
+"82C5": {
+"doc": "tag",
+"group": "TagType25 --- Group Sequence (Step)",
+"sections": [
+[
+112,
+84.3,
+811.9
+],
+[
+113,
+78.0,
+811.9
+]
+],
+"explain": "The SEQ-S macro is used for each step of sequence master which controls start/stop/open/close of a series of auxiliaries or actuator sequentially. NOTICE --- When the product (Parameter4 x1000)/CPU Cycle(expressed in ms) is greater than 30,000, adjust the value of Parameter4 to be a divisor of 60.",
+"shared": false
+},
+"8244": {
+"doc": "tag",
+"group": "TagType25 --- Group Sequence (Step)",
+"sections": [
+[
+114,
+84.9,
+811.9
+]
+],
+"explain": "The X-SEQS macro is used for transfering signals from controller to HMI. X-SEQS macro has no functional logic in it.",
+"shared": false
+},
+"820D": {
+"doc": "tag",
+"group": "TagType26 --- MV Station",
+"sections": [
+[
+115,
+108.1,
+811.9
+],
+[
+116,
+78.0,
+811.9
+],
+[
+117,
+78.0,
+811.9
+]
+],
+"explain": "The MV-POS macro is a tag macro of MV Station. MV-POS macro is used for a closed loop control with position feedback signal.",
+"shared": false
+},
+"820E": {
+"doc": "tag",
+"group": "TagType26 --- MV Station",
+"sections": [
+[
+118,
+84.3,
+811.9
+],
+[
+119,
+78.0,
+811.9
+],
+[
+120,
+78.0,
+811.9
+]
+],
+"explain": "The MV macro is a tag macro of MV Station. MV macro is used for a closed loop control.",
+"shared": false
+},
+"820F": {
+"doc": "tag",
+"group": "TagType26 --- MV Station",
+"sections": [
+[
+121,
+84.3,
+811.9
+],
+[
+122,
+78.0,
+811.9
+],
+[
+123,
+78.0,
+811.9
+]
+],
+"explain": "The MV-FF-POS macro is a tag macro of MV Station. MV macro is used for a closed loop control with feed forward logic and position feedback signal.",
+"shared": false
+},
+"8210": {
+"doc": "tag",
+"group": "TagType26 --- MV Station",
+"sections": [
+[
+124,
+84.3,
+811.9
+],
+[
+125,
+78.0,
+811.9
+],
+[
+126,
+78.0,
+811.9
+]
+],
+"explain": "The MV-FF macro is a tag macro of MV station. MV-FF macro is used for a closed loop control with feed forward logic.",
+"shared": false
+},
+"8247": {
+"doc": "tag",
+"group": "TagType26 --- MV Station",
+"sections": [
+[
+127,
+84.3,
+811.9
+],
+[
+128,
+78.0,
+811.9
+]
+],
+"explain": "The X-MV macro is used for transfering of signals from controller to HMI. X-MV macro has no functional logic in it.",
+"shared": false
+},
+"8237": {
+"doc": "tag",
+"group": "TagType32 --- HMI Digital",
+"sections": [
+[
+129,
+108.1,
+811.9
+]
+],
+"explain": "The HMI DO macro is used for transfering a digital signal from HMI to controller.",
+"shared": false
+},
+"824B": {
+"doc": "tag",
+"group": "TagType32 --- HMI Digital",
+"sections": [
+[
+130,
+80.7,
+811.9
+]
+],
+"explain": "The HMI DO-SC macro is used for transfering a digital signal from HMI to controller. HMI DO-SC macro clears output value after \"CTime\" seconds.",
+"shared": false
+},
+"8238": {
+"doc": "tag",
+"group": "TagType33 --- HMI Analog",
+"sections": [
+[
+131,
+108.1,
+811.9
+]
+],
+"explain": "The HMI AO macro is used for transfering an analog signal from HMI to controller.",
+"shared": false
+},
+"8234": {
+"doc": "tag",
+"group": "TagType34 --- Acknowledge",
+"sections": [
+[
+132,
+108.1,
+811.9
+]
+],
+"explain": "The ACK macro is used for transfering signals (Acknowledge Request, Sound Request, Silence Request and Reset Request) from HMI to controller. Put ACK macro in every controller. (Don’t use more than 1 at one controller.) Put ACK macro before any other tag macro.",
+"shared": false
+},
+"8230": {
+"doc": "tag",
+"group": "TagType41 --- Intelligent Digital Input",
+"sections": [
+[
+133,
+108.1,
+811.9
+],
+[
+134,
+78.0,
+811.9
+]
+],
+"explain": "The IDALM macro is a digital point tag used for DICW11. Note (*1) Connect “Input Value” with the register of DICW11 directly.",
+"shared": false
+},
+"8231": {
+"doc": "tag",
+"group": "TagType42 --- Intelligent Analog Input",
+"sections": [
+[
+135,
+108.1,
+811.9
+],
+[
+136,
+78.0,
+811.9
+]
+],
+"explain": "The I-AI macro is an analog point tag used for AICW11. Note (*1) Connect “Input Value” with the register of AICW11 directly.",
+"shared": false
+},
+"8232": {
+"doc": "tag",
+"group": "TagType43 --- Intelligent Digital Output",
+"sections": [
+[
+137,
+108.1,
+811.9
+]
+],
+"explain": "The I-DO macro can be used for the failure detection of DO in the configuration of using CPUW11 and DOCW11.",
+"shared": false
+},
+"8235": {
+"doc": "tag",
+"group": "TagType43 --- Intelligent Digital Output",
+"sections": [
+[
+138,
+84.3,
+811.9
+]
+],
+"explain": "The I-DO macro can be used for the failure detection of DO in the configuration of using CPUW11 and DOCW11.",
+"shared": false
+},
+"8233": {
+"doc": "tag",
+"group": "TagType44 --- Intelligent Analog Output",
+"sections": [
+[
+139,
+108.1,
+811.9
+],
+[
+140,
+78.0,
+811.9
+]
+],
+"explain": "The I-AO macro can be used for the failure detection of AO in the configuration of using CPUW11 and DOCW11.",
+"shared": false
+},
+"8236": {
+"doc": "tag",
+"group": "TagType44 --- Intelligent Analog Output",
+"sections": [
+[
+141,
+84.3,
+811.9
+]
+],
+"explain": "The I-AO macro can be used for the failure detection of AO in the configuration of using CPUW11 and DOCW11.",
+"shared": false
+},
+"8239": {
+"doc": "tag",
+"group": "TagType45 --- Gateway Digital Input",
+"sections": [
+[
+142,
+108.1,
+811.9
+]
+],
+"explain": "The GWDI macro is a digital point tag without alarm, and is possible to use at TOSMAP-DS/EV/LX Gateway. GWDI macro is used to receive DI signal from GSM ( GE Energy Standard Messaging ) transmission. The time stamp of the GWDI macro is same as that of GSM transmission. Connect \"Input Status\" with register of GSM setting ( Line No in Dataview ) directly. DDL macro (⇒ p.16) can be used instead of the GWDI macro, but the DDL macro time stamp is not same as GSM transmission. Connect the input QTY of the GWDI macro to the quality line of DI signal input, generally. The maximum number of one TagType macro that is allowed to be used in one CPU is 1,023. If it is still required to use GWDI Tag macro while number of TagType 45 macro already exceeded this maximum numbers, use following macros which have same functionality with GWDI Tag macro.",
+"shared": false
+},
+"823A": {
+"doc": "tag",
+"group": "TagType45 --- Gateway Digital Input",
+"sections": [
+[
+143,
+84.3,
+811.9
+]
+],
+"explain": "The GWDIA macro is a digital point tag with alarm, and is possible to use at TOSMAP-DS/EV/LX Gateway. GWDIA macro is used to receive DI signal from GSM ( GE Energy Standard Messaging ) transmission. The time stamp of the GWDIA macro is same as that of GSM transmission. Connect \"Input Status\" with register of GSM setting ( Line No in Dataview ) directly. DALM macro (⇒ p.17) can be used instead of the GWDIA macro, but the DALM macro time stamp is not same as GSM transmission. Connect the input QTY of the GWDIA macro to the quality line of DI signal input, generally.",
+"shared": false
+},
+"823B": {
+"doc": "tag",
+"group": "TagType46 --- Gateway Analog Input",
+"sections": [
+[
+144,
+108.1,
+811.9
+]
+],
+"explain": "The GW-AI macro is an analog point tag used for TOSMAP-DS Gateway.",
+"shared": false
+},
+"8273": {
+"doc": "tag",
+"group": "TagType51 --- Annunciator",
+"sections": [
+[
+145,
+108.1,
+811.9
+]
+],
+"explain": "The ANN macro is used for an alarm annunciator.",
+"shared": false
+},
+"82EA": {
+"doc": "tag",
+"group": "TagType54 --- Gateway Digital Input Ex1",
+"sections": [
+[
+146,
+108.1,
+259.4
+]
+],
+"explain": "The function, input, output and parameters of GWDI1 are same as those of GWDI (⇒ p.142) in TagType 45.",
+"shared": false
+},
+"82EB": {
+"doc": "tag",
+"group": "TagType54 --- Gateway Digital Input Ex1",
+"sections": [
+[
+146,
+259.4,
+811.9
+]
+],
+"explain": "The function, input, output and parameters of GWDIA1 are same as those of GWDIA (⇒ p.143) in TagType 45.",
+"shared": false
+},
+"82EE": {
+"doc": "tag",
+"group": "TagType55 --- Gateway Digital Input Ex2",
+"sections": [
+[
+147,
+108.1,
+259.4
+]
+],
+"explain": "The function, input, output and parameters of GWDI2 are same as those of GWDI (⇒ p.142) in TagType 45.",
+"shared": false
+},
+"82EF": {
+"doc": "tag",
+"group": "TagType55 --- Gateway Digital Input Ex2",
+"sections": [
+[
+147,
+259.4,
+315.9
+]
+],
+"explain": "The function, input, output and parameters of GWDI2 are same as those of GWDI (⇒ p.142) in TagType 45.",
+"shared": true
+},
+"82F2": {
+"doc": "tag",
+"group": "TagType56 --- Gateway Digital Input Ex3",
+"sections": [
+[
+147,
+458.0,
+609.7
+]
+],
+"explain": "The function, input, output and parameters of GWDI3 are same as those of GWDI (⇒ p.142) in TagType 45.",
+"shared": false
+},
+"82F3": {
+"doc": "tag",
+"group": "TagType56 --- Gateway Digital Input Ex3",
+"sections": [
+[
+147,
+609.7,
+811.9
+]
+],
+"explain": "The function, input, output and parameters of GWDIA3 are same as those of GWDIA (⇒ p.143) in TagType 45.",
+"shared": false
+},
+"82D5": {
+"doc": "tag",
+"group": "TagType61 --- SOE with Alarm",
+"sections": [
+[
+148,
+108.1,
+811.9
+]
+],
+"explain": "The SOE macro is used for transferring a Serial IO SOE signal with alarm from controller to HMI.",
+"shared": false
+},
+"82FD": {
+"doc": "tag",
+"group": "TagType62 --- Calculated Digital Ex1",
+"sections": [
+[
+149,
+108.1,
+256.8
+]
+],
+"explain": "The function, input, output and parameters of DDL1 are same as those of DDL (⇒ p.16) in TagType 2.",
+"shared": false
+},
+"82FE": {
+"doc": "tag",
+"group": "TagType62 --- Calculated Digital Ex1",
+"sections": [
+[
+149,
+256.8,
+309.7
+]
+],
+"explain": "The function, input, output and parameters of DDL1 are same as those of DDL (⇒ p.16) in TagType 2.",
+"shared": true
+},
+"82FF": {
+"doc": "tag",
+"group": "TagType63 --- Calculated Digital Ex2",
+"sections": [
+[
+149,
+462.7,
+610.4
+]
+],
+"explain": "The function, input, output and parameters of DDL2 are same as those of DDL (⇒ p.16) in TagType 2.",
+"shared": false
+},
+"8300": {
+"doc": "tag",
+"group": "TagType63 --- Calculated Digital Ex2",
+"sections": [
+[
+149,
+610.4,
+811.9
+]
+],
+"explain": "The function, input, output and parameters of DALM2 are same as those of DALM (⇒ p.17) in TagType 2.",
+"shared": false
+},
+"8304": {
+"doc": "tag",
+"group": "TagType91 --- SV Station (Change Inhibit)",
+"sections": [
+[
+150,
+108.1,
+811.9
+],
+[
+151,
+78.0,
+811.9
+],
+[
+152,
+78.0,
+811.9
+]
+],
+"explain": "The SV-CI (CI = Change Inhibit) macro is the addition of inhibitting increase and decrease to SV macro (TagType:19, Code:820CH)(P.83). When CNT Input No.7 INC-INH (SV Increment Inhibit) is ON, the increment of CNT Ouput No.2 SV (Setting Value Demand) is inhibitted. When CNT Input No.9 DEC-INH (SV Decrement Inhibit) is ON, the decrement of CNT Ouput No.2 SV (Setting Value Demand) is inhibitted.",
+"shared": false
+},
+"8305": {
+"doc": "tag",
+"group": "TagType92 --- MV Station (Change Inhibit)",
+"sections": [
+[
+153,
+108.1,
+811.9
+],
+[
+154,
+78.0,
+811.9
+],
+[
+155,
+78.0,
+811.9
+],
+[
+156,
+78.0,
+811.9
+],
+[
+157,
+78.0,
+811.9
+],
+[
+158,
+78.0,
+811.9
+]
+],
+"explain": "The MV-FF-POS-CI (CI = Change Inhibit) macro is the addition of inhibitting increase and decrease of MV-VV-POS macro (TagType:26, Code:820FH)(P.121). When CNT Input No.19 INC-INH (MV Increment Inhibit) is ON, the increment of CNT Ouput No.4 MV (MV Demand) is inhibitted. When CNT Input No.20 DEC-INH (MV Decrement Inhibit) is ON, the decrement of CNT Ouput No.4 MV (MV Demand) is inhibitted.",
+"shared": false
+}
+}
+}
