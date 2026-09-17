@@ -12,7 +12,7 @@ import re
 
 from PySide6.QtGui import QColor, QTextCharFormat, QTextCursor, QTextDocument
 
-MAU = "#074944"          # xanh mong ket: khong dung mau nao cua tieu de (#0F172A/#1D4ED8)
+MAU = "#0B5F58"          # xanh mong ket: khong dung mau nao cua tieu de (#0F172A/#1D4ED8)
 
 # mot doan chu viet HOA lien mach - ung vien cho ten tin hieu
 _DOAN = re.compile(r"[A-Z0-9][-A-Z0-9 &/.'#+()]*")
@@ -95,9 +95,8 @@ def to_mau(edit, db, cpu_paths=None):
     if not ten:
         return 0
     cf = QTextCharFormat()
-    cf.setForeground(QColor(MAU))
-    cf.setFontWeight(700)             # dung dung 700 nhu tieu de o ai_dialog: chu trong
-    n = 0                             # cau day len dam, chu o tieu de khong bi nhat di
+    cf.setForeground(QColor(MAU))     # chi doi mau: dat them do dam se lam nhat chu
+    n = 0                             # o tieu de (tieu de dang 700, merge 600 la tut xuong)
     for s in sorted(ten_trong_chu(doc.toPlainText(), ten), key=len, reverse=True):
         cur = QTextCursor(doc)
         while True:

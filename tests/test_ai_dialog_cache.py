@@ -80,6 +80,46 @@ def test_luot_hong_thi_khong_luu(app, db):
     d.deleteLater()
 
 
+@pytest.fixture
+def muc_gia(monkeypatch):
+    """Muc vi tri gia: ghi lai ten nhan duoc va so muc, khoi can CSDL that."""
+    from core import signal_locations as SL
+    from ui import answer_marks as AM
+    monkeypatch.setattr(AM, "ten_du_an", lambda db, cpu_paths=None: {"NET1"})
+    monkeypatch.setattr(SL, "muc_vi_tri", lambda ten, dbs, **kw:
+                        "\n\n## (%d) VI TRI %s\n" % (kw["so"], ",".join(ten)))
+
+
+def test_muc_vi_tri_chi_de_hien_kho_van_luu_cau_goc(app, db, muc_gia):
+    """Gan luc hien, khong luu: khoa kho khong doi va vi tri luon tra theo ban ve moi."""
+    d = _mo(db)
+    d._khoa = _khoa(d)
+    d._w = types.SimpleNamespace(loi=False)
+    d._t0, d._ntool = 0, 0
+    d._show(CAU)
+    assert "(5) VI TRI NET1" in d.answer.toPlainText()
+    assert C.tim(db, d._khoa)["answer"] == CAU.strip()       # _show cat khoang trang cuoi
+    d.deleteLater()
+
+
+def test_cau_cu_mo_tu_kho_cung_co_muc_vi_tri(app, db, muc_gia):
+    d = _mo(db)
+    k = _khoa(d)
+    d.deleteLater()
+    C.luu(db, k, CAU)
+    d2 = _mo(db)
+    assert "NO LA GI" in d2.answer.toPlainText()
+    assert "VI TRI NET1" in d2.answer.toPlainText()
+    d2.deleteLater()
+
+
+def test_luot_hong_thi_khong_gan_muc_vi_tri(app, db, muc_gia):
+    d = _mo(db)
+    assert d._muc_vi_tri("Khong goi duoc groq.", False) == ""
+    assert d._muc_vi_tri(CAU, True) == ""
+    d.deleteLater()
+
+
 def test_cau_da_luu_khong_bat_nut_len_khi_chua_cau_hinh(app, db, monkeypatch):
     """Hien lai cau cu la mot chuyen, cho bam Ask khi chua co API key lai la chuyen khac."""
     d = _mo(db)

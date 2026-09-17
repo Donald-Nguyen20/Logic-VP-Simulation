@@ -85,6 +85,23 @@ def test_bold_does_not_lighten_a_heading(app, monkeypatch):
     assert e.document().find("FURN PRS HI HI").charFormat().fontWeight() == 700
 
 
+def test_location_table_colours_only_the_signal_column(app, monkeypatch):
+    """Muc vi tri do code gan: ten loop/sheet ('010 PULV A TRIP LOOP') trung chu ten tin
+    hieu nhung khong phai tin hieu. Bang cua AI phia tren van to o moi cot."""
+    import ui.answer_marks as AM
+    monkeypatch.setattr(AM, "ten_du_an", lambda db, cpu=None: TEN)
+    e = QtWidgets.QTextEdit()
+    e.setMarkdown("## (4) SO\n\n| a | b |\n|---|---|\n| 1 | giu FURN PRS HI HI |\n\n"
+                  "## (5) VI TRI\n\nloi dan co BT-102 MFT(2)\n\n"
+                  "| Ten | Loop |\n|---|---|\n| CWP 1 RUN | 010 PULV A TRIP LOOP |\n")
+    assert AM.to_mau(e, "db", tieu_de_bang="(5) VI TRI") == 2
+    doc = e.document()
+    for s, mau in (("FURN PRS HI HI", MAU), ("CWP 1 RUN", MAU),
+                   ("PULV A TRIP", "#000000"), ("BT-102 MFT(2)", "#000000")):
+        c = doc.find(s)
+        assert c.charFormat().foreground().color().name().upper() == mau.upper(), s
+
+
 def test_no_names_means_no_change(app, monkeypatch):
     import ui.answer_marks as AM
     monkeypatch.setattr(AM, "ten_du_an", lambda db, cpu=None: set())

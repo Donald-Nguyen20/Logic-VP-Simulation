@@ -120,6 +120,7 @@ class AIExplainDialog(QDialog):
                          "(context error: %s)" % e)
         self._name = name; self._ctx = ctx
         self._db = db; self._cpu = cpu_paths or []   # de to mau ten tin hieu that
+        self._sheet = sheet                          # sheet goc cho muc vi tri
         self.setWindowTitle("Explain (AI): %s" % name)
         lay = QVBoxLayout(self)
         hdr = QLabel(name); hdr.setStyleSheet("font-size:15px;font-weight:600;")
@@ -453,6 +454,32 @@ class AIExplainDialog(QDialog):
         cur.movePosition(QTextCursor.Start)
         self.answer.setTextCursor(cur)
 
+    def _muc_vi_tri(self, out, loi):
+        """Muc cuoi: moi tin hieu trong cau tra loi nam o CPU/loop/sheet nao.
+
+        Code tu tra CSDL chu khong nho AI viet, de khong co so loop/sheet nao bi bia. Gan
+        vao luc hien, khong luu vao kho: prompt va khoa kho giu nguyen, cau cu mo lai cung
+        co muc nay, sua ban ve xong thi vi tri tu cap nhat."""
+        if not luu_duoc(out, loi):          # loi duong day, cau cut ngang: khong gan
+            return ""
+        try:
+            from core import signal_locations as SL
+            from ui.answer_marks import ten_du_an, ten_trong_chu
+            goc = (self._name or "").upper()
+            ten = sorted(ten_trong_chu(out, ten_du_an(self._db, self._cpu)),
+                         key=lambda s: (s.upper() != goc, out.find(s)))
+            dbs = [self._db] + [p for p in self._cpu if p and p != self._db]
+            return SL.muc_vi_tri(ten, dbs, goc=self._sheet_goc(), ctx=self._ctx,
+                                 lang=self._lang, so=5 if self._loop is None else 6)
+        except Exception:
+            return ""                       # thieu muc nay van doc duoc cau tra loi
+
+    def _sheet_goc(self):
+        """(db, sheet) dang duoc giai thich: 1 sheet, hoac moi sheet cua loop."""
+        if self._loop is None:
+            return [(self._db, self._sheet)]
+        return [(self._db, s[0]) for s in AE._loop_sheets(self._db, self._loop)]
+
     def _show(self, text, cu=None):
         try:
             self._tick.stop()
@@ -466,12 +493,15 @@ class AIExplainDialog(QDialog):
             self._bat_nut(True)
             return
         out = self._trim(out)
+        loi = False if cu else getattr(getattr(self, "_w", None), "loi", False)
+        muc = self._muc_vi_tri(out, loi)
+        hien = out + muc                    # chi de hien, kho van luu `out`
         # trong luc chay thi hien chu tho cho nhanh; xong moi dung Markdown that (tieu de,
         # bang, chu dam) vi luc do van ban moi tron ven
         try:
-            self.answer.setMarkdown(out)
+            self.answer.setMarkdown(hien)
         except Exception:
-            self.answer.setPlainText(out)
+            self.answer.setPlainText(hien)
         else:
             try:
                 self._polish()          # chi la gian dong, hong thi van giu ban markdown
@@ -479,7 +509,8 @@ class AIExplainDialog(QDialog):
                 pass
         try:
             from ui.answer_marks import to_mau
-            to_mau(self.answer, self._db, self._cpu)   # sau _polish: khong bi de len
+            to_mau(self.answer, self._db, self._cpu,   # sau _polish: khong bi de len
+                   tieu_de_bang=muc.strip().split("\n", 1)[0].lstrip("# "))
         except Exception:
             pass
         if cu:

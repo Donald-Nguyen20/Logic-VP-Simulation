@@ -114,22 +114,31 @@ QSS_MUI_TEN = """
 QComboBox::down-arrow { image: url(%s); width: 11px; height: 11px; }
 QComboBox::down-arrow:disabled { image: none; }
 """
-# --- Dong goi ---------------------------------------------------------------
-#  Chay:  .\build.ps1              (PowerShell - ban dang dung)
-#         build.bat                 (cmd.exe - ban cu, van giu de khong pha thoi quen)
-#
-#  Truoc day cho nay chep nguyen lenh pyinstaller vao mot chuoi tro troi. Lenh do
-#  noi dong bang dau ^ tuc cu phap cmd.exe, ai copy ra dan vao PowerShell la nhan
-#  ngay mot loat "Missing expression after unary operator '--'". Va no chi co moi
-#  buoc pyinstaller: thieu ca buoc cai requests lan buoc soi lai ban vua ra, nen
-#  dong goi bang no se cho mot ban chay duoc nhung chet luc bam AI. Bon buoc
-#  day du nam trong build.ps1 - dung chep lenh ra ngoai nua:
-#    1) cai thu vien (co requests - thieu no la AI chet luc bam)
-#    2) pyinstaller
-#    3) chep DEF/SR21E cua hang ra canh file exe. Thieu buoc nay thi may khac
-#       mat 12.667/12.871 khoi tram khi mo phong, vi core/def_sim.py chay thang
-#       than lenh goc trong TAG_MCR.DEF ma file do nam ngoai repo.
-#    4) soi lai ban vua ra
+""" pyinstaller main.py --name "Logic Simulation 1.1" --onedir --windowed --noconfirm --clean `
+  --noupx `
+  --icon icon.ico `
+  --add-data "core;core" `
+  --add-data "icon.ico;." `
+  --collect-all claude_agent_sdk `
+  --exclude-module tkinter --exclude-module numpy --exclude-module matplotlib `
+  --exclude-module pandas --exclude-module scipy --exclude-module PIL `
+  --exclude-module fitz --exclude-module pdfplumber --exclude-module pdfminer `
+  --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick `
+  --exclude-module PySide6.QtQuickWidgets --exclude-module PySide6.QtQuick3D `
+  --exclude-module PySide6.QtWebEngineCore --exclude-module PySide6.QtWebEngineWidgets `
+  --exclude-module PySide6.QtWebChannel --exclude-module PySide6.QtWebSockets `
+  --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtMultimedia `
+  --exclude-module PySide6.QtMultimediaWidgets --exclude-module PySide6.QtCharts `
+  --exclude-module PySide6.QtDataVisualization --exclude-module PySide6.QtPdf `
+  --exclude-module PySide6.QtPdfWidgets --exclude-module PySide6.QtSql `
+  --exclude-module PySide6.QtSvg --exclude-module PySide6.QtSvgWidgets `
+  --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtOpenGLWidgets `
+  --exclude-module PySide6.QtPrintSupport --exclude-module PySide6.QtTest `
+  --exclude-module PySide6.QtDesigner --exclude-module PySide6.QtUiTools `
+  --exclude-module PySide6.Qt3DCore --exclude-module PySide6.QtXml `
+  --exclude-module PySide6.QtConcurrent --exclude-module PySide6.QtPositioning
+
+  """
 
 def _ve_mui_ten():
     """Ve mui ten xuong cho o chon, tra ve duong dan file (rong neu that bai).
@@ -141,7 +150,7 @@ def _ve_mui_ten():
     bang CSS thuan duoc (da thu meo tam giac bang vien trong suot: Qt ra hinh
     chu nhat dac).
 
-    Ve luc chay chu khong de san mot file anh trong repo, vi T-Designer-Lite.spec
+    Ve luc chay chu khong de san mot file anh trong repo, vi "Logic Simulation 1.1.spec"
     chi dong goi thu muc 'core' - anh de trong 'ui' se mat khi dong goi.
     """
     try:
