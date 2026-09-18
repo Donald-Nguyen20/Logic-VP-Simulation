@@ -88,21 +88,42 @@ def _bien_the(s):
     return [x for i, x in enumerate(ra) if x and x not in ra[:i]]
 
 
-def to_mau(edit, db, cpu_paths=None):
-    """To mau moi ten tin hieu that trong o tra loi. Tra ve so cho da to."""
+def _dau_muc(doc, tieu_de):
+    """Vi tri bat dau cua muc mang tieu de nay, hoac None neu tai lieu khong co muc do."""
+    if not tieu_de:
+        return None
+    cur = doc.find(tieu_de)
+    return None if cur.isNull() else cur.selectionStart()
+
+
+def _o_cot_dau(cur):
+    """Cho nay co phai o cot dau cua mot bang khong."""
+    bang = cur.currentTable()
+    return bang is not None and bang.cellAt(cur).column() == 0
+
+
+def to_mau(edit, db, cpu_paths=None, tieu_de_bang=None):
+    """To mau moi ten tin hieu that trong o tra loi. Tra ve so cho da to.
+
+    `tieu_de_bang` la tieu de muc vi tri do code tu gan (khong phai cua AI). Tu tieu de
+    do tro di chi to o COT DAU cua bang, vi cac cot sau la ten loop/sheet - '010 PULV A
+    TRIP LOOP' trung chu voi ten tin hieu nhung khong phai tin hieu."""
     doc = edit.document()
     ten = ten_du_an(db, cpu_paths)
     if not ten:
         return 0
     cf = QTextCharFormat()
-    cf.setForeground(QColor(MAU))     # chi doi mau: dat them do dam se lam nhat chu
-    n = 0                             # o tieu de (tieu de dang 700, merge 600 la tut xuong)
+    cf.setForeground(QColor(MAU))
+    cf.setFontWeight(700)             # dung 700 chu khong phai Bold/600: tieu de dang o
+    moc = _dau_muc(doc, tieu_de_bang)  # 700, merge so nho hon la lam nhat chu tieu de
+    n = 0
     for s in sorted(ten_trong_chu(doc.toPlainText(), ten), key=len, reverse=True):
         cur = QTextCursor(doc)
         while True:
             cur = doc.find(s, cur, QTextDocument.FindFlag.FindCaseSensitively)
             if cur.isNull():
                 break
-            cur.mergeCharFormat(cf)
-            n += 1
+            if moc is None or cur.selectionStart() < moc or _o_cot_dau(cur):
+                cur.mergeCharFormat(cf)
+                n += 1
     return n
