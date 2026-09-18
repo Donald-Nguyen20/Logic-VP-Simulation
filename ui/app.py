@@ -1569,6 +1569,40 @@ class MainWindow(QMainWindow):
             pass
         return info
 
+    def _nut_cai_dat(self, dlg, luu):
+        """Hang nut chung cho 3 hop cai dat khoi dong: Apply / Run dynamic / Close.
+
+        Apply chi LUU cai dat roi tinh lai sheet y nhu mot lan bam doi dau vao: dau ra
+        khoi doi NGAY, khong dung lai tu dieu kien ban dau va khong mo cua so do thi.
+        Truoc day hop nay chi co mot nut "Run dynamic", nen viec nho nhu dua khoi tram
+        sang Auto cung buoc phai chay dong - ma chay dong thi reset sach trang thai va
+        bat len mot cua so do thi khong ai can. Xem run_dynamic_sim()."""
+        row = QHBoxLayout()
+        b_ap = QPushButton("Apply")
+        b_run = QPushButton("▶ Run dynamic")
+        b_close = QPushButton("Close")
+        b_ap.setDefault(True)
+        b_ap.setToolTip("Luu cai dat va tinh lai sheet ngay - khong chay mo phong dong")
+        row.addStretch(1)
+        for b in (b_close, b_run, b_ap):
+            row.addWidget(b)
+
+        def _xong(chay_dong):
+            luu()
+            dlg.accept()
+            # Tinh lai truoc: dau ra da ep hien ra ngay ca khi "Simulate on sheet" dang TAT
+            if getattr(self, "cur_sheet", None) is not None:
+                try:
+                    self._apply_sheet_sim()
+                except Exception:
+                    pass
+            if chay_dong:
+                self.run_dynamic_sim()
+        b_ap.clicked.connect(lambda: _xong(False))
+        b_run.clicked.connect(lambda: _xong(True))
+        b_close.clicked.connect(dlg.reject)
+        return row
+
     def _sim_timer_config(self, bid, cur, over):
         """Click khoi delay/xung: cai thoi gian (giay), dt, so buoc + nut Chay.
 
@@ -1620,20 +1654,12 @@ class MainWindow(QMainWindow):
         for w in (sp_dt, sp_steps, sp_t):
             w.valueChanged.connect(_upd)
         _upd()
-        row = QHBoxLayout()
-        b_run = QPushButton("\u25b6 Run dynamic"); b_close = QPushButton("Close")
-        row.addStretch(1); row.addWidget(b_close); row.addWidget(b_run)
-        form.addRow(row)
-
-        def _apply_run():
+        def _luu():
             if not mot_nhip:
                 over[bid] = {"tsec": sp_t.value() * hs}
             self.sim_dyn_over = over
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
-            dlg.accept()
-            self.run_dynamic_sim()
-        b_run.clicked.connect(_apply_run)
-        b_close.clicked.connect(dlg.reject)
+        form.addRow(self._nut_cai_dat(dlg, _luu))
         dlg.exec()
 
     def _sim_dyn_config(self, bid):
@@ -1697,12 +1723,7 @@ class MainWindow(QMainWindow):
         def _upd():
             lbl_t.setText("%.1f s" % (sp_dt.value() * sp_steps.value()))
         sp_dt.valueChanged.connect(_upd); sp_steps.valueChanged.connect(_upd); _upd()
-        row = QHBoxLayout()
-        b_run = QPushButton("▶ Run dynamic"); b_close = QPushButton("Close")
-        row.addStretch(1); row.addWidget(b_close); row.addWidget(b_run)
-        form.addRow(row)
-
-        def _apply_run():
+        def _luu():
             if kind == "R":
                 over[bid] = {"up": sp_up.value(), "dn": sp_dn.value(), "init": sp_init.value()}
             elif kind in ("C", "Q"):
@@ -1711,10 +1732,7 @@ class MainWindow(QMainWindow):
                 over[bid] = {"ti": sp_ti.value(), "init": sp_init.value()}
             self.sim_dyn_over = over
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
-            dlg.accept()
-            self.run_dynamic_sim()
-        b_run.clicked.connect(_apply_run)
-        b_close.clicked.connect(dlg.reject)
+        form.addRow(self._nut_cai_dat(dlg, _luu))
         dlg.exec()
 
     def _sim_station_config(self, bid, cur, over):
@@ -1941,13 +1959,7 @@ class MainWindow(QMainWindow):
         def _upd():
             lbl_t.setText("%.1f s" % (sp_dt.value() * sp_steps.value()))
         sp_dt.valueChanged.connect(_upd); sp_steps.valueChanged.connect(_upd); _upd()
-        row = QHBoxLayout()
-        b_run = QPushButton("▶ Run dynamic"); b_close = QPushButton("Close")
-        row.addStretch(1); row.addWidget(b_close); row.addWidget(b_run)
-        outer.addLayout(row)
-        dlg.resize(760, 760)
-
-        def _apply_run():
+        def _luu():
             new_in = {}
             new_ops = {}
             for name, tup in widgets.items():
@@ -1979,19 +1991,8 @@ class MainWindow(QMainWindow):
             # cai cu se tiep tuc tich luy, bo qua thay doi nguoi dung vua nhap)
             self.station_sims.get((self.db_path, self.cur_sheet), {}).pop(bid, None)
             self._dyn_dt = sp_dt.value(); self._dyn_steps = sp_steps.value()
-            dlg.accept()
-            # Cap nhat badge NGAY (mach don-buoc, giong nhu bam 1 tin hieu tay) truoc,
-            # de dau ra da EP hien ra dung ngay ca khi "Simulate on sheet" dang TAT hoac
-            # nguoi dung khong bam "Run dynamic" - khong phai cho chay xong mo phong da
-            # buoc (chi lam viec khi Simulate on sheet dang BAT) moi thay duoc gia tri ep.
-            if getattr(self, "cur_sheet", None) is not None:
-                try:
-                    self._apply_sheet_sim()
-                except Exception:
-                    pass
-            self.run_dynamic_sim()
-        b_run.clicked.connect(_apply_run)
-        b_close.clicked.connect(dlg.reject)
+        outer.addLayout(self._nut_cai_dat(dlg, _luu))
+        dlg.resize(760, 760)
         dlg.exec()
 
     def _apply_sheet_sim(self, advance=None):
