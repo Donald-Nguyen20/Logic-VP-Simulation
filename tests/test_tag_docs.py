@@ -13,7 +13,7 @@ from core import macro_def as MD
 from core import tag_docs as TD
 from core.block_params import param_meta
 
-EXPECTED = ("820C", "820D", "820E", "820F", "8211")
+EXPECTED = ("8204", "820C", "820D", "820E", "820F", "8211")
 _PREFIX = ("in:", "out:", "prm:", "ops:", "st:")
 
 
