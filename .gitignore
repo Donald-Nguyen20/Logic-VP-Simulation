@@ -19,6 +19,12 @@ env/
 .mypy_cache/
 .ruff_cache/
 
+# --- Do phu test (pytest --cov) ---
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
 # --- IDE / editor ---
 .vscode/
 .idea/
@@ -39,6 +45,8 @@ Desktop.ini
 # --- File tam / log / anh debug ---
 *.tmp
 *.log
+*.bak
+*.orig
 _v*.png
 ~$*
 
@@ -50,6 +58,10 @@ _v*.png
 # CHUA API KEY. Chan CA THU MUC chu khong chan tung ten file: file moi them vao sau
 # nay se duoc bao ve san, khong phai nho sua tiep cho nay. DUNG BO DONG DUOI DAY.
 data/
+
+# --- Ban ve tach tu so tay cua hang (tai lieu Toshiba, KHONG dua len repo cong khai) ---
+# Tao lai bang 'python -m core.manual_drawing' truoc khi dong goi .exe.
+core/book_drawings/
 
 # --- API key / cau hinh AI (KHONG BAO GIO commit) ---
 llm_config.json

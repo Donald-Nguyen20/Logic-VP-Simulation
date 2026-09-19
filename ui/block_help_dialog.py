@@ -15,9 +15,12 @@ Chu tren man hinh viet bang tieng Anh va qua tr() (core/help_i18n.py); nut
 [English | Tieng Viet] o goc tren dung lai toan bo chu theo ngon ngu vua chon. Chu thich
 trong code van la tieng Viet khong dau.
 
-Tram van hanh (MV, MV-POS, MV-FF-POS, SV, SV-BIAS) con co o "How it works" o tren cung:
-tai lieu viet tay tu than lenh DEF kem bieu do kich ban chay bang DefSim (ui/tag_doc_view.py,
-core/tag_docs.py).
+Tram van hanh (MV, MV-POS, MV-FF-POS, SV, SV-BIAS, MOV2-NSH) con co o "How it works" o
+tren cung: tai lieu viet tay tu than lenh DEF kem bieu do kich ban chay bang DefSim
+(ui/tag_doc_view.py, core/tag_docs.py).
+
+Ca than cua so nam trong MOT vung cuon doc: moi o cao dung bang noi dung that, cuon mot
+lan tu tren xuong la het. Chi ban ve giu thanh cuon ngang rieng vi no rong toi ~3.900px.
 
 Khac voi BlockParamDialog (sua tham so de mo phong), cua so nay CHI DOC.
 """
@@ -25,7 +28,7 @@ from __future__ import annotations
 import html
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGroupBox, QFrame,
-    QScrollArea, QSplitter,
+    QScrollArea, QWidget,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QFont
@@ -38,6 +41,7 @@ from core.block_params import block_pin_rows, block_param_rows
 import core.sheet_sim as SS
 import core.block_sources as BS
 from core.help_i18n import tr
+from core.book_diagram import co_khung, khung
 from ui.help_lang_toggle import lang_toggle
 from ui.tag_doc_view import has_doc, tag_doc_panel
 
@@ -107,6 +111,7 @@ class BlockHelpDialog(QDialog):
         self._w_what = self._what_it_does()
         self._w_diag = self._diagram_slot()
         self._w_tag = self._tag_slot() if has_doc(self.code) else None
+        self._w_book = self._book_slot() if co_khung(self.code) else None
         self._bo_cuc_than(lay)
 
         bar = QHBoxLayout()
@@ -124,29 +129,73 @@ class BlockHelpDialog(QDialog):
         self._chu_nut()
 
     def _bo_cuc_than(self, lay):
-        """Xep phan than cua so.
+        """Xep ca than cua so vao CHUNG mot vung cuon doc.
 
-        Khoi thuong: o "What this block does" roi ban ve an ca phan con lai. Hai bang
-        "Settings" va "Pins" da bo han; nhung gi chung noi nay nam ngay tren ban ve.
+        Truoc day o "How it works" va ban ve moi o mot thanh cuon rieng, lai chia nhau
+        chieu cao qua mot thanh keo: o nao cung chi con mot khe hep, doc vai dong da phai
+        cuon, va noi o nay ra thi o kia teo lai. Nay moi o cao DUNG BANG noi dung that va
+        ca ba cuon chung mot lan tu tren xuong, nen khong o nao bi cat.
 
-        Tram van hanh co tai lieu doc tu logic goc (core/tag_docs): manual chi co vai cau
-        nen o "How it works" len DAU, ban ve o duoi, hai phan chia bang thanh keo duoc; doan
-        chep tu manual xuong cuoi."""
+        Hai bang "Settings" va "Pins" da bo han; nhung gi chung noi nay nam tren ban ve."""
+        than = QWidget()
+        v = QVBoxLayout(than)
+        v.setContentsMargins(0, 0, 0, 0)
+        for w in self._thu_tu_o():
+            v.addWidget(w)
+        v.addStretch(1)
+        sc = QScrollArea()
+        sc.setWidget(than)
+        sc.setWidgetResizable(True)
+        sc.setFrameShape(QFrame.Shape.NoFrame)
+        lay.addWidget(sc, 1)
+
+    def _thu_tu_o(self):
+        """Thu tu cac o tu tren xuong.
+
+        Tram van hanh: "How it works" (viet tu than lenh DEF) len dau vi day moi la cai
+        nguoi doc can, roi ban ve, con doan chep tu manual chi vai cau nen xuong cuoi.
+        Khoi thuong khong co o dau, chu cua app len truoc ban ve.
+
+        Ban ve kieu so tay dat NGAY DUOI ban ve tu sinh: hai cai cung mot logic, xem
+        lien nhau moi doi chieu duoc - do cung la cho nguoi doc dang cam quyen so tay
+        tim thay hinh quen thuoc ma khong phai cuon qua het phan chu."""
+        o = [self._w_diag] if self._w_book is None else [self._w_diag, self._w_book]
         if self._w_tag is None:
-            lay.addWidget(self._w_what)
-            lay.addWidget(self._w_diag, 1)
-            return
-        sp = QSplitter(Qt.Orientation.Vertical)
-        sp.setChildrenCollapsible(False)
-        sp.addWidget(self._w_tag)
-        sp.addWidget(self._w_diag)
-        sp.setStretchFactor(0, 3)
-        sp.setStretchFactor(1, 2)
-        lay.addWidget(sp, 1)
-        lay.addWidget(self._w_what)
+            return [self._w_what] + o
+        return [self._w_tag] + o + [self._w_what]
 
     def _tag_slot(self):
-        return tag_doc_panel(self.code)
+        return tag_doc_panel(self.code, cuon=False)
+
+    def _book_slot(self):
+        """O ban ve so tay: net ve NGUYEN cua hang, chi them mau gia tri. Chi dung cho
+        ma khoi da co file neo o core/book_layouts."""
+        from ui.book_diagram_view import book_panel
+        g = QGroupBox(tr("Book diagram (vendor original drawing)"))
+        v = QVBoxLayout(g)
+        pv, _pn, px, ps = self._pin_state_fbd()
+        d, why = book_panel(self.code, pin_vals=pv, pin_sigs=ps, pin_nums=px)
+        if d is None:
+            v.addWidget(self._cho_trong(why))
+            return g
+        v.addWidget(self._khung_cuon(d), 1)
+        v.addWidget(self._chu_thich_so_tay())
+        return g
+
+    def _chu_thich_so_tay(self):
+        """Noi ro ban ve lay tu dau va vi sao co the khac o "So do" - de nguoi doc khong
+        tuong hai ban ve mau thuan nhau. Khong noi chac "ban rut gon": co khoi hang ve rut
+        gon (8204: 26 cong so voi 47), co khoi ve gan du."""
+        k = khung(self.code) or {}
+        noi = " / ".join(x for x in (k.get("ma_ban_ve"), k.get("trang_in")) if x)
+        t = tr("Redrawn line for line from the vendor manual. The vendor may draw a "
+               "simplified version with fewer gates than the real logic - the full logic "
+               "is the diagram above. Tint: %s, none = no 0/1 here. Hover a pin or "
+               "display cell for its real signal and value. Click a pin or display "
+               "cell to light up its wire through the gates (inputs: where it goes; "
+               "outputs and display cells: what drives it); click it again to clear."
+               ) % _legend()
+        return self._chu_thich("%s%s" % (t, ("  [%s]" % noi) if noi else ""))
 
     def _dat_tieu_de(self):
         title = self.info["short"] or self._name
@@ -169,18 +218,16 @@ class BlockHelpDialog(QDialog):
                  ("_w_diag", self._diagram_slot)]
         if self._w_tag is not None:
             pairs.append(("_w_tag", self._tag_slot))
+        if self._w_book is not None:
+            pairs.append(("_w_book", self._book_slot))
         for attr, build in pairs:
             self._thay(attr, build)
 
     def _thay(self, attr, build):
-        """Dung lai 1 phan. Phan nam trong thanh chia thi thay qua QSplitter (layout cua
-        cua so khong tim thay no), nho vay kich thuoc nguoi dung da keo van giu."""
+        """Dung lai 1 phan, dat dung cho cu. Phai hoi layout cua CHINH widget cha: ba o
+        nam trong vung cuon chu khong phai con truc tiep cua cua so nua."""
         old, new = getattr(self, attr), build()
-        sp = old.parentWidget()
-        if isinstance(sp, QSplitter):
-            sp.replaceWidget(sp.indexOf(old), new)
-        else:
-            self.layout().replaceWidget(old, new)
+        old.parentWidget().layout().replaceWidget(old, new)
         old.hide()
         old.deleteLater()
         setattr(self, attr, new)
@@ -448,15 +495,24 @@ class BlockHelpDialog(QDialog):
                 for r in hang if str(r["value"] or "").strip() != ""}
 
     def _khung_cuon(self, d):
-        """Ban ve trong vung cuon hai chieu, KHONG ep chieu cao.
+        """Ban ve: cao TRON BAN, chi cuon ngang.
 
-        Truoc day vung nay bi setFixedHeight(250/330) de nhuong cho hai bang tham so va
-        chan ben duoi. Hai bang do da bo, nen ban ve lay het chieu cao cua so."""
+        Ca than cua so da nam trong mot vung cuon chung nen o day khong cuon doc nua -
+        hai thanh cuon long nhau thi keo mai khong biet minh dang o dau, va ban ve luon
+        bi nhot trong mot khe hep. Chieu cao dat dung bang chieu cao that cua ban ve.
+
+        Chieu ngang thi van phai cuon rieng: ban ve khoi tram rong toi ~3.900px, keo
+        ngang ca trang thi doan chu ben tren troi theo, doc khong noi."""
         sc = QScrollArea()
         sc.setWidget(d)
         sc.setWidgetResizable(True)
         sc.setFrameShape(QFrame.Shape.StyledPanel)
         sc.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        sc.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # Chua thu chieu rong khung nen chua biet co thanh cuon ngang hay khong: cu chua
+        # san cho no. Thieu cho thi ban ve bi thanh cuon che mat hang duoi cung.
+        sc.setFixedHeight(d.minimumHeight() + 2 * sc.frameWidth()
+                          + sc.horizontalScrollBar().sizeHint().height())
         return sc
 
     def _ve_dang_song(self, v):

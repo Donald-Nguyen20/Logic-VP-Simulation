@@ -138,6 +138,8 @@ QComboBox::down-arrow:disabled { image: none; }
   --exclude-module PySide6.Qt3DCore --exclude-module PySide6.QtXml `
   --exclude-module PySide6.QtConcurrent --exclude-module PySide6.QtPositioning
 
+  TRUOC lenh tren: python -m core.manual_drawing  (tach ban ve so tay vao core/book_drawings/
+  - ban .exe khong co fitz nen khong tu tach duoc; thu muc do nam trong .gitignore)
   """
 
 def _ve_mui_ten():

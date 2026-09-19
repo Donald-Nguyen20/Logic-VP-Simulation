@@ -1,0 +1,19 @@
+{
+  "code": "8211",
+  "tai_lieu": "tag",
+  "trang": 86,
+  "trang_in": "P-86/172",
+  "ma_ban_ve": "AA208",
+  "ghi_chu": "Ban ve lay NGUYEN tu so tay (core/manual_drawing.py tach net vector). File nay chi noi o nao tren ban ve ung voi nguon tin hieu nao, de to mau gia tri. Moi dong: [nguon, kieu, nhan tren giay]. Nguon: pin:N chan vao, ra:N chan ra. Dot nay chi neo chan vao/ra; o hien thi (reg:OPS_OUTn) va nut man hinh (ops:OPS_INn) chua map.",
+  "neo": [
+    ["pin:1", "vao", "Reset"],
+    ["pin:2", "vao", "Auto SV"],
+    ["pin:3", "vao", "HL-Bias"],
+    ["pin:4", "vao", "LL-Bias"],
+    ["pin:5", "vao", "HL-SV"],
+    ["pin:6", "vao", "LL-SV"],
+    ["pin:7", "vao", "PV"],
+    ["ra:8", "ra", "SV Bias"],
+    ["ra:9", "ra", "SV"]
+  ]
+}

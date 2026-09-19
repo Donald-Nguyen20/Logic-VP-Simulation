@@ -39,8 +39,11 @@ def has_doc(code):
     return TD.doc_for(code) is not None
 
 
-def tag_doc_panel(code):
-    """O "How it works" hoan chinh, co thanh cuon rieng."""
+def tag_doc_panel(code, cuon=True):
+    """O "How it works" hoan chinh.
+
+    `cuon=False` tra ve o CAO DUNG BANG noi dung, khong co thanh cuon rieng - dung khi
+    ben goi da dat ca than cua so vao mot vung cuon chung (ui/block_help_dialog.py)."""
     code = (code or "").upper()
     d = TD.doc_for(code) or {}
     g = QGroupBox(tr("How it works (read from the vendor logic)"))
@@ -54,13 +57,16 @@ def tag_doc_panel(code):
         if part:
             iv.addWidget(_nhan(part))
     iv.addWidget(_nhan("<span style='color:#777;font-size:9pt'>%s</span>" % _nguon(code, d)))
+    v = QVBoxLayout(g)
+    v.setContentsMargins(6, 6, 6, 6)
+    if not cuon:
+        v.addWidget(inner)
+        return g
     iv.addStretch(1)
     sc = QScrollArea()
     sc.setWidget(inner)
     sc.setWidgetResizable(True)
     sc.setFrameShape(QFrame.Shape.NoFrame)
-    v = QVBoxLayout(g)
-    v.setContentsMargins(6, 6, 6, 6)
     v.addWidget(sc)
     return g
 

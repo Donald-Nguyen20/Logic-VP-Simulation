@@ -1,0 +1,26 @@
+{
+  "code": "820E",
+  "tai_lieu": "tag",
+  "trang": 120,
+  "trang_in": "P-120/172",
+  "ma_ban_ve": "AA205",
+  "ghi_chu": "Ban ve lay NGUYEN tu so tay (core/manual_drawing.py tach net vector). File nay chi noi o nao tren ban ve ung voi nguon tin hieu nao, de to mau gia tri. Moi dong: [nguon, kieu, nhan tren giay]. Nguon: pin:N chan vao, ra:N chan ra. Dot nay chi neo chan vao/ra; o hien thi (reg:OPS_OUTn) va nut man hinh (ops:OPS_INn) chua map.",
+  "neo": [
+    ["pin:1", "vao", "Auto"],
+    ["pin:2", "vao", "Manual"],
+    ["pin:3", "vao", "DLT MV"],
+    ["pin:4", "vao", "OR-R-MV"],
+    ["pin:5", "vao", "OR-MV"],
+    ["pin:6", "vao", "HL-MV"],
+    ["pin:7", "vao", "LL-MV"],
+    ["pin:8", "vao", "MV"],
+    ["pin:9", "vao", "REF1"],
+    ["pin:10", "vao", "REF2"],
+    ["pin:11", "vao", "REF3"],
+    ["pin:12", "vao", "CTL-ABN"],
+    ["pin:13", "vao", "DRV-ABN"],
+    ["ra:14", "ra", "Auto"],
+    ["ra:15", "ra", "MV"],
+    ["ra:16", "ra", "ABN"]
+  ]
+}
